@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>SGX官方视频笔记 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。 features and benefits 这些不可寻址的分页内存是从系统的物理内存中保留的，并且经过了加密； 安全区是受保护的内存区域，应用程序可以在里面处理它的机密数据而不必担">
+  <meta name="description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。">
 <meta name="keywords" content="SGX">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SGX官方视频笔记">
 <meta property="og:url" content="http://yoursite.com/2019/07/31/sgx笔记/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
-<meta property="og:description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。 features and benefits 这些不可寻址的分页内存是从系统的物理内存中保留的，并且经过了加密； 安全区是受保护的内存区域，应用程序可以在里面处理它的机密数据而不必担">
+<meta property="og:description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-01T03:50:45.909Z">
+<meta property="og:updated_time" content="2019-08-01T05:02:32.619Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SGX官方视频笔记">
-<meta name="twitter:description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。 features and benefits 这些不可寻址的分页内存是从系统的物理内存中保留的，并且经过了加密； 安全区是受保护的内存区域，应用程序可以在里面处理它的机密数据而不必担">
+<meta name="twitter:description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -200,14 +200,14 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="intel-sgx笔记"><a href="#intel-sgx笔记" class="headerlink" title="intel sgx笔记"></a>intel sgx笔记</h1><p>intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。<br>intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。</p>
+<a id="more"></a>
+
 <h2 id="features-and-benefits"><a href="#features-and-benefits" class="headerlink" title="features and benefits"></a>features and benefits</h2><ul>
 <li>这些不可寻址的分页内存是从系统的物理内存中保留的，并且经过了加密；</li>
 <li>安全区是受保护的内存区域，应用程序可以在里面处理它的机密数据而不必担心泄露；</li>
 </ul>
 <p>包含intel SGX技术的应用程序分为两个部分，分别是可信部分和不可信部分。当应用程序需要处理机密时，会创建一个位于可信内存的安全区，然后调用可信函数。可信函数是由开发者创建的，专门在安全区内执行的函数。一旦这个函数被调用，应用程序就会在可信区域执行，并且明文访问安全区内的代码和数据。而试图从安全区之外的地方访问安全区内存的行为都会被处理器拒绝，即使是系统特权用户的行为。</p>
 <p>当可信函数执行完毕之后，安全区的数据依然会保留在可信内存中，而应用程序返回到不可信区域继续执行，并且失去了对可信内存的访问权限。</p>
-<a id="more"></a>
-
 <h2 id="检测和开启intel-SGX"><a href="#检测和开启intel-SGX" class="headerlink" title="检测和开启intel SGX"></a>检测和开启intel SGX</h2><p>应用程序可以使用intel SGX的四个条件</p>
 <blockquote>
 <p>CPU必须支持intel SGX的指令<br>BIOS必须支持intel SGX<br>必须在BIOS设置中开启intel SGX<br>必须安装intel SGX PSW</p>
@@ -549,6 +549,22 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">SGX</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">实验</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Ubuntu</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">英语</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">读后感</a>
               </li>
             
             <div class="clearfix"></div>
