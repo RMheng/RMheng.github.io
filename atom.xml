@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>rww&#39;s Blog</title>
-  
+  <icon>https://www.gravatar.com/avatar/875500b7339ad8bf5d54b6a28209fad0</icon>
   <subtitle>半夏花已开，未来诚可期</subtitle>
   <link href="/atom.xml" rel="self"/>
   
@@ -11,7 +11,7 @@
   
   <author>
     <name>rmheng</name>
-    
+    <email>2961930359@qq.com</email>
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>

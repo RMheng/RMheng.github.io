@@ -20,7 +20,7 @@
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
   
-    <link rel="icon" href="/favicon.png">
+    <link rel="icon" href="/img/favicon.ico">
   
   <link rel="stylesheet" type="text/css" href="/./main.0cf68a.css">
   <style type="text/css">
@@ -82,7 +82,7 @@
 				
 					<a class="github" target="_blank" href="https://github.com/rmheng" title="github"><i class="icon-github"></i></a>
 		        
-					<a class="mail" target="_blank" href="/information" title="mail"><i class="icon-mail"></i></a>
+					<a class="mail" target="_blank" href="mailto:2961930359@qq.com" title="mail"><i class="icon-mail"></i></a>
 		        
 			</div>
 		</nav>
@@ -121,7 +121,7 @@
 					
 						<a class="github" target="_blank" href="https://github.com/rmheng" title="github"><i class="icon-github"></i></a>
 			        
-						<a class="mail" target="_blank" href="/information" title="mail"><i class="icon-mail"></i></a>
+						<a class="mail" target="_blank" href="mailto:2961930359@qq.com" title="mail"><i class="icon-mail"></i></a>
 			        
 				</div>
 			</nav>
@@ -171,8 +171,6 @@
       
         <p>本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。</p>
 <p>希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。  </p>
-        
-          <a class="article-more-a" href="/2019/07/31/intel-sgx-explained阅读笔记/#more">more >></a>
         
       
 
@@ -253,8 +251,6 @@
 </ul>
 <p>包含intel SGX技术的应用程序分为两个部分，分别是可信部分和不可信部分。当应用程序需要处理机密时，会创建一个位于可信内存的安全区，然后调用可信函数。可信函数是由开发者创建的，专门在安全区内执行的函数。一旦这个函数被调用，应用程序就会在可信区域执行，并且明文访问安全区内的代码和数据。而试图从安全区之外的地方访问安全区内存的行为都会被处理器拒绝，即使是系统特权用户的行为。</p>
 <p>当可信函数执行完毕之后，安全区的数据依然会保留在可信内存中，而应用程序返回到不可信区域继续执行，并且失去了对可信内存的访问权限。</p>
-        
-          <a class="article-more-a" href="/2019/07/31/sgx笔记/#more">more >></a>
         
       
 
