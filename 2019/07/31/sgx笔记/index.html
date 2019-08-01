@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。 features and benefits 这些不可寻址的分页内存是从系统的物理内存中保留的，并且经过了加密； 安全区是受保护的内存区域，应用程序可以在里面处理它的机密数据而不必担">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-31T12:45:54.297Z">
+<meta property="og:updated_time" content="2019-08-01T03:50:45.909Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SGX官方视频笔记">
 <meta name="twitter:description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。 features and benefits 这些不可寻址的分页内存是从系统的物理内存中保留的，并且经过了加密； 安全区是受保护的内存区域，应用程序可以在里面处理它的机密数据而不必担">
@@ -169,6 +169,34 @@
         
       </header>
     
+	<!-- 目录内容 -->
+
+    <p class="show-toc-btn" id="show-toc-btn" οnclick="showToc();" style="display:none">
+          <span class="btn-bg"></span>
+          <span class="btn-text">文章导航</span>
+          </p>
+    <div id="toc-article" class="toc-article">
+        <span id="toc-close" class="toc-close" title="隐藏导航" οnclick="showBtn();">×</span>
+        <strong class="toc-title">文章目录</strong>
+           <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#intel-sgx笔记"><span class="toc-number">1.</span> <span class="toc-text">intel sgx笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#features-and-benefits"><span class="toc-number">1.1.</span> <span class="toc-text">features and benefits</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#检测和开启intel-SGX"><span class="toc-number">1.2.</span> <span class="toc-text">检测和开启intel SGX</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何设计intel-SGX应用程序"><span class="toc-number">1.3.</span> <span class="toc-text">如何设计intel SGX应用程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安全区定义语言（EDL）"><span class="toc-number">1.4.</span> <span class="toc-text">安全区定义语言（EDL）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#EDL语言的进阶主题"><span class="toc-number">1.5.</span> <span class="toc-text">EDL语言的进阶主题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调试intel-SGX应用程序"><span class="toc-number">1.6.</span> <span class="toc-text">调试intel SGX应用程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#intel-SGX的数据密封功能"><span class="toc-number">1.7.</span> <span class="toc-text">intel SGX的数据密封功能</span></a></li></ol></li></ol>
+         </div>
+   <script type="text/javascript">
+    function showToc(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:block");
+        show_toc_btn.setAttribute("style","display:none");
+        };
+    function showBtn(){
+        var toc_article = document.getElementById("toc-article");
+        var show_toc_btn = document.getElementById("show-toc-btn");
+        toc_article.setAttribute("style","display:none");
+        show_toc_btn.setAttribute("style","display:block");
+        };
+   </script>
+      
+<!-- 目录内容结束 -->
+
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="intel-sgx笔记"><a href="#intel-sgx笔记" class="headerlink" title="intel sgx笔记"></a>intel sgx笔记</h1><p>intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。<br>intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。</p>
@@ -186,7 +214,11 @@
 </blockquote>
 <p>BIOS设置中intel SGX可能的三种选项是启用、禁用以及软件控制</p>
 <blockquote>
-<p>“启用”：严格开启了intel SGX<br>“禁用”：严格关闭了intel SGX<br>“软件控制”：允许包含intel SGX技术的应用程序在系统重启后启用intel SGX<br>安装程序时检查的步骤：<br>检查CPU和BIOS是否支持intel SGX<br>检查intel SGX PSW是否安装，如果没有安装，就安装<br>检查intel SGX是否在BIOS中开启，如果没有开启，则用软件控制开启</p>
+<p>“启用”：严格开启了intel SGX<br>“禁用”：严格关闭了intel SGX<br>“软件控制”：允许包含intel SGX技术的应用程序在系统重启后启用intel SGX  </p>
+</blockquote>
+<p>安装程序时检查的步骤：</p>
+<blockquote>
+<p>检查CPU和BIOS是否支持intel SGX<br>检查intel SGX PSW是否安装，如果没有安装，就安装<br>检查intel SGX是否在BIOS中开启，如果没有开启，则用软件控制开启</p>
 </blockquote>
 <p>应用程序本身的检查</p>
 <blockquote>
