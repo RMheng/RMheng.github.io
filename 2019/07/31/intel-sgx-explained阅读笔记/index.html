@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>intel sgx explained阅读笔记 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。   overview之前看的时候还很不连贯，会在最后第2,5章全部读完时再回头重新读一遍时，再进行相关的记录。 computer architecture background本部分主要是对intel目前最为流行的计算机处理器背后的总体架构">
+  <meta name="description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。">
 <meta name="keywords" content="SGX">
 <meta property="og:type" content="article">
 <meta property="og:title" content="intel sgx explained阅读笔记">
 <meta property="og:url" content="http://yoursite.com/2019/07/31/intel-sgx-explained阅读笔记/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
-<meta property="og:description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。   overview之前看的时候还很不连贯，会在最后第2,5章全部读完时再回头重新读一遍时，再进行相关的记录。 computer architecture background本部分主要是对intel目前最为流行的计算机处理器背后的总体架构">
+<meta property="og:description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-31T09:20:52.865Z">
+<meta property="og:updated_time" content="2019-07-31T12:43:09.328Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="intel sgx explained阅读笔记">
-<meta name="twitter:description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。   overview之前看的时候还很不连贯，会在最后第2,5章全部读完时再回头重新读一遍时，再进行相关的记录。 computer architecture background本部分主要是对intel目前最为流行的计算机处理器背后的总体架构">
+<meta name="twitter:description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -48,7 +48,7 @@
 <div class="intrude-less">
 	<header id="header" class="inner">
 		<a href="/" class="profilepic">
-			<img src="/20190731130715.jpg" class="js-avatar">
+			<img src="/assert/img/20190731130715.jpg" class="js-avatar">
 		</a>
 		<hgroup>
 		  <h1 class="header-author"><a href="/">rmheng</a></h1>
@@ -86,7 +86,7 @@
 				
 					<a class="github" target="_blank" href="https://github.com/rmheng" title="github"><i class="icon-github"></i></a>
 		        
-					<a class="mail" target="_blank" href="/2961930359@qq.com" title="mail"><i class="icon-mail"></i></a>
+					<a class="mail" target="_blank" href="/information" title="mail"><i class="icon-mail"></i></a>
 		        
 			</div>
 		</nav>
@@ -104,7 +104,7 @@
 	<div class="intrude-less">
 		<header id="header" class="inner">
 			<div class="profilepic">
-				<img src="/20190731130715.jpg" class="js-avatar">
+				<img src="/assert/img/20190731130715.jpg" class="js-avatar">
 			</div>
 			<hgroup>
 			  <h1 class="header-author js-header-author">rmheng</h1>
@@ -125,7 +125,7 @@
 					
 						<a class="github" target="_blank" href="https://github.com/rmheng" title="github"><i class="icon-github"></i></a>
 			        
-						<a class="mail" target="_blank" href="/2961930359@qq.com" title="mail"><i class="icon-mail"></i></a>
+						<a class="mail" target="_blank" href="/information" title="mail"><i class="icon-mail"></i></a>
 			        
 				</div>
 			</nav>
@@ -173,6 +173,7 @@
       
         <p>本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。</p>
 <p>希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。  </p>
+<a id="more"></a>
 <h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><p>之前看的时候还很不连贯，会在最后第2,5章全部读完时再回头重新读一遍时，再进行相关的记录。</p>
 <h1 id="computer-architecture-background"><a href="#computer-architecture-background" class="headerlink" title="computer architecture background"></a>computer architecture background</h1><p>本部分主要是对intel目前最为流行的计算机处理器背后的总体架构进行概括，以及运行在这些处理器上的系统所需要的安全特性。</p>
 <h2 id="overview-1"><a href="#overview-1" class="headerlink" title="overview"></a>overview</h2><p>同样等第二章全部读完之后再进行阅读。</p>
@@ -263,7 +264,7 @@
   
   
     <a href="/2019/07/31/sgx笔记/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">sgx笔记</div>
+      <div class="article-nav-title">SGX官方视频笔记</div>
       <i class="icon-circle-right"></i>
     </a>
   

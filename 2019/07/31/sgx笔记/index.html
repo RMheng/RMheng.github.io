@@ -6,19 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>sgx笔记 | rww&#39;s Blog</title>
+  <title>SGX官方视频笔记 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。 features and benefits 这些不可寻址的分页内存是从系统的物理内存中保留的，并且经过了加密； 安全区是受保护的内存区域，应用程序可以在里面处理它的机密数据而不必担">
 <meta name="keywords" content="SGX">
 <meta property="og:type" content="article">
-<meta property="og:title" content="sgx笔记">
+<meta property="og:title" content="SGX官方视频笔记">
 <meta property="og:url" content="http://yoursite.com/2019/07/31/sgx笔记/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。 features and benefits 这些不可寻址的分页内存是从系统的物理内存中保留的，并且经过了加密； 安全区是受保护的内存区域，应用程序可以在里面处理它的机密数据而不必担">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-31T12:11:25.367Z">
+<meta property="og:updated_time" content="2019-07-31T12:45:54.297Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="sgx笔记">
+<meta name="twitter:title" content="SGX官方视频笔记">
 <meta name="twitter:description" content="intel sgx笔记intel sgx是使得程序能够在可信的环境下执行代码并保护机密信息，从而让开发者直接控制程序的安全性。intel sgx在内存中划定了名为安全区（enclave）的隔离区域，用来存放代码和数据。 features and benefits 这些不可寻址的分页内存是从系统的物理内存中保留的，并且经过了加密； 安全区是受保护的内存区域，应用程序可以在里面处理它的机密数据而不必担">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
@@ -48,7 +48,7 @@
 <div class="intrude-less">
 	<header id="header" class="inner">
 		<a href="/" class="profilepic">
-			<img src="/20190731130715.jpg" class="js-avatar">
+			<img src="/assert/img/20190731130715.jpg" class="js-avatar">
 		</a>
 		<hgroup>
 		  <h1 class="header-author"><a href="/">rmheng</a></h1>
@@ -86,7 +86,7 @@
 				
 					<a class="github" target="_blank" href="https://github.com/rmheng" title="github"><i class="icon-github"></i></a>
 		        
-					<a class="mail" target="_blank" href="/2961930359@qq.com" title="mail"><i class="icon-mail"></i></a>
+					<a class="mail" target="_blank" href="/information" title="mail"><i class="icon-mail"></i></a>
 		        
 			</div>
 		</nav>
@@ -104,7 +104,7 @@
 	<div class="intrude-less">
 		<header id="header" class="inner">
 			<div class="profilepic">
-				<img src="/20190731130715.jpg" class="js-avatar">
+				<img src="/assert/img/20190731130715.jpg" class="js-avatar">
 			</div>
 			<hgroup>
 			  <h1 class="header-author js-header-author">rmheng</h1>
@@ -125,7 +125,7 @@
 					
 						<a class="github" target="_blank" href="https://github.com/rmheng" title="github"><i class="icon-github"></i></a>
 			        
-						<a class="mail" target="_blank" href="/2961930359@qq.com" title="mail"><i class="icon-mail"></i></a>
+						<a class="mail" target="_blank" href="/information" title="mail"><i class="icon-mail"></i></a>
 			        
 				</div>
 			</nav>
@@ -158,7 +158,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      sgx笔记
+      SGX官方视频笔记
     </h1>
   
 
@@ -178,6 +178,8 @@
 </ul>
 <p>包含intel SGX技术的应用程序分为两个部分，分别是可信部分和不可信部分。当应用程序需要处理机密时，会创建一个位于可信内存的安全区，然后调用可信函数。可信函数是由开发者创建的，专门在安全区内执行的函数。一旦这个函数被调用，应用程序就会在可信区域执行，并且明文访问安全区内的代码和数据。而试图从安全区之外的地方访问安全区内存的行为都会被处理器拒绝，即使是系统特权用户的行为。</p>
 <p>当可信函数执行完毕之后，安全区的数据依然会保留在可信内存中，而应用程序返回到不可信区域继续执行，并且失去了对可信内存的访问权限。</p>
+<a id="more"></a>
+
 <h2 id="检测和开启intel-SGX"><a href="#检测和开启intel-SGX" class="headerlink" title="检测和开启intel SGX"></a>检测和开启intel SGX</h2><p>应用程序可以使用intel SGX的四个条件</p>
 <blockquote>
 <p>CPU必须支持intel SGX的指令<br>BIOS必须支持intel SGX<br>必须在BIOS设置中开启intel SGX<br>必须安装intel SGX PSW</p>
@@ -295,6 +297,17 @@
 	</div>
 
       
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/SGX//" class="article-tag-list-link color4">SGX</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
 
       
 
@@ -383,6 +396,19 @@
             </div>
         </div>
         
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#intel-sgx笔记"><span class="toc-number">1.</span> <span class="toc-text">intel sgx笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#features-and-benefits"><span class="toc-number">1.1.</span> <span class="toc-text">features and benefits</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#检测和开启intel-SGX"><span class="toc-number">1.2.</span> <span class="toc-text">检测和开启intel SGX</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何设计intel-SGX应用程序"><span class="toc-number">1.3.</span> <span class="toc-text">如何设计intel SGX应用程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安全区定义语言（EDL）"><span class="toc-number">1.4.</span> <span class="toc-text">安全区定义语言（EDL）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#EDL语言的进阶主题"><span class="toc-number">1.5.</span> <span class="toc-text">EDL语言的进阶主题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调试intel-SGX应用程序"><span class="toc-number">1.6.</span> <span class="toc-text">调试intel SGX应用程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#intel-SGX的数据密封功能"><span class="toc-number">1.7.</span> <span class="toc-text">intel SGX的数据密封功能</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
         
     </div>
 </aside>
