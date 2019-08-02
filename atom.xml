@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-08-01T05:10:59.651Z</updated>
+  <updated>2019-08-02T07:40:03.202Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>操作系统基本知识</title>
+    <link href="http://yoursite.com/2019/08/01/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/"/>
+    <id>http://yoursite.com/2019/08/01/操作系统基本知识/</id>
+    <published>2019-08-01T06:10:04.000Z</published>
+    <updated>2019-08-02T07:40:03.202Z</updated>
+    
+    <content type="html"><![CDATA[<p>本篇文章断断续续地记录了在读书中回顾到的以前遇到的基本知识，算是对计算机专业课中基本知识的回顾。</p><a id="more"></a><h1 id="内存、cache和寄存器之间的关系"><a href="#内存、cache和寄存器之间的关系" class="headerlink" title="内存、cache和寄存器之间的关系"></a>内存、cache和寄存器之间的关系</h1><p>把CPU比作大脑的话，寄存器相当于当前正在思考问题，而cache则相当于临时的记忆。</p><h2 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h2><p>寄存器是中央处理器(CPU)的组成部分，是有限存储容量的高速存储部件，可以用来暂存指令、数据和位址。CPU的控制部件中，包含的寄存器有指令寄存器(IR)和程序寄存器(PC)。在CPU的算数逻辑部件中，包含的寄存器有累加器(ACC)。</p><h2 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h2><p>内存用来存放当前正在使用的程序和数据。RAM可以分为静态存储器(Staic Random Access Memory,SRAM)和动态存储器(Dynamic Random Access Memory)，一般我们提到的DRAM就是内存。</p><p>SRAM中的存储单元相当于一个锁存器，只有0、1两个稳态；而DRAM是利用电容存储电荷来保存0和1两个状态，需要定时刷新。</p><p>DRAM，其中，随机访问表示的是以无序的顺序访问DRAM中的任何信息的这种能力。动态表示的是暂时性存储数据的基本能力。</p><h2 id="Cache"><a href="#Cache" class="headerlink" title="Cache"></a>Cache</h2><p>Cache就是高速缓冲存储器，是位于CPU和主内存之间的容量小但速度很快的存储器。Cache中保存着CPU刚用过的一部分数据，当CPU再次使用这部分数据直接从Cache中直接调用即可，从而减少了CPU的使用时间提高了效率。Cache分为一级Cache(L1 Cache)和二级Cache(L2 Cache)，L1 Cache集成在CPU内部，L2早起焊在主板上，现在也都集成在CPU内部。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，寄存器(register file)位于CPU内部，内存是连接CPU和磁盘的桥梁，而缓存是为了解决内存和CPU的运算速度差异而设置的组件。数据的流向过程是内存-Cache-寄存器。</p><h2 id="磁盘缓存"><a href="#磁盘缓存" class="headerlink" title="磁盘缓存"></a>磁盘缓存</h2><p>最后补一个磁盘缓存，缓存的概念目前已经从CPU和主内存之间的Cache扩充到内存和磁盘之间的Cache（磁盘缓存）。凡是速度差异较大的两个硬件之间，用于协调两者数据传输速度差异的结构，就可以称之为Cache。</p><p>磁盘缓存实际上是将需要下载的数据先保存到系统为软件分配的内存空间中（该内存空间被称之为“内存池”），当保存到内存池中的数据达到一定程度时，便将数据保存到硬盘中，这样就可以减少实际的磁盘操作，有效保护磁盘避免重复的读写操作而造成的损坏。</p><blockquote><p>磁盘缓存是为了减少CPU透过I/O读取磁盘的次数，提高I/O的效率，用一块内存来存储存取较为频繁的磁盘内容。因为内存的存取是电子动作，而磁盘的存取是I/O动作。</p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本篇文章断断续续地记录了在读书中回顾到的以前遇到的基本知识，算是对计算机专业课中基本知识的回顾。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="操作系统" scheme="http://yoursite.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+      <category term="操作系统" scheme="http://yoursite.com/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+      <category term="基本知识复习" scheme="http://yoursite.com/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86%E5%A4%8D%E4%B9%A0/"/>
+    
+  </entry>
   
   <entry>
     <title>SGX-Ubuntu-makefile</title>
@@ -71,9 +95,9 @@
     <link href="http://yoursite.com/2019/07/31/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
     <id>http://yoursite.com/2019/07/31/intel-sgx-explained阅读笔记/</id>
     <published>2019-07-31T08:17:08.000Z</published>
-    <updated>2019-07-31T12:43:09.328Z</updated>
+    <updated>2019-08-02T07:50:17.763Z</updated>
     
-    <content type="html"><![CDATA[<p>本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。</p><p>希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。  </p><a id="more"></a><h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><p>之前看的时候还很不连贯，会在最后第2,5章全部读完时再回头重新读一遍时，再进行相关的记录。</p><h1 id="computer-architecture-background"><a href="#computer-architecture-background" class="headerlink" title="computer architecture background"></a>computer architecture background</h1><p>本部分主要是对intel目前最为流行的计算机处理器背后的总体架构进行概括，以及运行在这些处理器上的系统所需要的安全特性。</p><h2 id="overview-1"><a href="#overview-1" class="headerlink" title="overview"></a>overview</h2><p>同样等第二章全部读完之后再进行阅读。</p><h2 id="computational-model"><a href="#computational-model" class="headerlink" title="computational model"></a>computational model</h2><p>本部分呈现了一个实现了intel架构的高度简化的计算机模型。</p><p>内存是存储单元的数组，使用从0开始的自然数来进行地址标记。它的一个显著特征就是<strong>即将读取的内存单元的地址等于最近的写入的地址单元的值</strong>。</p>]]></content>
+    <content type="html"><![CDATA[<p>本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。</p><p>希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。  </p><a id="more"></a><h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><p>之前看的时候还很不连贯，会在最后第2,5章全部读完时再回头重新读一遍时，再进行相关的记录。</p><h1 id="computer-architecture-background"><a href="#computer-architecture-background" class="headerlink" title="computer architecture background"></a>computer architecture background</h1><p>本部分主要是对intel目前最为流行的计算机处理器背后的总体架构进行概括，以及运行在这些处理器上的系统所需要的安全特性。</p><h2 id="overview-1"><a href="#overview-1" class="headerlink" title="overview"></a>overview</h2><p>同样等第二章全部读完之后再进行阅读。</p><h2 id="computational-model"><a href="#computational-model" class="headerlink" title="computational model"></a>computational model</h2><p>本部分呈现了一个实现了intel架构的高度简化的计算机模型。</p><p>内存是存储单元的数组，使用从0开始的自然数来进行地址标记。它的一个显著特征就是<strong>即将读取的内存单元的地址等于最近的写入的地址单元的值</strong>。</p><p>RIP和RSP</p><blockquote><p>RIP(instruction pointer)指令指针，保存着即将被处理器执行的下一条指令的内存地址<br>RSP(stack pointer)堆栈指针，保存堆栈中最顶层元素的内存地址  </p></blockquote><p>和许多常见的RISC架构不同，intel架构采用的是可变大小的指令编码，所以当且仅当指令被读取到内存中，才能知道指令长度。</p><p>在指令的先决条件没有得到满足的情况下，就会导致出现错误(fault)。当一条指令导致故障时，处理器会停止下正常的执行流，转而执行故障处理程序。简而言之，处理器首先会根据故障的性质查找能够处理故障的代码地址，而后为处理该故障准备执行环境。</p><p>处理器之间或与内存是通过系统总线进行通信的，这之间构成了一个广播网络。<br>&nbsp;</p><p><img src="/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-1/system-bus-abstraction.png" alt="system-bus-abstraction"></p>]]></content>
     
     <summary type="html">
     

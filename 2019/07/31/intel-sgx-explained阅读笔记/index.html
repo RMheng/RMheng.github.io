@@ -16,10 +16,12 @@
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-31T12:43:09.328Z">
+<meta property="og:image" content="http://yoursite.com/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-1/system-bus-abstraction.png">
+<meta property="og:updated_time" content="2019-08-02T07:50:17.763Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="intel sgx explained阅读笔记">
 <meta name="twitter:description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。">
+<meta name="twitter:image" content="http://yoursite.com/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-1/system-bus-abstraction.png">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -183,6 +185,14 @@
 <h2 id="overview-1"><a href="#overview-1" class="headerlink" title="overview"></a>overview</h2><p>同样等第二章全部读完之后再进行阅读。</p>
 <h2 id="computational-model"><a href="#computational-model" class="headerlink" title="computational model"></a>computational model</h2><p>本部分呈现了一个实现了intel架构的高度简化的计算机模型。</p>
 <p>内存是存储单元的数组，使用从0开始的自然数来进行地址标记。它的一个显著特征就是<strong>即将读取的内存单元的地址等于最近的写入的地址单元的值</strong>。</p>
+<p>RIP和RSP</p>
+<blockquote>
+<p>RIP(instruction pointer)指令指针，保存着即将被处理器执行的下一条指令的内存地址<br>RSP(stack pointer)堆栈指针，保存堆栈中最顶层元素的内存地址  </p>
+</blockquote>
+<p>和许多常见的RISC架构不同，intel架构采用的是可变大小的指令编码，所以当且仅当指令被读取到内存中，才能知道指令长度。</p>
+<p>在指令的先决条件没有得到满足的情况下，就会导致出现错误(fault)。当一条指令导致故障时，处理器会停止下正常的执行流，转而执行故障处理程序。简而言之，处理器首先会根据故障的性质查找能够处理故障的代码地址，而后为处理该故障准备执行环境。</p>
+<p>处理器之间或与内存是通过系统总线进行通信的，这之间构成了一个广播网络。<br>&nbsp;</p>
+<p><img src="/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-1/system-bus-abstraction.png" alt="system-bus-abstraction"></p>
 
       
 
@@ -425,6 +435,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Ubuntu</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
               </li>
              
               <li class="article-tag-list-item">
