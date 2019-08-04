@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-08-02T07:40:03.202Z</updated>
+  <updated>2019-08-04T10:15:08.985Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -17,13 +17,35 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>专业单词记录</title>
+    <link href="http://yoursite.com/2019/08/02/%E4%B8%93%E4%B8%9A%E5%8D%95%E8%AF%8D%E8%AE%B0%E5%BD%95/"/>
+    <id>http://yoursite.com/2019/08/02/专业单词记录/</id>
+    <published>2019-08-02T07:54:26.000Z</published>
+    <updated>2019-08-04T10:15:08.985Z</updated>
+    
+    <content type="html"><![CDATA[<p>本篇文章主要用于记录在论文中看到的常见的专业单词以及感觉很有意思的短语句子之类的。</p><a id="more"></a><p>hypervisor 系统管理程序<br>homomorphic encryption  同态加密<br>endorsement  认可，支持<br>predecessor  前驱，前辈<br>software attestation  软件认证<br>peripheral  外围的，次要的<br>compatible  兼容的<br>manual 手册<br>dedicated  专用的<br>asynchronous  异步的<br>delegate  委托<br>evict  驱逐<br>asynchronous enclave exit  异步安全区退出<br>scatter  分散<br>prerequisite  先决条件<br>lauch control feature  发射控制功能<br>hint  暗示<br>disclose  揭示<br>sidestep  回避<br>peculiarity  特性<br>refrain  节制<br>intricacy  复杂性<br>multiplex  多路传输<br>disposal  处理<br>register file  寄存器堆<br>thrust  重点<br>terminology  术语<br>acronyms  首字母缩略词<br>peripheral  外设<br>intuition  直观<br>building block  基石<br>salient feature  鲜明特征<br>procedural  程序<br>internal memory  内部存储器，内存<br>execution context  执行上下文<br>instruction pointer  指令指针<br>stack point  堆栈指针<br>precondition  前置条件<br>execution flow  执行流<br>in a nutshell  简而言之<br>processor  处理器<br>issue by 发出的<br>interrupt request  中断请求输入信号<br>Infrastructure-as-a-Service(IaaS)  基础设施即服务<br>implicitly  隐式地<br>motherboard  主板<br>bootstrapping  引导程序<br>firmware  固件<br>manufacture  厂商<br>emulate  传真<br>benchmark and optimize software  基准测试和优化软件<br>fine-grained  细粒度的<br>virtually  事实上<br>load  加载  </p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本篇文章主要用于记录在论文中看到的常见的专业单词以及感觉很有意思的短语句子之类的。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="计算机英语" scheme="http://yoursite.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%8B%B1%E8%AF%AD/"/>
+    
+    
+      <category term="计算机英语" scheme="http://yoursite.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%8B%B1%E8%AF%AD/"/>
+    
+  </entry>
+  
+  <entry>
     <title>操作系统基本知识</title>
     <link href="http://yoursite.com/2019/08/01/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/"/>
     <id>http://yoursite.com/2019/08/01/操作系统基本知识/</id>
     <published>2019-08-01T06:10:04.000Z</published>
-    <updated>2019-08-02T07:40:03.202Z</updated>
+    <updated>2019-08-03T08:27:08.869Z</updated>
     
-    <content type="html"><![CDATA[<p>本篇文章断断续续地记录了在读书中回顾到的以前遇到的基本知识，算是对计算机专业课中基本知识的回顾。</p><a id="more"></a><h1 id="内存、cache和寄存器之间的关系"><a href="#内存、cache和寄存器之间的关系" class="headerlink" title="内存、cache和寄存器之间的关系"></a>内存、cache和寄存器之间的关系</h1><p>把CPU比作大脑的话，寄存器相当于当前正在思考问题，而cache则相当于临时的记忆。</p><h2 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h2><p>寄存器是中央处理器(CPU)的组成部分，是有限存储容量的高速存储部件，可以用来暂存指令、数据和位址。CPU的控制部件中，包含的寄存器有指令寄存器(IR)和程序寄存器(PC)。在CPU的算数逻辑部件中，包含的寄存器有累加器(ACC)。</p><h2 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h2><p>内存用来存放当前正在使用的程序和数据。RAM可以分为静态存储器(Staic Random Access Memory,SRAM)和动态存储器(Dynamic Random Access Memory)，一般我们提到的DRAM就是内存。</p><p>SRAM中的存储单元相当于一个锁存器，只有0、1两个稳态；而DRAM是利用电容存储电荷来保存0和1两个状态，需要定时刷新。</p><p>DRAM，其中，随机访问表示的是以无序的顺序访问DRAM中的任何信息的这种能力。动态表示的是暂时性存储数据的基本能力。</p><h2 id="Cache"><a href="#Cache" class="headerlink" title="Cache"></a>Cache</h2><p>Cache就是高速缓冲存储器，是位于CPU和主内存之间的容量小但速度很快的存储器。Cache中保存着CPU刚用过的一部分数据，当CPU再次使用这部分数据直接从Cache中直接调用即可，从而减少了CPU的使用时间提高了效率。Cache分为一级Cache(L1 Cache)和二级Cache(L2 Cache)，L1 Cache集成在CPU内部，L2早起焊在主板上，现在也都集成在CPU内部。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，寄存器(register file)位于CPU内部，内存是连接CPU和磁盘的桥梁，而缓存是为了解决内存和CPU的运算速度差异而设置的组件。数据的流向过程是内存-Cache-寄存器。</p><h2 id="磁盘缓存"><a href="#磁盘缓存" class="headerlink" title="磁盘缓存"></a>磁盘缓存</h2><p>最后补一个磁盘缓存，缓存的概念目前已经从CPU和主内存之间的Cache扩充到内存和磁盘之间的Cache（磁盘缓存）。凡是速度差异较大的两个硬件之间，用于协调两者数据传输速度差异的结构，就可以称之为Cache。</p><p>磁盘缓存实际上是将需要下载的数据先保存到系统为软件分配的内存空间中（该内存空间被称之为“内存池”），当保存到内存池中的数据达到一定程度时，便将数据保存到硬盘中，这样就可以减少实际的磁盘操作，有效保护磁盘避免重复的读写操作而造成的损坏。</p><blockquote><p>磁盘缓存是为了减少CPU透过I/O读取磁盘的次数，提高I/O的效率，用一块内存来存储存取较为频繁的磁盘内容。因为内存的存取是电子动作，而磁盘的存取是I/O动作。</p></blockquote>]]></content>
+    <content type="html"><![CDATA[<p>本篇文章断断续续地记录了在读书中回顾到的以前遇到的基本知识，算是对计算机专业课中基本知识的回顾。</p><a id="more"></a><h1 id="内存、cache和寄存器之间的关系"><a href="#内存、cache和寄存器之间的关系" class="headerlink" title="内存、cache和寄存器之间的关系"></a>内存、cache和寄存器之间的关系</h1><p>把CPU比作大脑的话，寄存器相当于当前正在思考问题，而cache则相当于临时的记忆。</p><h2 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h2><p>寄存器是中央处理器(CPU)的组成部分，是有限存储容量的高速存储部件，可以用来暂存指令、数据和位址。CPU的控制部件中，包含的寄存器有指令寄存器(IR)和程序寄存器(PC)。在CPU的算数逻辑部件中，包含的寄存器有累加器(ACC)。</p><h2 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h2><p>内存用来存放当前正在使用的程序和数据。RAM可以分为静态存储器(Staic Random Access Memory,SRAM)和动态存储器(Dynamic Random Access Memory)，一般我们提到的DRAM就是内存。</p><p>SRAM中的存储单元相当于一个锁存器，只有0、1两个稳态；而DRAM是利用电容存储电荷来保存0和1两个状态，需要定时刷新。</p><p>DRAM，其中，随机访问表示的是以无序的顺序访问DRAM中的任何信息的这种能力。动态表示的是暂时性存储数据的基本能力。</p><h2 id="Cache"><a href="#Cache" class="headerlink" title="Cache"></a>Cache</h2><p>Cache就是高速缓冲存储器，是位于CPU和主内存之间的容量小但速度很快的存储器。Cache中保存着CPU刚用过的一部分数据，当CPU再次使用这部分数据直接从Cache中直接调用即可，从而减少了CPU的使用时间提高了效率。Cache分为一级Cache(L1 Cache)和二级Cache(L2 Cache)，L1 Cache集成在CPU内部，L2早起焊在主板上，现在也都集成在CPU内部。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说，寄存器(register file)位于CPU内部，内存是连接CPU和磁盘的桥梁，而缓存是为了解决内存和CPU的运算速度差异而设置的组件。数据的流向过程是内存-Cache-寄存器。</p><h2 id="磁盘缓存"><a href="#磁盘缓存" class="headerlink" title="磁盘缓存"></a>磁盘缓存</h2><p>最后补一个磁盘缓存，缓存的概念目前已经从CPU和主内存之间的Cache扩充到内存和磁盘之间的Cache（磁盘缓存）。凡是速度差异较大的两个硬件之间，用于协调两者数据传输速度差异的结构，就可以称之为Cache。</p><p>磁盘缓存实际上是将需要下载的数据先保存到系统为软件分配的内存空间中（该内存空间被称之为“内存池”），当保存到内存池中的数据达到一定程度时，便将数据保存到硬盘中，这样就可以减少实际的磁盘操作，有效保护磁盘避免重复的读写操作而造成的损坏。</p><blockquote><p>磁盘缓存是为了减少CPU透过I/O读取磁盘的次数，提高I/O的效率，用一块内存来存储存取较为频繁的磁盘内容。因为内存的存取是电子动作，而磁盘的存取是I/O动作。</p></blockquote><h1 id="Intel-VMM"><a href="#Intel-VMM" class="headerlink" title="Intel VMM"></a>Intel VMM</h1><p>intel提供了处理器级别的VMX(Virtual-Machine Extensions)技术.intel VMX的体系结构可以划分为两层：VMM和VM。</p><p>VMM(Virtual-Machine Monitors)作为host，具有对processor和平台硬件的完全控制权限。它为guest提供了VCPU(virtual processor)的抽象，并允许guest直接运行在逻辑处理器上，具有对处理器资源、物理内存、中断和IO的控制的权利。  </p><p>VM(Virtual-Machine)相应地作为guest，其实提供了一种guest的软件环境。它维护了一个栈，其中包含了OS和application software。其中每个操作都独立于其他的VM，并且使用由同一个物理平台所提供的处理器、内存、硬盘、显卡和IO访问的统一接口。这些栈并不知道VMM的存在。运行于VM中的软件其权限是受限的，也就保障了VMM对整个平台资源的完全控制。</p>]]></content>
     
     <summary type="html">
     
@@ -34,9 +56,9 @@
       <category term="操作系统" scheme="http://yoursite.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
     
     
-      <category term="操作系统" scheme="http://yoursite.com/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
       <category term="基本知识复习" scheme="http://yoursite.com/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86%E5%A4%8D%E4%B9%A0/"/>
+    
+      <category term="操作系统" scheme="http://yoursite.com/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
     
   </entry>
   
@@ -95,9 +117,9 @@
     <link href="http://yoursite.com/2019/07/31/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
     <id>http://yoursite.com/2019/07/31/intel-sgx-explained阅读笔记/</id>
     <published>2019-07-31T08:17:08.000Z</published>
-    <updated>2019-08-02T07:50:17.763Z</updated>
+    <updated>2019-08-04T13:36:51.950Z</updated>
     
-    <content type="html"><![CDATA[<p>本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。</p><p>希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。  </p><a id="more"></a><h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><p>之前看的时候还很不连贯，会在最后第2,5章全部读完时再回头重新读一遍时，再进行相关的记录。</p><h1 id="computer-architecture-background"><a href="#computer-architecture-background" class="headerlink" title="computer architecture background"></a>computer architecture background</h1><p>本部分主要是对intel目前最为流行的计算机处理器背后的总体架构进行概括，以及运行在这些处理器上的系统所需要的安全特性。</p><h2 id="overview-1"><a href="#overview-1" class="headerlink" title="overview"></a>overview</h2><p>同样等第二章全部读完之后再进行阅读。</p><h2 id="computational-model"><a href="#computational-model" class="headerlink" title="computational model"></a>computational model</h2><p>本部分呈现了一个实现了intel架构的高度简化的计算机模型。</p><p>内存是存储单元的数组，使用从0开始的自然数来进行地址标记。它的一个显著特征就是<strong>即将读取的内存单元的地址等于最近的写入的地址单元的值</strong>。</p><p>RIP和RSP</p><blockquote><p>RIP(instruction pointer)指令指针，保存着即将被处理器执行的下一条指令的内存地址<br>RSP(stack pointer)堆栈指针，保存堆栈中最顶层元素的内存地址  </p></blockquote><p>和许多常见的RISC架构不同，intel架构采用的是可变大小的指令编码，所以当且仅当指令被读取到内存中，才能知道指令长度。</p><p>在指令的先决条件没有得到满足的情况下，就会导致出现错误(fault)。当一条指令导致故障时，处理器会停止下正常的执行流，转而执行故障处理程序。简而言之，处理器首先会根据故障的性质查找能够处理故障的代码地址，而后为处理该故障准备执行环境。</p><p>处理器之间或与内存是通过系统总线进行通信的，这之间构成了一个广播网络。<br>&nbsp;</p><p><img src="/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-1/system-bus-abstraction.png" alt="system-bus-abstraction"></p>]]></content>
+    <content type="html"><![CDATA[<p>本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。</p><p>希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。  </p><a id="more"></a><h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><p>之前看的时候还很不连贯，会在最后第2,5章全部读完时再回头重新读一遍时，再进行相关的记录。</p><h1 id="computer-architecture-background"><a href="#computer-architecture-background" class="headerlink" title="computer architecture background"></a>computer architecture background</h1><p>本部分主要是对intel目前最为流行的计算机处理器背后的总体架构进行概括，以及运行在这些处理器上的系统所需要的安全特性。</p><h2 id="overview-1"><a href="#overview-1" class="headerlink" title="overview"></a>overview</h2><p>同样等第二章全部读完之后再进行阅读。</p><h2 id="computational-model"><a href="#computational-model" class="headerlink" title="computational model"></a>computational model</h2><p>本部分呈现了一个实现了intel架构的高度简化的计算机模型。</p><p>内存是存储单元的数组，使用从0开始的自然数来进行地址标记。它的一个显著特征就是<strong>即将读取的内存单元的地址等于最近的写入的地址单元的值</strong>。</p><p>RIP和RSP</p><blockquote><p>RIP(instruction pointer)指令指针，保存着即将被处理器执行的下一条指令的内存地址<br>RSP(stack pointer)堆栈指针，保存堆栈中最顶层元素的内存地址  </p></blockquote><p>和许多常见的RISC架构不同，intel架构采用的是可变大小的指令编码，所以当且仅当指令被读取到内存中，才能知道指令长度。</p><p>在指令的先决条件没有得到满足的情况下，就会导致出现错误(fault)。当一条指令导致故障时，处理器会停止下正常的执行流，转而执行故障处理程序。简而言之，处理器首先会根据故障的性质查找能够处理故障的代码地址，而后为处理该故障准备执行环境。</p><p>处理器之间或与内存是通过系统总线进行通信的，这之间构成了一个广播网络。  </p><table><thead><tr><th>SEND(op,addr,data)-&gt;∅</th></tr></thead><tbody><tr><td>发送一条包含了操作码op，总线地址addr和总线值data的信息给总线</td></tr></tbody></table><table><thead><tr><th>READ()-&gt;(op,addr,value)</th></tr></thead><tbody><tr><td>在时钟循环开始的时候讲写入总线的信息返回</td></tr></tbody></table><p>在每个时钟循环，大部分与系统总线相连的设备都可以发送一条信息，这些信息也会被其他总线相连的设备接收到。这些设备对操作码和地址解码，并忽略不需要其参与的信息。（这里感觉比较像ARP广播，那么值得考虑的是这边是否也会受到类似中间人攻击呢？）</p><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本章以简化模型为切入点，开始引入内存和寄存器的概念，然后提到了寄存器中最为常见的两个寄存器RIP和RSP。并简要概述了以下几个问题：</p><ul><li>处理器遇到了中断如何处理  </li><li>处理器和内存如何进行通信（通过总线）  </li><li>处理器如何与外部世界进行通信（I/O设备）</li></ul><h2 id="软件权限级别"><a href="#软件权限级别" class="headerlink" title="软件权限级别"></a>软件权限级别</h2><p>在x86系统架构中，最高权限为SMM模式，运行BIOS；其次为VMX Root(Virtual Machine Extension，虚拟机扩展)，这其中，系统管理程序(Hypervisor)位于其中的ring0模式；而VMX Non-Root位于再下面一层，其中，os kernel位于ring0，装载有SGX Enclave的应用程序位于ring3.  </p><p>每个权限级别都比其下面的权限更强大，并且能够自由地修改在较低权限级别运行的代码和数据。在对系统安全性进行分析时，必须考虑所有特权级别的软件。</p><p>SMM旨在供主板提供商实现风扇控制和深度睡眠等功能，或模拟缺少的硬件。计算机中的引导软件负责将需要以SMM模式运行的代码装载到SMRAM(System Management RAM)</p><blockquote><p>SMM属于16位模式，主要用于主板控制和电源管理。只有当CPU收到硬件系统管理中断SMI(System Management Interrupt)时，才进入系统管理模式。关于SMM模式的入口，所有单一CPU寄存器都将其保存在“memory saved state map”，而它自己也被保存在一个称作SMRAM的内存区域中。每一个SMI handler均由SMRAM执行。</p></blockquote><p>IssS云服务提供商允许客户在虚拟机环境下运行自己所选择的操作系统。VMX为管理程序(Virtual Machine Monitor,VMM)提供了支持。管理程序比操作系统拥有更多的权限，并且负责在共享一个物理机的多个操作系统上分配资源。管理程序利用CPU硬件的虚拟化功能能够让每个操作系统相信它在只属于它的电脑上运行，也就是虚拟机。</p><p>一般来说，建议将操作系统分解成运行高权限级别的内核上，也就是内核模式或者管理模式。内核将资源分配给其他的系统组件，这些系统组件以较低的权限运行。但出于性能原因，主流操作系统在ring0模式下运行了大量的代码。它们的单内核包括了设备驱动程序、文件系统代码、网络协议堆栈和视频渲染功能。</p><p>以用户模式运行的应用程序代码在IaaS的云环境下，用户提供的虚拟机映像泡在VMX non-root模式下，其中，kernel在其中的ring0模式运行，而应用程序代码则在ring3模式下运行。</p><h3 id="微内核和单内核"><a href="#微内核和单内核" class="headerlink" title="微内核和单内核"></a>微内核和单内核</h3><h4 id="微内核"><a href="#微内核" class="headerlink" title="微内核"></a>微内核</h4><p>在微内核中，最常用的功能被设计在内核模式(ring0)运行的一个进程中，而其他大部分的核心功能都会作为单独的进程运行在用户模式下(ring3)，他们通过信息传递来进行通讯。<strong>其中，基本思想是内核下的程序要尽可能的小，通常微内核只会包含了进程调度、内存管理和进程间通信这几个功能</strong>  </p><p>由于模块化的设计，不包含在微内核的驱动程序可以被动态地加载或者卸载。用户可以在系统运行时将研发出的新系统模块或需要替换现有模块的模块直接迅速地加入到系统中。不需要的模块就不会被加载到内存中，因为微内核能够更有效地利用内存，适合构建分布式操作系统和面向对象操作系统。</p><h4 id="单内核"><a href="#单内核" class="headerlink" title="单内核"></a>单内核</h4><p>单内核是一个很大的进程。它的内部能够被分为若干模块，在运行时，是一个单独的二进制映象。因为在同一个进程中，模块间的通讯是可以通过直接调用其他模块的函数实现的，而不是微内核那样在多个进程之间进行消息传递。所以，它的运行效率更快。</p><h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>本部分主要阐述了intel架构下的软件权限级别，分为3个级别，并分别对每个级别上运行的程序进行了简要的概述，其实本章的第一段就是概述。</p><ul><li>一共有几个级别  </li><li>每个级别上运行哪些程序  </li><li>这些程序的功能又是什么？他们与不同权限的程序之间的关系怎么样？</li></ul><h3 id="扩展阅读"><a href="#扩展阅读" class="headerlink" title="扩展阅读"></a>扩展阅读</h3><p><a href="https://wenku.baidu.com/view/acfff30d6c85ec3a87c2c5ca.html" target="_blank" rel="noopener">深入SMRAM：SMM重载</a></p><p><a href="http://blog.sina.com.cn/s/blog_62b250b50102v6wl.html" target="_blank" rel="noopener">Micro kernel与Monolithic kernel微内核与单内核之争</a></p><h2 id="地址空间"><a href="#地址空间" class="headerlink" title="地址空间"></a>地址空间</h2><p>本节在一个较高的层面概述了intel架构定义的物理地址空间，重点介绍了它们的用途和管理方法。</p><p>寄存器空间由用于访问CPU寄存器堆的名称构成，这是唯一一个以CPU时钟频率运行的存储器，可以在没有任何延迟损失的情况下使用。</p><p>某些寄存器，比如控制寄存器，将会在配置CPU的操作中起非常重要的作用。这些寄存器可以通过特权级别进行访问，它们的分配通过软件编译器进行管理。很多CPU指令通常只会操作寄存器中的数据，并且将计算结果存入寄存器中。</p><p>内存空间，一般指的是地址空间或者说是物理地址空间，用于访问DRAM或者进行内存映射。内存映射一个非常著名的例子是在计算机启动阶段，内存地址为0xFFFF0000-0xFFFFFFFF将会被映射到装载着第一部分计算机引导程序的快闪内存设备。</p><p>在引导过程中，内存空间被计算机硬件在设备和DRAM之间进行分区。操作系统内核通过地址转换来控制应用程序对内存空间的访问；同样，管理程序也用类似的方法来管理客户端操作系统。</p><p>I/O空间由2^16个IO地址构成，通常被称为端口。每个I/O端口与专门的设备进行通信。目前的CPU实现了系统软件对应用程序更为细粒度的I/O访问，但大部分现代kernel为了避免潜在的应用程序bug，都是严格限制直接访问I/O空间。</p><p>MSR(Model Specific Register，模型特定寄存器)，这类寄存器与处理器的Model密切相关。不同的Model，即使只相差一个迭代版本，MSR也会不同。有些MSR一旦确定之后就不会改变，这类MSR被称为”architectural MSRs”，它们的语义也称为了intel架构中的一部分。MSR寄存器可以通过CPU提供的特定的指令来进行读取或写入，这些指令当然也仅仅被系统软件使用，某些MSR也可以让应用程序通过一些指令进行读取。</p><h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><p>本部分主要以图9为切入点，分别介绍了寄存器、MSR、内存地址和I/O端口，寄存器和MSR是在CPU内部的，而内存地址和I/O地址是为了和与总线相连的DRAM和I/O设备进行通信的，并主要回答以下几个问题：  </p><ul><li>寄存器空间的基本组成  </li><li>地址映射的例子？为什么需要地址映射</li><li>CPU如何对寄存器、MSR、内存地址和I/O进行管理？如何访问？</li></ul><h2 id="地址转换"><a href="#地址转换" class="headerlink" title="地址转换"></a>地址转换</h2><p>系统软件通过地址转换机制来实现低特权软件（应用程序或操作系统）之间的隔离。</p><h3 id="地址转换概念"><a href="#地址转换概念" class="headerlink" title="地址转换概念"></a>地址转换概念</h3><p>首先明确虚地址和物理地址的概念，虚地址(virtual memory)用于从程序内存中加载和存储指令；而物理地址，就是内存地址。物理地址和虚地址之间的映射是通过页表来定义的。</p>]]></content>
     
     <summary type="html">
     
@@ -106,8 +128,14 @@
     
     </summary>
     
+      <category term="操作系统" scheme="http://yoursite.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
     
       <category term="SGX" scheme="http://yoursite.com/tags/SGX/"/>
+    
+      <category term="基本知识复习" scheme="http://yoursite.com/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86%E5%A4%8D%E4%B9%A0/"/>
+    
+      <category term="操作系统" scheme="http://yoursite.com/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
     
   </entry>
   

@@ -9,19 +9,17 @@
   <title>intel sgx explained阅读笔记 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。">
-<meta name="keywords" content="SGX">
+<meta name="keywords" content="SGX,基本知识复习,操作系统">
 <meta property="og:type" content="article">
 <meta property="og:title" content="intel sgx explained阅读笔记">
 <meta property="og:url" content="http://yoursite.com/2019/07/31/intel-sgx-explained阅读笔记/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-1/system-bus-abstraction.png">
-<meta property="og:updated_time" content="2019-08-02T07:50:17.763Z">
+<meta property="og:updated_time" content="2019-08-04T13:36:51.950Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="intel sgx explained阅读笔记">
 <meta name="twitter:description" content="本篇文章主要是对SGX经典入门综述intel SGX Explained这本书的阅读笔记。 希望能够坚持下来，在这个过程中得到从英语和知识水平两个方面的提高。">
-<meta name="twitter:image" content="http://yoursite.com/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-1/system-bus-abstraction.png">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -191,8 +189,69 @@
 </blockquote>
 <p>和许多常见的RISC架构不同，intel架构采用的是可变大小的指令编码，所以当且仅当指令被读取到内存中，才能知道指令长度。</p>
 <p>在指令的先决条件没有得到满足的情况下，就会导致出现错误(fault)。当一条指令导致故障时，处理器会停止下正常的执行流，转而执行故障处理程序。简而言之，处理器首先会根据故障的性质查找能够处理故障的代码地址，而后为处理该故障准备执行环境。</p>
-<p>处理器之间或与内存是通过系统总线进行通信的，这之间构成了一个广播网络。<br>&nbsp;</p>
-<p><img src="/intel-sgx-explained%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-1/system-bus-abstraction.png" alt="system-bus-abstraction"></p>
+<p>处理器之间或与内存是通过系统总线进行通信的，这之间构成了一个广播网络。  </p>
+<table>
+<thead>
+<tr>
+<th>SEND(op,addr,data)-&gt;∅</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>发送一条包含了操作码op，总线地址addr和总线值data的信息给总线</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>READ()-&gt;(op,addr,value)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>在时钟循环开始的时候讲写入总线的信息返回</td>
+</tr>
+</tbody></table>
+<p>在每个时钟循环，大部分与系统总线相连的设备都可以发送一条信息，这些信息也会被其他总线相连的设备接收到。这些设备对操作码和地址解码，并忽略不需要其参与的信息。（这里感觉比较像ARP广播，那么值得考虑的是这边是否也会受到类似中间人攻击呢？）</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本章以简化模型为切入点，开始引入内存和寄存器的概念，然后提到了寄存器中最为常见的两个寄存器RIP和RSP。并简要概述了以下几个问题：</p>
+<ul>
+<li>处理器遇到了中断如何处理  </li>
+<li>处理器和内存如何进行通信（通过总线）  </li>
+<li>处理器如何与外部世界进行通信（I/O设备）</li>
+</ul>
+<h2 id="软件权限级别"><a href="#软件权限级别" class="headerlink" title="软件权限级别"></a>软件权限级别</h2><p>在x86系统架构中，最高权限为SMM模式，运行BIOS；其次为VMX Root(Virtual Machine Extension，虚拟机扩展)，这其中，系统管理程序(Hypervisor)位于其中的ring0模式；而VMX Non-Root位于再下面一层，其中，os kernel位于ring0，装载有SGX Enclave的应用程序位于ring3.  </p>
+<p>每个权限级别都比其下面的权限更强大，并且能够自由地修改在较低权限级别运行的代码和数据。在对系统安全性进行分析时，必须考虑所有特权级别的软件。</p>
+<p>SMM旨在供主板提供商实现风扇控制和深度睡眠等功能，或模拟缺少的硬件。计算机中的引导软件负责将需要以SMM模式运行的代码装载到SMRAM(System Management RAM)</p>
+<blockquote>
+<p>SMM属于16位模式，主要用于主板控制和电源管理。只有当CPU收到硬件系统管理中断SMI(System Management Interrupt)时，才进入系统管理模式。关于SMM模式的入口，所有单一CPU寄存器都将其保存在“memory saved state map”，而它自己也被保存在一个称作SMRAM的内存区域中。每一个SMI handler均由SMRAM执行。</p>
+</blockquote>
+<p>IssS云服务提供商允许客户在虚拟机环境下运行自己所选择的操作系统。VMX为管理程序(Virtual Machine Monitor,VMM)提供了支持。管理程序比操作系统拥有更多的权限，并且负责在共享一个物理机的多个操作系统上分配资源。管理程序利用CPU硬件的虚拟化功能能够让每个操作系统相信它在只属于它的电脑上运行，也就是虚拟机。</p>
+<p>一般来说，建议将操作系统分解成运行高权限级别的内核上，也就是内核模式或者管理模式。内核将资源分配给其他的系统组件，这些系统组件以较低的权限运行。但出于性能原因，主流操作系统在ring0模式下运行了大量的代码。它们的单内核包括了设备驱动程序、文件系统代码、网络协议堆栈和视频渲染功能。</p>
+<p>以用户模式运行的应用程序代码在IaaS的云环境下，用户提供的虚拟机映像泡在VMX non-root模式下，其中，kernel在其中的ring0模式运行，而应用程序代码则在ring3模式下运行。</p>
+<h3 id="微内核和单内核"><a href="#微内核和单内核" class="headerlink" title="微内核和单内核"></a>微内核和单内核</h3><h4 id="微内核"><a href="#微内核" class="headerlink" title="微内核"></a>微内核</h4><p>在微内核中，最常用的功能被设计在内核模式(ring0)运行的一个进程中，而其他大部分的核心功能都会作为单独的进程运行在用户模式下(ring3)，他们通过信息传递来进行通讯。<strong>其中，基本思想是内核下的程序要尽可能的小，通常微内核只会包含了进程调度、内存管理和进程间通信这几个功能</strong>  </p>
+<p>由于模块化的设计，不包含在微内核的驱动程序可以被动态地加载或者卸载。用户可以在系统运行时将研发出的新系统模块或需要替换现有模块的模块直接迅速地加入到系统中。不需要的模块就不会被加载到内存中，因为微内核能够更有效地利用内存，适合构建分布式操作系统和面向对象操作系统。</p>
+<h4 id="单内核"><a href="#单内核" class="headerlink" title="单内核"></a>单内核</h4><p>单内核是一个很大的进程。它的内部能够被分为若干模块，在运行时，是一个单独的二进制映象。因为在同一个进程中，模块间的通讯是可以通过直接调用其他模块的函数实现的，而不是微内核那样在多个进程之间进行消息传递。所以，它的运行效率更快。</p>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>本部分主要阐述了intel架构下的软件权限级别，分为3个级别，并分别对每个级别上运行的程序进行了简要的概述，其实本章的第一段就是概述。</p>
+<ul>
+<li>一共有几个级别  </li>
+<li>每个级别上运行哪些程序  </li>
+<li>这些程序的功能又是什么？他们与不同权限的程序之间的关系怎么样？</li>
+</ul>
+<h3 id="扩展阅读"><a href="#扩展阅读" class="headerlink" title="扩展阅读"></a>扩展阅读</h3><p><a href="https://wenku.baidu.com/view/acfff30d6c85ec3a87c2c5ca.html" target="_blank" rel="noopener">深入SMRAM：SMM重载</a></p>
+<p><a href="http://blog.sina.com.cn/s/blog_62b250b50102v6wl.html" target="_blank" rel="noopener">Micro kernel与Monolithic kernel微内核与单内核之争</a></p>
+<h2 id="地址空间"><a href="#地址空间" class="headerlink" title="地址空间"></a>地址空间</h2><p>本节在一个较高的层面概述了intel架构定义的物理地址空间，重点介绍了它们的用途和管理方法。</p>
+<p>寄存器空间由用于访问CPU寄存器堆的名称构成，这是唯一一个以CPU时钟频率运行的存储器，可以在没有任何延迟损失的情况下使用。</p>
+<p>某些寄存器，比如控制寄存器，将会在配置CPU的操作中起非常重要的作用。这些寄存器可以通过特权级别进行访问，它们的分配通过软件编译器进行管理。很多CPU指令通常只会操作寄存器中的数据，并且将计算结果存入寄存器中。</p>
+<p>内存空间，一般指的是地址空间或者说是物理地址空间，用于访问DRAM或者进行内存映射。内存映射一个非常著名的例子是在计算机启动阶段，内存地址为0xFFFF0000-0xFFFFFFFF将会被映射到装载着第一部分计算机引导程序的快闪内存设备。</p>
+<p>在引导过程中，内存空间被计算机硬件在设备和DRAM之间进行分区。操作系统内核通过地址转换来控制应用程序对内存空间的访问；同样，管理程序也用类似的方法来管理客户端操作系统。</p>
+<p>I/O空间由2^16个IO地址构成，通常被称为端口。每个I/O端口与专门的设备进行通信。目前的CPU实现了系统软件对应用程序更为细粒度的I/O访问，但大部分现代kernel为了避免潜在的应用程序bug，都是严格限制直接访问I/O空间。</p>
+<p>MSR(Model Specific Register，模型特定寄存器)，这类寄存器与处理器的Model密切相关。不同的Model，即使只相差一个迭代版本，MSR也会不同。有些MSR一旦确定之后就不会改变，这类MSR被称为”architectural MSRs”，它们的语义也称为了intel架构中的一部分。MSR寄存器可以通过CPU提供的特定的指令来进行读取或写入，这些指令当然也仅仅被系统软件使用，某些MSR也可以让应用程序通过一些指令进行读取。</p>
+<h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><p>本部分主要以图9为切入点，分别介绍了寄存器、MSR、内存地址和I/O端口，寄存器和MSR是在CPU内部的，而内存地址和I/O地址是为了和与总线相连的DRAM和I/O设备进行通信的，并主要回答以下几个问题：  </p>
+<ul>
+<li>寄存器空间的基本组成  </li>
+<li>地址映射的例子？为什么需要地址映射</li>
+<li>CPU如何对寄存器、MSR、内存地址和I/O进行管理？如何访问？</li>
+</ul>
+<h2 id="地址转换"><a href="#地址转换" class="headerlink" title="地址转换"></a>地址转换</h2><p>系统软件通过地址转换机制来实现低特权软件（应用程序或操作系统）之间的隔离。</p>
+<h3 id="地址转换概念"><a href="#地址转换概念" class="headerlink" title="地址转换概念"></a>地址转换概念</h3><p>首先明确虚地址和物理地址的概念，虚地址(virtual memory)用于从程序内存中加载和存储指令；而物理地址，就是内存地址。物理地址和虚地址之间的映射是通过页表来定义的。</p>
 
       
 
@@ -208,11 +267,30 @@
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">SGX</a>
         		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">基本知识复习</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">操作系统</a>
+        		</li>
       		
 		</ul>
 	</div>
 
       
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/操作系统//" class="article-tag-list-link color5">操作系统</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
 
       
 
@@ -314,7 +392,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#overview"><span class="toc-number">1.</span> <span class="toc-text">overview</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#computer-architecture-background"><span class="toc-number">2.</span> <span class="toc-text">computer architecture background</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#overview-1"><span class="toc-number">2.1.</span> <span class="toc-text">overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#computational-model"><span class="toc-number">2.2.</span> <span class="toc-text">computational model</span></a></li></ol></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#overview"><span class="toc-number">1.</span> <span class="toc-text">overview</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#computer-architecture-background"><span class="toc-number">2.</span> <span class="toc-text">computer architecture background</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#overview-1"><span class="toc-number">2.1.</span> <span class="toc-text">overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#computational-model"><span class="toc-number">2.2.</span> <span class="toc-text">computational model</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#总结"><span class="toc-number">2.2.1.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#软件权限级别"><span class="toc-number">2.3.</span> <span class="toc-text">软件权限级别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#微内核和单内核"><span class="toc-number">2.3.1.</span> <span class="toc-text">微内核和单内核</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#微内核"><span class="toc-number">2.3.1.1.</span> <span class="toc-text">微内核</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#单内核"><span class="toc-number">2.3.1.2.</span> <span class="toc-text">单内核</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总结-1"><span class="toc-number">2.3.2.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#扩展阅读"><span class="toc-number">2.3.3.</span> <span class="toc-text">扩展阅读</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#地址空间"><span class="toc-number">2.4.</span> <span class="toc-text">地址空间</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#总结-2"><span class="toc-number">2.4.1.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#地址转换"><span class="toc-number">2.5.</span> <span class="toc-text">地址转换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#地址转换概念"><span class="toc-number">2.5.1.</span> <span class="toc-text">地址转换概念</span></a></li></ol></li></ol></li></ol>
                     </div>
                 </span>
             </div>
@@ -438,11 +516,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
+                <a href="javascript:void(0)" class="js-tag color1">计算机英语</a>
               </li>
              
               <li class="article-tag-list-item">
