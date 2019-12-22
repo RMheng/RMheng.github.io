@@ -104,9 +104,9 @@
       <category term="keystone" scheme="http://yoursite.com/categories/keystone/"/>
     
     
-      <category term="实验" scheme="http://yoursite.com/tags/%E5%AE%9E%E9%AA%8C/"/>
-    
       <category term="keystone" scheme="http://yoursite.com/tags/keystone/"/>
+    
+      <category term="实验" scheme="http://yoursite.com/tags/%E5%AE%9E%E9%AA%8C/"/>
     
       <category term="qemu" scheme="http://yoursite.com/tags/qemu/"/>
     
@@ -220,9 +220,9 @@
       <category term="SGX" scheme="http://yoursite.com/categories/SGX/"/>
     
     
-      <category term="SGX" scheme="http://yoursite.com/tags/SGX/"/>
-    
       <category term="实验" scheme="http://yoursite.com/tags/%E5%AE%9E%E9%AA%8C/"/>
+    
+      <category term="SGX" scheme="http://yoursite.com/tags/SGX/"/>
     
       <category term="Ubuntu" scheme="http://yoursite.com/tags/Ubuntu/"/>
     
