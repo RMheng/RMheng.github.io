@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="因为实习项目的原因，学习Rust，这是相关笔记。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-12-04T06:50:59.754Z">
+<meta property="og:updated_time" content="2019-12-09T03:52:12.819Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Rust语言学习">
 <meta name="twitter:description" content="因为实习项目的原因，学习Rust，这是相关笔记。">
@@ -179,6 +179,16 @@
 <a id="more"></a>
 <h1 id="Rust概述"><a href="#Rust概述" class="headerlink" title="Rust概述"></a>Rust概述</h1><p>Rust作为系统编程语言，被设计为保证内存和线程安全，并防止段错误。作为系统编程语言，基本理念是“零开销抽象”，它的速度理论上和C/C++同级。</p>
 <p>Rust强调安全性、并发和内存控制，不允许空指针和悬挂指针，从而避免了C/C++中系统崩溃、内存泄露和不安全代码的根源。</p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>cargo是Rust的构建系统和包管理工具，它主要完成三个工作：构建代码，下载代码依赖的库并编译这些库。</p>
+<p># </p>
+<h2 id="tuple"><a href="#tuple" class="headerlink" title="tuple"></a>tuple</h2><p>tuple is a general way of grouping together some number of other values with a varity of types into one compound type.</p>
+<h2 id="array"><a href="#array" class="headerlink" title="array"></a>array</h2><p>every element of an array must have the same type.</p>
+<p>Rust是一个基于表达式的语言</p>
+<p>Rust借用中的一些规则：</p>
+<ul>
+<li>任何借用必须位于比拥有者更小的作用域中；</li>
+<li>对于同一个资源的借用，以下情况不能同时出现在一个作用域下：一个或多个不可变引用(&amp;T)；唯一一个可变引用(&amp;mut T)</li>
+</ul>
 
       
 
@@ -277,6 +287,15 @@
   
 <nav id="article-nav">
   
+    <a href="/2019/12/18/try-DCAP/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          try DCAP
+        
+      </div>
+    </a>
+  
   
     <a href="/2019/12/03/keystone-qemu手动安装测试/" id="article-nav-older" class="article-nav-link-wrap">
       <div class="article-nav-title">keystone-qemu手动安装测试</div>
@@ -306,7 +325,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Rust概述"><span class="toc-number">1.</span> <span class="toc-text">Rust概述</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Rust概述"><span class="toc-number">1.</span> <span class="toc-text">Rust概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#安装"><span class="toc-number">2.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#tuple"><span class="toc-number">2.1.</span> <span class="toc-text">tuple</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#array"><span class="toc-number">2.2.</span> <span class="toc-text">array</span></a></li></ol></li></ol>
                     </div>
                 </span>
             </div>
@@ -418,6 +437,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">日记</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">生活</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">SGX</a>
               </li>
              
@@ -430,15 +457,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Rust</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">sgx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">日记</a>
+                <a href="javascript:void(0)" class="js-tag color1">计算机英语</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -450,10 +469,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">计算机英语</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">keystone</a>
               </li>
              
@@ -462,11 +477,27 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Rust</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">sgx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">-sgx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">英语</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">读后感</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">读书</a>
               </li>
             
             <div class="clearfix"></div>

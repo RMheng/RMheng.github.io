@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Tag: 计算机英语 | rww&#39;s Blog</title>
+  <title>try DCAP | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="程序猿">
-<meta property="og:type" content="website">
-<meta property="og:title" content="rww&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/tags/计算机英语/index.html">
+  <meta name="description" content="安装DCAP，阅读源代码笔记以及碎碎念。">
+<meta name="keywords" content="-sgx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="try DCAP">
+<meta property="og:url" content="http://yoursite.com/2019/12/18/try-DCAP/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
+<meta property="og:description" content="安装DCAP，阅读源代码笔记以及碎碎念。">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-22T09:03:55.989Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="rww&#39;s Blog">
+<meta name="twitter:title" content="try DCAP">
+<meta name="twitter:description" content="安装DCAP，阅读源代码笔记以及碎碎念。">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -147,71 +151,302 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-try-DCAP" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/08/02/专业单词记录/" class="archive-article-date">
-  	<time datetime="2019-08-02T07:54:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-08-02</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/08/02/专业单词记录/">专业单词记录</a>
+    <h1 class="article-title" itemprop="name">
+      try DCAP
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2019/12/18/try-DCAP/" class="archive-article-date">
+  	<time datetime="2019-12-18T03:25:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-12-18</time>
+</a>
+        
+      </header>
+    
+	<!-- 目录内容 -->
+	
+		<!-- 目录内容结束 -->
+
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>安装DCAP，阅读源代码笔记以及碎碎念。</p>
+<a id="more"></a>
+
+<h1 id="DCAP安装-Ubuntu18-04"><a href="#DCAP安装-Ubuntu18-04" class="headerlink" title="DCAP安装-Ubuntu18.04"></a>DCAP安装-Ubuntu18.04</h1><ul>
+<li><p>从github clone下源代码<br><code>https://github.com/intel/SGXDataCenterAttestationPrimitives</code></p>
+</li>
+<li><p>进入SGXDataCenterAttestationPrimitives/QuoteGeneration文件夹中，首先执行<code>download_prebuilt.sh</code>，然后出现了如下述的错误。</p>
+<blockquote>
+<p>ERROR: cannot verify github.com’s certificate, issued by ‘CN=DigiCert SHA2 Extended Validation Server CA,OU=<a href="http://www.digicert.com,O=DigiCert" target="_blank" rel="noopener">www.digicert.com,O=DigiCert</a> Inc,C=US’:<br>Unable to locally verify the issuer’s authority.<br>To connect to github.com insecurely, use `–no-check-certificate’.  </p>
+</blockquote>
+</li>
+</ul>
+<p>(ノ｀Д)ノ自从这个服务器被升级到Ubuntu18之后，就巨事逼，以前多好啊，网速还快，现在网速巨慢，Ubuntu18还各种unsecure</p>
+<p>然后我的解决方法就是用vim打开该sh文件，手动wget下载对应的压缩包并解压。然后使用<code>make</code>命令执行，然后标准结局来了。</p>
+<blockquote>
+<p>ERROR: cannot verify github.com’s certificate, issued by ‘CN=DigiCert SHA2 Extended Validation Server CA,OU=<a href="http://www.digicert.com,O=DigiCert" target="_blank" rel="noopener">www.digicert.com,O=DigiCert</a> Inc,C=US’:<br>  Unable to locally verify the issuer’s authority.<br>To connect to github.com insecurely, use `–no-check-certificate’.<br>Makefile:178: recipe for target ‘PREPARE_SGX_SSL’ failed<br>make[2]: <strong>* [PREPARE_SGX_SSL] Error 1<br>make[2]: Leaving directory ‘/data/dy_ms/SGXDataCenterAttestationPrimitives/QuoteVerification/QvE’<br>Makefile:37: recipe for target ‘all’ failed<br>make[1]: *</strong> [all] Error 2<br>make[1]: Leaving directory ‘/data/dy_ms/SGXDataCenterAttestationPrimitives/QuoteVerification’<br>Makefile:81: recipe for target ‘qve_wrapper’ failed<br>make: *** [qve_wrapper] Error 2</p>
+</blockquote>
+<p>绕不过绕不过，找了一早上试了各种各样的方法，最后终于可以编译了。解决方法：<br>安装ca-certificates</p>
+<blockquote>
+<p>sudo apt install ca-certificates<br>而后打开/etc/wgetrc文件，在末尾加上ca_directory位置<br>sudo vim /etc/wgetrc<br>ca_directory=/etc/ssl/certs<br>然后到DCAP文件夹中进行make，终于可以了。</p>
+</blockquote>
+<p>然后在sample中make，失败了。而后换了台服务器重新装了一遍，以下是第二次尝试过程。</p>
+<h1 id="DCAP安装-Ubuntu16-04"><a href="#DCAP安装-Ubuntu16-04" class="headerlink" title="DCAP安装-Ubuntu16.04"></a>DCAP安装-Ubuntu16.04</h1><p>后来重新装了一遍理清了思路过程，intel的readme真的是一言难尽，它要是傻瓜式的该有多好，参考一下<a href="https://github.com/apache/incubator-teaclave-sgx-sdk" target="_blank" rel="noopener">rust-sgx的安装过程的readme</a>，写的多清楚啊。</p>
+<h2 id="prerequisites"><a href="#prerequisites" class="headerlink" title="prerequisites"></a>prerequisites</h2><ul>
+<li>一台网速不错且不掉线的服务器（本地网速好+服务器网速好）( • ̀ω•́ )✧；</li>
+<li>sgx driver安装<br>检查驱动是否安装完毕可以直接通过查看是否有/dev/isgx  </li>
+<li>sgx psw安装<br>psw(platform software)是否安装可以通过检查ps -A|grep aesm来查看是否有aesm服务，如果没有的话可以尝试使用<code>sudo service aesmd restart</code>命令来重启服务。  </li>
+<li>sgxsdk安装<br>检查是否安装可以通过查看是否有/opt/intel/sgxsdk文件夹。如果没有的话在安装完sgxsdk后要记得<code>source /opt/intel/sgxsdk environment</code>  </li>
+</ul>
+<h2 id="build过程"><a href="#build过程" class="headerlink" title="build过程"></a>build过程</h2><h3 id="prebuild"><a href="#prebuild" class="headerlink" title="prebuild"></a>prebuild</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd QuoteGeneration  </span><br><span class="line">./download_prebuilt.sh</span><br></pre></td></tr></table></figure>
+
+<p>运行完毕，在文件夹下出现了linux_dcap_interface.zip压缩包。</p>
+<h3 id="make"><a href="#make" class="headerlink" title="make"></a>make</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make</span><br></pre></td></tr></table></figure>
+
+<p>经过长长的等待过程，我记得没错的话，又出现了error（熊猫尴尬笑.jpg），</p>
+<blockquote>
+<p>redefinition of ‘struct _sgx_ql_qve_collateral_t  </p>
+</blockquote>
+<p>无脑之间谷歌，没人出过我这个错误(ﾉ｀⊿´)ﾉ<br>这时候只能带上脑子，看一下是不是真的重定义了，然后我在enclave.edl中真的发现了作者真的又定义了一遍这个结构体（之前已经在sgx_ql_lib_common.h文件中定义过了，我也不知道他为啥又重新定义一遍，然后我就没报啥希望修改了源代码，把这个重定义的结构体直接注释掉。继而重新make，make成功。（有点惊喜，就是不知道这个是不是对之后产生影响）</p>
+<h3 id="编译运行samplecode"><a href="#编译运行samplecode" class="headerlink" title="编译运行samplecode"></a>编译运行samplecode</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd ~/SGXDataCenterAtteatationPrimitives/SampleCode/QuoteGenerationSample  </span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+
+<p>执行之后，当然是标准结局——error。<br>然后读readme.txt，里面提到了要提前装好这两个包</p>
+<blockquote>
+<p>libsgx-dcap-ql_{version}-{revision}_{arch}.deb<br>  libsgx-dcap-ql-dev_{version}-{revision}_{arch}.deb</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget https://download.01.org/intel-sgx/sgx-dcap/1.3.1/linux/distro/ubuntuServer16.04/libsgx-dcap-ql_1.3.101.3-xenial1_amd64.deb  </span><br><span class="line">sudo dpkg -i libsgx-dcap-ql_1.3.101.3-xenial1_amd64.deb  </span><br><span class="line">wget https://download.01.org/intel-sgx/sgx-dcap/1.3.1/linux/distro/ubuntuServer16.04/libsgx-dcap-ql-dev_1.3.101.3-xenial1_amd64.deb  </span><br><span class="line">sudo dpkg -i libsgx-dcap-ql-dev_1.3.101.3-xenial1_amd64.deb</span><br></pre></td></tr></table></figure>
+
+<p>而后继续编译</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make  </span><br><span class="line">./app</span><br></pre></td></tr></table></figure>
+
+<p>执行失败，错误提示</p>
+<blockquote>
+<p>Step1: Call sgx_qe_get_target_info:Error in sgx_qe_get_target_info. 0xe035</p>
+</blockquote>
+<p>接下来去读源代码里面找0xe035这个错误的来源，代码中表示该错误是SGX_PCE_INVILID_PRIVILEGE，</p>
+<blockquote>
+<p>Indicates that the QE does not have the prov key bit set.  Unexpected for a production release.</p>
+</blockquote>
+<h1 id="DCAP-software-package"><a href="#DCAP-software-package" class="headerlink" title="DCAP software package"></a>DCAP software package</h1><h2 id="header-files"><a href="#header-files" class="headerlink" title="header files"></a>header files</h2><ul>
+<li><p>sgx_ql_lib_common.h</p>
+<blockquote>
+<p>defines the QL library error codes and the data structures needed by the Quote Provider Library for retrieving TCBm and PCK cert Chain</p>
+</blockquote>
+</li>
+<li><p>sgx_dcap_ql_wrapper.h</p>
+<blockquote>
+<p>defines the API prototypes used by Intel(R) SGX DCAP to request quotes from the libsgx_dcap_ql.so</p>
+</blockquote>
+</li>
+<li><p>sgx_report.h</p>
+<blockquote>
+<p>defines the REPORT data structures used by the sgx_dcap_ql.so. Consumers of the sgx_dcap_ql.so will need to include this file.(consumers?)</p>
+</blockquote>
+</li>
+<li><p>sgx_key.h</p>
+<blockquote>
+<p>defines the SVN structures used by the REPORT data structure.Included by sgx_report.h</p>
+</blockquote>
+</li>
+<li><p>sgx_attributes.h</p>
+<blockquote>
+<p>defines the REPORT attributes. Included by sgx_report.h</p>
+</blockquote>
+</li>
+<li><p>sgx_pce.h</p>
+<blockquote>
+<p>defines the APIs and data structures for the PCE library. Included by sgx_dcap_ql_wrapper.h files.</p>
+</blockquote>
+</li>
+<li><p>sgx_defs.h</p>
+<blockquote>
+<p>defines basic macros used in SGX.Included by sgx_pce.h.</p>
+</blockquote>
+</li>
+<li><p>sgx_errors.h</p>
+<blockquote>
+<p>defines the error code in SGX. Included by sgx_pce.h.</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="Libraries"><a href="#Libraries" class="headerlink" title="Libraries"></a>Libraries</h2><ul>
+<li><p>libsgx_dcap_ql.so</p>
+<blockquote>
+<p>provides the ECDSA quoting API’s to the Intel(R) SGX DCAP.It will dynamically link with uRTS and will look for PCE and QE files in the current directory.</p>
+</blockquote>
+</li>
+<li><p>libsgx_pce.signed.so</p>
+<blockquote>
+<p>The provisioning Certification Enclave(PCE) used by the quoting library.The quoting library currently expectes this file to be located in the current directory.</p>
+</blockquote>
+</li>
+<li><p>libsgx_qe3.signed.so</p>
+<blockquote>
+<p>The ECDSA Quoting Enclave(QE) used by the quoting library. The quoting library currently expectes this file to be located in the current directory.</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="https://serverfault.com/questions/314635/why-wget-doesnt-verify-ssl-certificates" target="_blank" rel="noopener">Why wget doesn’t verify SSL certificates</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">计算机英语</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">-sgx</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/计算机英语//" class="article-tag-list-link color1">计算机英语</a>
+        			<a href="/categories/sgx//" class="article-tag-list-link color4">sgx</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2019/12/18/try-DCAP/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2019/12/22/最近读的闲书20191222/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          最近读的闲书20191222
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2019/12/03/rust语言学习/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Rust语言学习</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#DCAP安装-Ubuntu18-04"><span class="toc-number">1.</span> <span class="toc-text">DCAP安装-Ubuntu18.04</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DCAP安装-Ubuntu16-04"><span class="toc-number">2.</span> <span class="toc-text">DCAP安装-Ubuntu16.04</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#prerequisites"><span class="toc-number">2.1.</span> <span class="toc-text">prerequisites</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#build过程"><span class="toc-number">2.2.</span> <span class="toc-text">build过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#prebuild"><span class="toc-number">2.2.1.</span> <span class="toc-text">prebuild</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#make"><span class="toc-number">2.2.2.</span> <span class="toc-text">make</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#编译运行samplecode"><span class="toc-number">2.2.3.</span> <span class="toc-text">编译运行samplecode</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DCAP-software-package"><span class="toc-number">3.</span> <span class="toc-text">DCAP software package</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#header-files"><span class="toc-number">3.1.</span> <span class="toc-text">header files</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Libraries"><span class="toc-number">3.2.</span> <span class="toc-text">Libraries</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">4.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -234,9 +469,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
