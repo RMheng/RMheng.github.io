@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>keystone-qemu手动安装测试 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="由于docker安装在我自己的虚拟机上出现了问题，并且我根本不知道这个问题该咋解决，所以这里老老实实手动安装qemu环境。">
-<meta name="keywords" content="keystone,实验,qemu">
+  <meta name="description" content="还是docker装吧。（摊手">
+<meta name="keywords" content="实验,keystone,qemu">
 <meta property="og:type" content="article">
 <meta property="og:title" content="keystone-qemu手动安装测试">
 <meta property="og:url" content="http://yoursite.com/2019/12/03/keystone-qemu手动安装测试/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
-<meta property="og:description" content="由于docker安装在我自己的虚拟机上出现了问题，并且我根本不知道这个问题该咋解决，所以这里老老实实手动安装qemu环境。">
+<meta property="og:description" content="还是docker装吧。（摊手">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-12-18T04:46:28.876Z">
+<meta property="og:updated_time" content="2020-04-19T07:47:28.991Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="keystone-qemu手动安装测试">
-<meta name="twitter:description" content="由于docker安装在我自己的虚拟机上出现了问题，并且我根本不知道这个问题该咋解决，所以这里老老实实手动安装qemu环境。">
+<meta name="twitter:description" content="还是docker装吧。（摊手">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -175,7 +175,7 @@
 
     <div class="article-entry" itemprop="articleBody">
       
-        <p>由于docker安装在我自己的虚拟机上出现了问题，并且我根本不知道这个问题该咋解决，所以这里老老实实手动安装qemu环境。</p>
+        <p>还是docker装吧。（摊手</p>
 <a id="more"></a>
 <h1 id="Install-Dependencies"><a href="#Install-Dependencies" class="headerlink" title="Install Dependencies"></a>Install Dependencies</h1><p>在执行<code>sudo apt update</code>后执行<code>sudo apt install autoconf automake autotools-dev bc bison build-essential curl expat libexpat1-dev flex gawk gcc git gperf libgmp-dev libmpc-dev libmpfr-dev libtool texinfo tmux patchutils zlib1g-dev wget bzip2 patch vim-common lbzip2 python pkg-config libglib2.0-dev libpixman-1-dev libssl-dev screen device-tree-compiler expect makeself unzip cpio rsync</code><br>然后出现了如下问题</p>
 <blockquote>
@@ -196,7 +196,7 @@ fatal: not a git repository (or any of the parent directories): .git</code>这�
 <p>error: RPC failed; curl 18 transfer closed with outstanding read data remaining<br>fatal: The remote end hung up unexpectedly<br>fatal: early EOF<br>fatal: index-pack failed<br>fatal: clone of ‘<a href="https://github.com/riscv/riscv-binutils-gdb.git&#39;" target="_blank" rel="noopener">https://github.com/riscv/riscv-binutils-gdb.git&#39;</a> into submodule path ‘/data/dy_ms/riscv-gnu-toolchain/riscv-binutils’ failed  </p>
 </blockquote>
 <p>google了相关问题，是因为网速太慢。(╯‵□′)╯︵┻━┻<br>本来我以为是实验室的网速慢，确实，实验室的网速也很慢。所以我昨天特地早早回家用家里的无线网连，还是10k每秒？？？今天跟学长老师交流了一下，是因为对面服务器的网速太慢了，晕了，这也太慢了。这个网速太坑了，我已经打算再试一下docker装了。</p>
-<h1 id="docker安装qemu"><a href="#docker安装qemu" class="headerlink" title="docker安装qemu"></a>docker安装qemu</h1><p>今天学到一个很有意思的点，还是关于服务器的。这两天有事要回学校，我就想我回学校，我能不能让服务器继续下载呢，还是说我的远程连接断掉之后，我在服务器上的下载也会断掉呢？答案是后者。因为所有的进程都有个父进程，当我ssh到服务器后，打开的这个ssh就是接下来的下载进程的父进程。当我因为网络各种各样的原因断开ssh连接后，这个父进程就没有，所以它的子进程也不会继续运行。如果想让他挂在后台更新，可以用nohup … &amp;命令，但考虑到我手上的这台服务器不是我一个人在用，万一被谁kill了进程，我也不知道，所以我暂时放弃安装了。</p>
+<h2 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h2><p>然后我用docker了，docker大法好，躺平任嘲XD</p>
 <h1 id="其他细节的知识点"><a href="#其他细节的知识点" class="headerlink" title="其他细节的知识点"></a>其他细节的知识点</h1><h2 id="ubuntu更新的区别与联系"><a href="#ubuntu更新的区别与联系" class="headerlink" title="ubuntu更新的区别与联系"></a>ubuntu更新的区别与联系</h2><p>update：是下载源里面的metadata，比如软件包的版本信息、系统要求、翻译、依赖项等等。apt get update是对软件包列表的更新过程，而upgrade是对软件包的更新过程。</p>
 <p>upgrade: 系统将现有的package升级，如果有相依性的问题，而相依性需要安装其他新的package或影响到其他package的相依性时，此时package就不会被升级而会保留下来；<br>dist-upgrade：可以聪明地解决相依性的问题，如果有相依性问题，需要安装或移除新的package，就会尝试去安装或者移除它。</p>
 <p>upgrade和disupgrade本质上没有什么不同，但dist-upgrade会识别出依赖关系改变的情况并作出处理，而upgrade对此情形不处理。</p>
@@ -217,11 +217,11 @@ fatal: not a git repository (or any of the parent directories): .git</code>这�
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">keystone</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">实验</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">实验</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">keystone</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
@@ -306,11 +306,11 @@ fatal: not a git repository (or any of the parent directories): .git</code>这�
   
 <nav id="article-nav">
   
-    <a href="/2019/12/03/rust语言学习/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2019/12/22/最近读的闲书20191222/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          Rust语言学习
+          最近读的闲书20191222
         
       </div>
     </a>
@@ -344,7 +344,7 @@ fatal: not a git repository (or any of the parent directories): .git</code>这�
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Install-Dependencies"><span class="toc-number">1.</span> <span class="toc-text">Install Dependencies</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Setup"><span class="toc-number">2.</span> <span class="toc-text">Setup</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#同步并更新所有的子模块"><span class="toc-number">2.1.</span> <span class="toc-text">同步并更新所有的子模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装RISC-V-GNU-toolchain"><span class="toc-number">2.2.</span> <span class="toc-text">安装RISC-V GNU toolchain</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#docker安装qemu"><span class="toc-number">3.</span> <span class="toc-text">docker安装qemu</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其他细节的知识点"><span class="toc-number">4.</span> <span class="toc-text">其他细节的知识点</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ubuntu更新的区别与联系"><span class="toc-number">4.1.</span> <span class="toc-text">ubuntu更新的区别与联系</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">5.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Install-Dependencies"><span class="toc-number">1.</span> <span class="toc-text">Install Dependencies</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Setup"><span class="toc-number">2.</span> <span class="toc-text">Setup</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#同步并更新所有的子模块"><span class="toc-number">2.1.</span> <span class="toc-text">同步并更新所有的子模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装RISC-V-GNU-toolchain"><span class="toc-number">2.2.</span> <span class="toc-text">安装RISC-V GNU toolchain</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#更新"><span class="toc-number">2.3.</span> <span class="toc-text">更新</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其他细节的知识点"><span class="toc-number">3.</span> <span class="toc-text">其他细节的知识点</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ubuntu更新的区别与联系"><span class="toc-number">3.1.</span> <span class="toc-text">ubuntu更新的区别与联系</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">4.</span> <span class="toc-text">参考资料</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -373,7 +373,7 @@ fatal: not a git repository (or any of the parent directories): .git</code>这�
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2019 rmheng
+    		&copy; 2020 rmheng
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
@@ -464,7 +464,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">keystone</a>
+                <a href="javascript:void(0)" class="js-tag color4">SGX</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -472,15 +472,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">qemu</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">SGX</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Ubuntu</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -492,19 +488,23 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">-sgx</a>
+                <a href="javascript:void(0)" class="js-tag color4">keystone</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Rust</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">sgx</a>
+                <a href="javascript:void(0)" class="js-tag color5">qemu</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">计算机英语</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">读书</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -513,10 +513,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">读后感</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">读书</a>
               </li>
             
             <div class="clearfix"></div>

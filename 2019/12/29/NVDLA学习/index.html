@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Category: keystone | rww&#39;s Blog</title>
+  <title>NVDLA学习 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="程序猿">
-<meta property="og:type" content="website">
-<meta property="og:title" content="rww&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/categories/keystone/index.html">
+  <meta name="description" content="毕设要用NVDLA，在这里记录一下NVDLA的安装过程和学习。">
+<meta name="keywords" content="NVDLA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NVDLA学习">
+<meta property="og:url" content="http://yoursite.com/2019/12/29/NVDLA学习/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
+<meta property="og:description" content="毕设要用NVDLA，在这里记录一下NVDLA的安装过程和学习。">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-04-19T07:45:05.055Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="rww&#39;s Blog">
+<meta name="twitter:title" content="NVDLA学习">
+<meta name="twitter:description" content="毕设要用NVDLA，在这里记录一下NVDLA的安装过程和学习。">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -147,79 +151,292 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-NVDLA学习" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/12/03/keystone-qemu手动安装测试/" class="archive-article-date">
-  	<time datetime="2019-12-03T06:16:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-12-03</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/12/03/keystone-qemu手动安装测试/">keystone-qemu手动安装测试</a>
+    <h1 class="article-title" itemprop="name">
+      NVDLA学习
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2019/12/29/NVDLA学习/" class="archive-article-date">
+  	<time datetime="2019-12-29T14:17:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-12-29</time>
+</a>
+        
+      </header>
+    
+	<!-- 目录内容 -->
+	
+		<!-- 目录内容结束 -->
+
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>毕设要用NVDLA，在这里记录一下NVDLA的安装过程和学习。</p>
+<a id="more"></a>
+
+<h1 id="NVDLA-Virtual-Simulator"><a href="#NVDLA-Virtual-Simulator" class="headerlink" title="NVDLA Virtual Simulator"></a>NVDLA Virtual Simulator</h1><p>NVDLA的安装文档写的很详细，但已经是2017年写的，很长时间没更新，而且对很多工具的版本要求都很emm怀旧，安装的时候还是遇到几个问题。NVDLA也可以直接运用docker版本的，但直接用原代码编译能加强对NVDLA整体的理解嘛（虽然我编译完根本不知道发生了啥:(）</p>
+<p>NVDLA Open Source Project中主要有四个文件夹。</p>
+<ul>
+<li><p>doc<br>Docunmentation for NVDLA</p>
+</li>
+<li><p>hw<br>RTL, Cmodel and testbench for NVDLA</p>
+</li>
+<li><p>sw<br>NVDLA SW</p>
+</li>
+<li><p>vp<br>Virtual Platform for NVDLA</p>
+</li>
+</ul>
+<h2 id="下载Virtual-Simulator"><a href="#下载Virtual-Simulator" class="headerlink" title="下载Virtual Simulator"></a>下载Virtual Simulator</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/nvdla/vp.git  </span><br><span class="line">cd vp  </span><br><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><h3 id="install-required-tools-and-libraries"><a href="#install-required-tools-and-libraries" class="headerlink" title="install required tools and libraries"></a>install required tools and libraries</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install g++ cmake libboost-dev python-dev libglib2.0-dev libpixman-1-dev liblua5.2-dev swig libcap-dev libattr1-dev</span><br></pre></td></tr></table></figure>
+
+<h3 id="install-SystemC-2-3-0"><a href="#install-SystemC-2-3-0" class="headerlink" title="install SystemC 2.3.0"></a>install SystemC 2.3.0</h3><p>这里需要注意的是必须用的systemC 2.3.0</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">wget -O systemc-2.3.0a.tar.gz http://www.accellera.org/images/downloads/standards/systemc/systemc-2.3.0a.tar.gz</span><br><span class="line">tar -xzvf systemc-2.3.0a.tar.gz</span><br><span class="line">cd systemc-2.3.0a</span><br><span class="line">sudo mkdir -p /usr/local/systemc-2.3.0/</span><br><span class="line">mkdir objdir</span><br><span class="line">cd objdir</span><br><span class="line">../configure --prefix=/usr/local/systemc-2.3.0</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h3 id="install-perl-package-required"><a href="#install-perl-package-required" class="headerlink" title="install perl package required"></a>install perl package required</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">wget -O YAML-1.24.tar.gz http://search.cpan.org/CPAN/authors/id/T/TI/TINITA/YAML-1.24.tar.gz</span><br><span class="line">tar -xzvf YAML-1.24.tar.gz</span><br><span class="line">cd YAML-1.24</span><br><span class="line">perl Makefile.PL</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br><span class="line">wget -O IO-Tee-0.65.tar.gz http://search.cpan.org/CPAN/authors/id/N/NE/NEILB/IO-Tee-0.65.tar.gz</span><br><span class="line">tar -xzvf IO-Tee-0.65.tar.gz</span><br><span class="line">cd IO-Tee-0.65</span><br><span class="line">perl Makefile.PL</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h3 id="install-NVDLA-CMOD"><a href="#install-NVDLA-CMOD" class="headerlink" title="install NVDLA CMOD"></a>install NVDLA CMOD</h3><p>CMOD安装需要保证环境配置得当，我的环境配置版本与readme中略有不同。</p>
+<ul>
+<li>java -jdk1.8</li>
+<li>Perl</li>
+<li>CPP</li>
+<li>python</li>
+<li>System -systemc-2.3.0</li>
+<li>[for Verilator builds] Verilator-Verilator</li>
+<li>[for Verilator builds] clang-clang </li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/nvdla/hw.git</span><br><span class="line">cd hw</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+
+<p>这一步执行完毕后需要按照提示输入对应的工具路径，这里我的工具路径如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">DEFAULT_CPP:=/usr/bin/cpp</span><br><span class="line">DEFAULT_GCC:=/usr/bin/g++</span><br><span class="line">DEFAULT_PERL:=/usr/bin/perl</span><br><span class="line">DEFAULT_JAVA:=/usr/bin/java</span><br><span class="line">DEFAULT_SYSTEMC:=~/systemc-2.3.0</span><br><span class="line">DEFAULT_VERILATOR:=verilator</span><br><span class="line">DEFAULT_CLANG:=clang</span><br><span class="line">DEFAULT_PROJ:=nv_small</span><br></pre></td></tr></table></figure>
+
+<p>make执行完毕后再输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tools/bin/tmake -build cmod_top</span><br></pre></td></tr></table></figure>
+
+<h2 id="Build-and-Install-the-Virtual-Simulator"><a href="#Build-and-Install-the-Virtual-Simulator" class="headerlink" title="Build and Install the Virtual Simulator"></a>Build and Install the Virtual Simulator</h2><h3 id="Cmake-build-under-the-vp-repository-directory"><a href="#Cmake-build-under-the-vp-repository-directory" class="headerlink" title="Cmake build under the vp repository directory"></a>Cmake build under the vp repository directory</h3><p>build/是希望安装virtual simulator的位置，/usr/local/systemC是SystemC的安装目录，~/hw是本地NVDLA HW仓库的位置，nv_small是NVDLA HW project name.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake -DCMAKE_INSTALL_PREFIX=build/ -DSYSTEMC_PREFIX=~/usr/local/systemc-2.3.0/ -DNVDLA_HW_PREFIX=~/hw -DNVDLA_HW_PROJECT=nv_small</span><br></pre></td></tr></table></figure>
+
+<h3 id="Compile-and-install"><a href="#Compile-and-install" class="headerlink" title="Compile and install"></a>Compile and install</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd vp/</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>编译vp中遇到了很多问题，里面直接导致无法运行的是这个</p>
+<blockquote>
+<p>/usr/local/systemc-2.3.0/include/sysc/packages/boost/get_pointer.hpp:21:40: error: ‘template<class> class std::auto_ptr’ is deprecated [-Werror=deprecated-declarations]<br> template<class t> T * get_pointer(std::auto_ptr<t> const&amp; p)</t></class></class></p>
+</blockquote>
+<p>产生的主要原因issue上的作者说是gcc版本应该用4.8的，后来在网上查到了不用修改gcc版本就可以成功编译的方法。<br><strong>修改vp/CMakeLists.txt</strong>(参考网址：<a href="https://blog.csdn.net/hywCogost/article/details/82114529" target="_blank" rel="noopener">https://blog.csdn.net/hywCogost/article/details/82114529</a>)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 注释掉以下三行</span><br><span class="line"># set(CMAKE_CXX_FLAGS &quot;$&#123;CMAKE_CXX_FLAGS&#125; -DSC_INCLUDE_DYNAMIC_PROCESSES -Wall -Werror $&#123;AWS_FPGA_CFLAGS&#125; $&#123;TRACE_CFLAGS&#125;&quot;)</span><br><span class="line"># set(CMAKE_CXX_FLAGS_DEBUG &quot;$&#123;CMAKE_CXX_FLAGS_DEBUG&#125; -DSC_INCLUDE_DYNAMIC_PROCESSES -Wall -Werror -DDEBUG_LOG=1 $&#123;AWS_FPGA_CFLAGS&#125; $&#123;TRACE_CFLAGS&#125;&quot;)</span><br><span class="line"># set(CMAKE_CXX_FLAGS_RELEASE &quot;$&#123;CMAKE_CXX_FLAGS_RELEASE&#125; -DSC_INCLUDE_DYNAMIC_PROCESSES -Wall -Werror $&#123;AWS_FPGA_CFLAGS&#125; $&#123;TRACE_CFLAGS&#125;&quot;)</span><br><span class="line"># 添加如下：</span><br><span class="line">set(CMAKE_CXX_FLAGS &quot;$&#123;CMAKE_CXX_FLAGS&#125; -DSC_INCLUDE_DYNAMIC_PROCESSES -Wall  $&#123;AWS_FPGA_CFLAGS&#125; $&#123;TRACE_CFLAGS&#125;&quot;)</span><br><span class="line">set(CMAKE_CXX_FLAGS_DEBUG &quot;$&#123;CMAKE_CXX_FLAGS_DEBUG&#125; -DSC_INCLUDE_DYNAMIC_PROCESSES -Wall  -DDEBUG_LOG=1 $&#123;AWS_FPGA_CFLAGS&#125; $&#123;TRACE_CFLAGS&#125;&quot;)</span><br><span class="line">set(CMAKE_CXX_FLAGS_RELEASE &quot;$&#123;CMAKE_CXX_FLAGS_RELEASE&#125; -DSC_INCLUDE_DYNAMIC_PROCESSES -Wall  $&#123;AWS_FPGA_CFLAGS&#125; $&#123;TRACE_CFLAGS&#125;&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>也就是将这三条语句中的Werror去掉，同样的操作还要将子目录下CMakeList.txt中的CMake_CXX_FLAGS语句中国的-Werror删除。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">./models/nvdla/CMakeLists.txt +87</span><br><span class="line">./models/nvdla/CMakeLists.txt +88</span><br><span class="line">./models/nvdla/CMakeLists.txt +89</span><br><span class="line"></span><br><span class="line">./fpga/aws-fpga/fpga_sc_wrapper/CMakeLists.txt +91</span><br><span class="line">./fpga/aws-fpga/fpga_sc_wrapper/CMakeLists.txt +92</span><br><span class="line">./fpga/aws-fpga/fpga_sc_wrapper/CMakeLists.txt +93</span><br><span class="line"></span><br><span class="line">./fpga/aws-fpga/cosim_sc_wrapper/CMakeLists.txt +82</span><br><span class="line">./fpga/aws-fpga/cosim_sc_wrapper/CMakeLists.txt +83</span><br><span class="line">./fpga/aws-fpga/cosim_sc_wrapper/CMakeLists.txt +84</span><br></pre></td></tr></table></figure>
+
+<h2 id="Running-the-Virtual-Simulator"><a href="#Running-the-Virtual-Simulator" class="headerlink" title="Running the Virtual Simulator"></a>Running the Virtual Simulator</h2><p>要运行virtual simulator首先要准备好linux kernel image，可以自己手动编译或者直接用NVDLA项目中已经编译好的image。我因为开始的一个智障报错把两个都试了一遍。用NVDLA中已经编译好的image比较省事且快，但文档中说的不是很清楚，但在这个<a href="https://github.com/nvdla/vp/issues/1" target="_blank" rel="noopener">issue</a>解释清楚了。</p>
+<p>我就简单说一下里面没有提到的部分，就是修改aarcha64_nvdla.lua中的kernel和driver的路径。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-kernel /path/to/sw/prebuilt/arm64-linux/image/linux/Image</span><br><span class="line">-driver /path/to/sw/prebuilt/arm64-linux/image/linux/rootfs.ext4</span><br></pre></td></tr></table></figure>
+
+<p>以下来简单说一下手动交叉编译一个linux内核的过程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget https://buildroot.org/downloads/buildroot-2017.11.tar.gz</span><br><span class="line">tar -zxvf buildroot-2017.11.tar.gz</span><br><span class="line">cd buildroot-2017.11/</span><br><span class="line">sudo apt-get install libncurses5-dev // make menuconfig时会用到</span><br><span class="line">make qemu_aarch64_virt_defconfig</span><br><span class="line">make menuconfig</span><br></pre></td></tr></table></figure>
+
+<p>需要自定义的配置如下：</p>
+<blockquote>
+<ul>
+<li>Target Options -&gt; Target Architecture -&gt; AArch64 (little endian)  </li>
+<li>Target Options -&gt; Target Architecture Variant -&gt; cortex-A57  </li>
+<li>Toolchain -&gt; Custom kernel headers series -&gt; 4.13.x  </li>
+<li>Toolchain -&gt; Toolchain type -&gt; External toolchain    </li>
+<li>Toolchain -&gt; Toolchain -&gt; Linaro AArch64 2017.08  </li>
+<li>Toolchain -&gt; Toolchain origin -&gt; Toolchain to be downloaded and installed  </li>
+<li>Kernel -&gt; () Kernel version -&gt; 4.13.3  </li>
+<li>Kernel -&gt; Kernel configuration -&gt; Use the architecture default configuration  </li>
+<li>System configuration -&gt; Enable root login with password -&gt; Y  </li>
+<li>System configuration -&gt; Root password -&gt; nvdla  </li>
+<li>Target Packages -&gt; Show packages that are also provided by busybox -&gt; Y  </li>
+<li>Target Packages -&gt; Networking applications -&gt; openssh -&gt; Y<br>最后，编译</li>
+</ul>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make -j4</span><br></pre></td></tr></table></figure>
+
+<h3 id="Running-Kernel-Image-in-the-Virtual-Simulator"><a href="#Running-Kernel-Image-in-the-Virtual-Simulator" class="headerlink" title="Running Kernel Image in the Virtual Simulator"></a>Running Kernel Image in the Virtual Simulator</h3><p>在运行之前，需要修改conf/aarch64_nvdla.lua中的路径信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-driver ~/vp/buildroot-2017.11/output/images/rootfs.ext4</span><br><span class="line">-kernel ~/vp/buildroor-2017.11/output/images/Images</span><br></pre></td></tr></table></figure>
+
+<p>接下来，就可以运行文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">export SC_SIGNAL_WRITE_CHECK=DISABLE</span><br><span class="line">./build/bin/aarch64_toplevel -c conf/aarch64_nvdla.lua</span><br><span class="line">``` </span><br><span class="line">然后我又遇到了这个问题</span><br><span class="line">&gt; Could not set up host forwarding rule &apos;tcp::6666-:6666&apos;</span><br><span class="line"></span><br><span class="line">针对这个问题，我直接把lua文件中的`tcp::6666-:6666`这段给删了，接下来运行未发生报错。</span><br></pre></td></tr></table></figure>
+
+<p>mount -t 9p -o trans=virtio r /mnt<br>cd /mnt/tests/hello<br>./aarch64_hello</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">运行成功，没有报错。</span><br><span class="line"></span><br><span class="line"># NVDLA documentation</span><br><span class="line">NVDLA在accelerate deep learning 中起到的是inference的作用，也就是一个网络已经训练好了，需要做实际应用了。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># nvdla vp模拟推断</span><br><span class="line">nvdla的文档真的太少了。。。官方文档给了就跟没给一样，开发过程完全靠issue上一起摸着石头过河的人的提问。。。这里还是要感谢导师和学长的帮助。</span><br><span class="line"></span><br><span class="line">NVDLA在virtual platform上应该只能进行inference的操作，并且会很慢。nvdla_compiler是编译器，将caffe网络文件编译成NVDLA可读的nvdla文件，也就是最后生成的fast-math.nvdla。</span><br><span class="line"></span><br><span class="line">## 编译</span><br><span class="line">命令</span><br></pre></td></tr></table></figure>
+
+<p>./nvdla_compiler –profile fast-math –configtarget nv_small –cprecision int8 –prototxt models/deep-residual-networks/prototxt/ResNet-50-deploy.prototxt –caffemodel ResNet-50-model.caffemodel –informat nchw –calibtable resnet50.json</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">+ `--profile`：编译生成的nvdla的四种模式（performance|basic|default|fast-math），fast_math应该是占用资源最少的一种模式，fast-math的时候一共162层，但如果是default，一共有334层</span><br><span class="line"></span><br><span class="line">+ `--configtarget`：生成的文件的规模，可以选择的是nv_small,nv_large,nv_full,对应的分别是资源的多少，nv\_small\&lt;nv\_large\&lt;nv\_full;</span><br><span class="line"></span><br><span class="line">+ `--cprecision`：精度，默认fp16，nv_small只支持int8，如果使用int8的话，需要加上calibtable参数（for quantizing pre-trained models from floating point to int8 and programming converters in NVDLA for scaling/re-scaling tensors）;</span><br><span class="line"></span><br><span class="line">+ `--prototxt`：prototxt文件是负责网络结构的定义,我这边的prototxt和caffemodel文件都来源于[何恺明的github](https://github.com/KaimingHe/deep-residual-networks)</span><br><span class="line"></span><br><span class="line">+ `--caffemodel`：caffemodel文件存储net参数以及所有layer的weights.</span><br><span class="line"></span><br><span class="line">+ `--informat`：该参数的设置是为了消除一个错误警报，但是作者在github上面有说该error其实出现了也无所谓，建议无视</span><br><span class="line"></span><br><span class="line">+ `--calibtable`：调用resnet50.json文件，该文件是vp自带的，应该是精度转化的json文件，如果是测试int8就需要</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 运行</span><br><span class="line">运行命令：</span><br></pre></td></tr></table></figure>
+
+<p>./nv_runtime  –loadable fast_math.nvdla –image boat.jpg  –rawdump –normalize 1<br>```<br>runtime只能在aarch64架构下运行，所以在vp上会利用qemu先进入aarch64架构中，然后会安装nvdla driver，这里分别有opendla_1.ko和opendla_2.ko，opendla_1.ko是专门给nv_full的，opendla_2.ko供nv_small和nv_large使用。</p>
+<ul>
+<li><p><code>--image</code>：后面跟的要进行推断的图片文件</p>
+</li>
+<li><p><code>--normalize</code>：标准化输入的图片</p>
+</li>
+<li><p><code>--rawdump</code>：将输出结果从小数变成0、1</p>
+</li>
+</ul>
+<p>我目前在软件上推断一次要两个小时，用的nv_full，用nv_small一直中间没有推断结束就断掉，貌似issue上有人有类似问题、、尴尬。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="http://nvdla.org/vp.html" target="_blank" rel="noopener">Virtual Platform</a></li>
+<li><a href="https://blog.csdn.net/hywCogost/article/details/82114529" target="_blank" rel="noopener">Ubuntu16.04 NVDLA环境搭建</a></li>
+<li><a href="https://blog.csdn.net/smiler_sun/article/details/89608320" target="_blank" rel="noopener">NVDLA virtual platform环境搭建</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">实验</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">keystone</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">qemu</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">NVDLA</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/keystone//" class="article-tag-list-link color4">keystone</a>
+        			<a href="/categories/NVDLA//" class="article-tag-list-link color1">NVDLA</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2019/12/29/NVDLA学习/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2020/04/19/python使用hahslib/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          python使用hahslib
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2019/12/22/最近读的闲书20191222/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">最近读的闲书20191222</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#NVDLA-Virtual-Simulator"><span class="toc-number">1.</span> <span class="toc-text">NVDLA Virtual Simulator</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#下载Virtual-Simulator"><span class="toc-number">1.1.</span> <span class="toc-text">下载Virtual Simulator</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装依赖"><span class="toc-number">1.2.</span> <span class="toc-text">安装依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#install-required-tools-and-libraries"><span class="toc-number">1.2.1.</span> <span class="toc-text">install required tools and libraries</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-SystemC-2-3-0"><span class="toc-number">1.2.2.</span> <span class="toc-text">install SystemC 2.3.0</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-perl-package-required"><span class="toc-number">1.2.3.</span> <span class="toc-text">install perl package required</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-NVDLA-CMOD"><span class="toc-number">1.2.4.</span> <span class="toc-text">install NVDLA CMOD</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Build-and-Install-the-Virtual-Simulator"><span class="toc-number">1.3.</span> <span class="toc-text">Build and Install the Virtual Simulator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Cmake-build-under-the-vp-repository-directory"><span class="toc-number">1.3.1.</span> <span class="toc-text">Cmake build under the vp repository directory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Compile-and-install"><span class="toc-number">1.3.2.</span> <span class="toc-text">Compile and install</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Running-the-Virtual-Simulator"><span class="toc-number">1.4.</span> <span class="toc-text">Running the Virtual Simulator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Running-Kernel-Image-in-the-Virtual-Simulator"><span class="toc-number">1.4.1.</span> <span class="toc-text">Running Kernel Image in the Virtual Simulator</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">2.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -242,10 +459,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
-		isCategory: true,
+		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",
