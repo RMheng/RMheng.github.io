@@ -218,9 +218,9 @@
       <category term="SGX" scheme="http://yoursite.com/categories/SGX/"/>
     
     
-      <category term="实验" scheme="http://yoursite.com/tags/%E5%AE%9E%E9%AA%8C/"/>
-    
       <category term="SGX" scheme="http://yoursite.com/tags/SGX/"/>
+    
+      <category term="实验" scheme="http://yoursite.com/tags/%E5%AE%9E%E9%AA%8C/"/>
     
       <category term="Ubuntu" scheme="http://yoursite.com/tags/Ubuntu/"/>
     
