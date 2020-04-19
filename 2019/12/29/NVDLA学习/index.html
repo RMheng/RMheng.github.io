@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="毕设要用NVDLA，在这里记录一下NVDLA的安装过程和学习。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-19T07:45:05.055Z">
+<meta property="og:updated_time" content="2020-04-19T07:56:32.326Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NVDLA学习">
 <meta name="twitter:description" content="毕设要用NVDLA，在这里记录一下NVDLA的安装过程和学习。">
@@ -253,24 +253,52 @@
 <li>System configuration -&gt; Enable root login with password -&gt; Y  </li>
 <li>System configuration -&gt; Root password -&gt; nvdla  </li>
 <li>Target Packages -&gt; Show packages that are also provided by busybox -&gt; Y  </li>
-<li>Target Packages -&gt; Networking applications -&gt; openssh -&gt; Y<br>最后，编译</li>
+<li>Target Packages -&gt; Networking applications -&gt; openssh -&gt; Y  </li>
 </ul>
 </blockquote>
+<p>最后，编译</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make -j4</span><br></pre></td></tr></table></figure>
 
 <h3 id="Running-Kernel-Image-in-the-Virtual-Simulator"><a href="#Running-Kernel-Image-in-the-Virtual-Simulator" class="headerlink" title="Running Kernel Image in the Virtual Simulator"></a>Running Kernel Image in the Virtual Simulator</h3><p>在运行之前，需要修改conf/aarch64_nvdla.lua中的路径信息</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-driver ~/vp/buildroot-2017.11/output/images/rootfs.ext4</span><br><span class="line">-kernel ~/vp/buildroor-2017.11/output/images/Images</span><br></pre></td></tr></table></figure>
 
 <p>接下来，就可以运行文件。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">export SC_SIGNAL_WRITE_CHECK=DISABLE</span><br><span class="line">./build/bin/aarch64_toplevel -c conf/aarch64_nvdla.lua</span><br><span class="line">``` </span><br><span class="line">然后我又遇到了这个问题</span><br><span class="line">&gt; Could not set up host forwarding rule &apos;tcp::6666-:6666&apos;</span><br><span class="line"></span><br><span class="line">针对这个问题，我直接把lua文件中的`tcp::6666-:6666`这段给删了，接下来运行未发生报错。</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> SC_SIGNAL_WRITE_CHECK=DISABLE</span><br><span class="line">./build/bin/aarch64_toplevel -c conf/aarch64_nvdla.lua</span><br></pre></td></tr></table></figure>
 
-<p>mount -t 9p -o trans=virtio r /mnt<br>cd /mnt/tests/hello<br>./aarch64_hello</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">运行成功，没有报错。</span><br><span class="line"></span><br><span class="line"># NVDLA documentation</span><br><span class="line">NVDLA在accelerate deep learning 中起到的是inference的作用，也就是一个网络已经训练好了，需要做实际应用了。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># nvdla vp模拟推断</span><br><span class="line">nvdla的文档真的太少了。。。官方文档给了就跟没给一样，开发过程完全靠issue上一起摸着石头过河的人的提问。。。这里还是要感谢导师和学长的帮助。</span><br><span class="line"></span><br><span class="line">NVDLA在virtual platform上应该只能进行inference的操作，并且会很慢。nvdla_compiler是编译器，将caffe网络文件编译成NVDLA可读的nvdla文件，也就是最后生成的fast-math.nvdla。</span><br><span class="line"></span><br><span class="line">## 编译</span><br><span class="line">命令</span><br></pre></td></tr></table></figure>
+<p>然后我又遇到了这个问题</p>
+<blockquote>
+<p>Could not set up host forwarding rule ‘tcp::6666-:6666’</p>
+</blockquote>
+<p>针对这个问题，我直接把lua文件中的<code>tcp::6666-:6666</code>这段给删了，接下来运行未发生报错。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mount -t 9p -o trans=virtio r /mnt</span><br><span class="line">cd /mnt/tests/hello</span><br><span class="line">./aarch64_hello</span><br></pre></td></tr></table></figure>
 
-<p>./nvdla_compiler –profile fast-math –configtarget nv_small –cprecision int8 –prototxt models/deep-residual-networks/prototxt/ResNet-50-deploy.prototxt –caffemodel ResNet-50-model.caffemodel –informat nchw –calibtable resnet50.json</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">+ `--profile`：编译生成的nvdla的四种模式（performance|basic|default|fast-math），fast_math应该是占用资源最少的一种模式，fast-math的时候一共162层，但如果是default，一共有334层</span><br><span class="line"></span><br><span class="line">+ `--configtarget`：生成的文件的规模，可以选择的是nv_small,nv_large,nv_full,对应的分别是资源的多少，nv\_small\&lt;nv\_large\&lt;nv\_full;</span><br><span class="line"></span><br><span class="line">+ `--cprecision`：精度，默认fp16，nv_small只支持int8，如果使用int8的话，需要加上calibtable参数（for quantizing pre-trained models from floating point to int8 and programming converters in NVDLA for scaling/re-scaling tensors）;</span><br><span class="line"></span><br><span class="line">+ `--prototxt`：prototxt文件是负责网络结构的定义,我这边的prototxt和caffemodel文件都来源于[何恺明的github](https://github.com/KaimingHe/deep-residual-networks)</span><br><span class="line"></span><br><span class="line">+ `--caffemodel`：caffemodel文件存储net参数以及所有layer的weights.</span><br><span class="line"></span><br><span class="line">+ `--informat`：该参数的设置是为了消除一个错误警报，但是作者在github上面有说该error其实出现了也无所谓，建议无视</span><br><span class="line"></span><br><span class="line">+ `--calibtable`：调用resnet50.json文件，该文件是vp自带的，应该是精度转化的json文件，如果是测试int8就需要</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 运行</span><br><span class="line">运行命令：</span><br></pre></td></tr></table></figure>
+<p>运行成功，没有报错。</p>
+<h1 id="NVDLA-documentation"><a href="#NVDLA-documentation" class="headerlink" title="NVDLA documentation"></a>NVDLA documentation</h1><p>NVDLA在accelerate deep learning 中起到的是inference的作用，也就是一个网络已经训练好了，需要做实际应用了。</p>
+<h1 id="nvdla-vp模拟推断"><a href="#nvdla-vp模拟推断" class="headerlink" title="nvdla vp模拟推断"></a>nvdla vp模拟推断</h1><p>nvdla的文档真的太少了。。。官方文档给了就跟没给一样，开发过程完全靠issue上一起摸着石头过河的人的提问。。。这里还是要感谢导师和学长的帮助。</p>
+<p>NVDLA在virtual platform上应该只能进行inference的操作，并且会很慢。nvdla_compiler是编译器，将caffe网络文件编译成NVDLA可读的nvdla文件，也就是最后生成的fast-math.nvdla。</p>
+<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><p>命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./nvdla_compiler --profile fast-math --configtarget nv_small --cprecision int8 --prototxt models/deep-residual-networks/prototxt/ResNet-50-deploy.prototxt --caffemodel ResNet-50-model.caffemodel --informat nchw --calibtable resnet50.json</span><br></pre></td></tr></table></figure>
 
-<p>./nv_runtime  –loadable fast_math.nvdla –image boat.jpg  –rawdump –normalize 1<br>```<br>runtime只能在aarch64架构下运行，所以在vp上会利用qemu先进入aarch64架构中，然后会安装nvdla driver，这里分别有opendla_1.ko和opendla_2.ko，opendla_1.ko是专门给nv_full的，opendla_2.ko供nv_small和nv_large使用。</p>
+<ul>
+<li><p><code>--profile</code>：编译生成的nvdla的四种模式（performance|basic|default|fast-math），fast_math应该是占用资源最少的一种模式，fast-math的时候一共162层，但如果是default，一共有334层</p>
+</li>
+<li><p><code>--configtarget</code>：生成的文件的规模，可以选择的是nv_small,nv_large,nv_full,对应的分别是资源的多少，nv_small&lt;nv_large&lt;nv_full;</p>
+</li>
+<li><p><code>--cprecision</code>：精度，默认fp16，nv_small只支持int8，如果使用int8的话，需要加上calibtable参数（for quantizing pre-trained models from floating point to int8 and programming converters in NVDLA for scaling/re-scaling tensors）;</p>
+</li>
+<li><p><code>--prototxt</code>：prototxt文件是负责网络结构的定义,我这边的prototxt和caffemodel文件都来源于<a href="https://github.com/KaimingHe/deep-residual-networks" target="_blank" rel="noopener">何恺明的github</a></p>
+</li>
+<li><p><code>--caffemodel</code>：caffemodel文件存储net参数以及所有layer的weights.</p>
+</li>
+<li><p><code>--informat</code>：该参数的设置是为了消除一个错误警报，但是作者在github上面有说该error其实出现了也无所谓，建议无视</p>
+</li>
+<li><p><code>--calibtable</code>：调用resnet50.json文件，该文件是vp自带的，应该是精度转化的json文件，如果是测试int8就需要</p>
+</li>
+</ul>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><p>运行命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./nv_runtime  --loadable fast_math.nvdla --image boat.jpg  --rawdump --normalize 1</span><br></pre></td></tr></table></figure>
+
+<p>runtime只能在aarch64架构下运行，所以在vp上会利用qemu先进入aarch64架构中，然后会安装nvdla driver，这里分别有opendla_1.ko和opendla_2.ko，opendla_1.ko是专门给nv_full的，opendla_2.ko供nv_small和nv_large使用。</p>
 <ul>
 <li><p><code>--image</code>：后面跟的要进行推断的图片文件</p>
 </li>
@@ -417,7 +445,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#NVDLA-Virtual-Simulator"><span class="toc-number">1.</span> <span class="toc-text">NVDLA Virtual Simulator</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#下载Virtual-Simulator"><span class="toc-number">1.1.</span> <span class="toc-text">下载Virtual Simulator</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装依赖"><span class="toc-number">1.2.</span> <span class="toc-text">安装依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#install-required-tools-and-libraries"><span class="toc-number">1.2.1.</span> <span class="toc-text">install required tools and libraries</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-SystemC-2-3-0"><span class="toc-number">1.2.2.</span> <span class="toc-text">install SystemC 2.3.0</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-perl-package-required"><span class="toc-number">1.2.3.</span> <span class="toc-text">install perl package required</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-NVDLA-CMOD"><span class="toc-number">1.2.4.</span> <span class="toc-text">install NVDLA CMOD</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Build-and-Install-the-Virtual-Simulator"><span class="toc-number">1.3.</span> <span class="toc-text">Build and Install the Virtual Simulator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Cmake-build-under-the-vp-repository-directory"><span class="toc-number">1.3.1.</span> <span class="toc-text">Cmake build under the vp repository directory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Compile-and-install"><span class="toc-number">1.3.2.</span> <span class="toc-text">Compile and install</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Running-the-Virtual-Simulator"><span class="toc-number">1.4.</span> <span class="toc-text">Running the Virtual Simulator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Running-Kernel-Image-in-the-Virtual-Simulator"><span class="toc-number">1.4.1.</span> <span class="toc-text">Running Kernel Image in the Virtual Simulator</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">2.</span> <span class="toc-text">参考资料</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#NVDLA-Virtual-Simulator"><span class="toc-number">1.</span> <span class="toc-text">NVDLA Virtual Simulator</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#下载Virtual-Simulator"><span class="toc-number">1.1.</span> <span class="toc-text">下载Virtual Simulator</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装依赖"><span class="toc-number">1.2.</span> <span class="toc-text">安装依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#install-required-tools-and-libraries"><span class="toc-number">1.2.1.</span> <span class="toc-text">install required tools and libraries</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-SystemC-2-3-0"><span class="toc-number">1.2.2.</span> <span class="toc-text">install SystemC 2.3.0</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-perl-package-required"><span class="toc-number">1.2.3.</span> <span class="toc-text">install perl package required</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install-NVDLA-CMOD"><span class="toc-number">1.2.4.</span> <span class="toc-text">install NVDLA CMOD</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Build-and-Install-the-Virtual-Simulator"><span class="toc-number">1.3.</span> <span class="toc-text">Build and Install the Virtual Simulator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Cmake-build-under-the-vp-repository-directory"><span class="toc-number">1.3.1.</span> <span class="toc-text">Cmake build under the vp repository directory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Compile-and-install"><span class="toc-number">1.3.2.</span> <span class="toc-text">Compile and install</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Running-the-Virtual-Simulator"><span class="toc-number">1.4.</span> <span class="toc-text">Running the Virtual Simulator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Running-Kernel-Image-in-the-Virtual-Simulator"><span class="toc-number">1.4.1.</span> <span class="toc-text">Running Kernel Image in the Virtual Simulator</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#NVDLA-documentation"><span class="toc-number">2.</span> <span class="toc-text">NVDLA documentation</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#nvdla-vp模拟推断"><span class="toc-number">3.</span> <span class="toc-text">nvdla vp模拟推断</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#编译"><span class="toc-number">3.1.</span> <span class="toc-text">编译</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行"><span class="toc-number">3.2.</span> <span class="toc-text">运行</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">4.</span> <span class="toc-text">参考资料</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -549,19 +577,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">SGX</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Ubuntu</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -577,6 +597,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">读书</a>
               </li>
              
@@ -586,6 +610,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">读后感</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
               </li>
             
             <div class="clearfix"></div>
