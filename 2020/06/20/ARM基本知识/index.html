@@ -16,12 +16,12 @@
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="本笔记借鉴的主要是ARMv7的相关的介绍，目前的v8和v7在各方面有着一定的差异。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/9774008-185c71d033e78961.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/662/format/webp">
-<meta property="og:updated_time" content="2020-06-20T10:23:38.151Z">
+<meta property="og:image" content="http://yoursite.com/2020/06/20/ARM基本知识/1.jpg">
+<meta property="og:updated_time" content="2020-06-20T13:22:36.013Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ARM基础知识">
 <meta name="twitter:description" content="本笔记借鉴的主要是ARMv7的相关的介绍，目前的v8和v7在各方面有着一定的差异。">
-<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/9774008-185c71d033e78961.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/662/format/webp">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/20/ARM基本知识/1.jpg">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -205,7 +205,7 @@
 <p>寄存器R13一般被用作堆栈指针SP。而处理器的每种运行模式都有自己独立的物理寄存器R13，在用户应用程序的初始化部分，一般都要初始化每种模式下的R13，使其指向该运行模式的栈空间。当程序运行进入异常模式时，将需要保护的寄存器放入R13所指向的堆栈，而当程序从异常模式返回时，则从对应的堆栈中恢复，采用这种方式从而保证异常发生后程序的正常执行。</p>
 <p>R14是子程序链接寄存器LR（Link Register），当执行子程序调用指令（BL）时，R14可得到R15的备份。</p>
 <p>常用的banked registers如下图所示。HYP模式是ARM为虚拟化扩展引入的Hypervisor mode，与TrustZone无关。</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/9774008-185c71d033e78961.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/662/format/webp" alt="img"></p>
+<p><img src="/2020/06/20/ARM基本知识/1.jpg" alt="img"></p>
 <p>另一类寄存器为CP15协处理器，主要用于系统配置，比如配置异常向量表、开关MMU等。一般在OS初始化时，首先会配置这些寄存器。与security extension相关的两个重要寄存器是SCR和MVBAR。</p>
 <h3 id="SCR表格"><a href="#SCR表格" class="headerlink" title="SCR表格"></a>SCR表格</h3><table>
 <thead>
@@ -531,23 +531,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">日记</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">生活</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">ARM</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">汇编</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">日记</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">生活</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -563,15 +559,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
+                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -583,6 +571,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
@@ -591,15 +591,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">读书</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">英语</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">读后感</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">读书</a>
               </li>
             
             <div class="clearfix"></div>
