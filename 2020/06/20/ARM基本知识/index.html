@@ -6,16 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Tag: qemu | rww&#39;s Blog</title>
+  <title>ARM基础知识 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="程序猿">
-<meta property="og:type" content="website">
-<meta property="og:title" content="rww&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/tags/qemu/index.html">
+  <meta name="description" content="本笔记借鉴的主要是ARMv7的相关的介绍，目前的v8和v7在各方面有着一定的差异。">
+<meta name="keywords" content="ARM,汇编">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ARM基础知识">
+<meta property="og:url" content="http://yoursite.com/2020/06/20/ARM基本知识/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
+<meta property="og:description" content="本笔记借鉴的主要是ARMv7的相关的介绍，目前的v8和v7在各方面有着一定的差异。">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/9774008-185c71d033e78961.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/662/format/webp">
+<meta property="og:updated_time" content="2020-06-20T10:23:38.151Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="rww&#39;s Blog">
+<meta name="twitter:title" content="ARM基础知识">
+<meta name="twitter:description" content="本笔记借鉴的主要是ARMv7的相关的介绍，目前的v8和v7在各方面有着一定的差异。">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/9774008-185c71d033e78961.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/662/format/webp">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -147,79 +153,292 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-ARM基本知识" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/12/03/keystone-qemu手动安装测试/" class="archive-article-date">
-  	<time datetime="2019-12-03T06:16:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-12-03</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/12/03/keystone-qemu手动安装测试/">keystone-qemu手动安装测试</a>
+    <h1 class="article-title" itemprop="name">
+      ARM基础知识
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2020/06/20/ARM基本知识/" class="archive-article-date">
+  	<time datetime="2020-06-20T10:23:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-20</time>
+</a>
+        
+      </header>
+    
+	<!-- 目录内容 -->
+	
+		<!-- 目录内容结束 -->
+
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本笔记借鉴的主要是ARMv7的相关的介绍，目前的v8和v7在各方面有着一定的差异。</p>
+<a id="more"></a>
+<h1 id="ARM基本知识"><a href="#ARM基本知识" class="headerlink" title="ARM基本知识"></a>ARM基本知识</h1><h3 id="处理器模式"><a href="#处理器模式" class="headerlink" title="处理器模式"></a>处理器模式</h3><p>ARM处理器有7种CPU mode，其中6种特权模式：FIQ，IRQ，Supervisor（SVC），Abort（ABT），Undefined（UND），System（SYS）以及一种非特权模式：User（USR）。在引入TrustZone后，新增了一种monitor（MON） mode。</p>
+<h3 id="FIQ和IRQ的区别"><a href="#FIQ和IRQ的区别" class="headerlink" title="FIQ和IRQ的区别"></a>FIQ和IRQ的区别</h3><ol>
+<li>FIQ模式提供了更多的banked寄存器，r8到r16还有SPSR；而IRQ模式下，r8到r12没有对应的banked寄存器，也就意味着ARM的IRQ模式下，中断处理程序要自己保存这几个寄存器，退出中断处理程序时还要恢复这几个寄存器。而FIQ模式因为有这几个banked寄存器，模式切换时CPU自动保存这些值到banked寄存器，退出FIQ时自动恢复，节省了时间。</li>
+<li>FIQ比IRQ优先级高，两者如果同时产生，FIQ先处理。</li>
+<li>当CPU位于FIQ模式处理FIQ中断时，所有的中断都被屏蔽，FIQ会被很快执行。但当CPU位于IRQ模式处理IRQ中断时，如果此时有FIQ中断时，正在执行的IRQ中断会被抢断，CPU会切换到IFIQ模式去执行这个FIQ中断。</li>
+<li>FIQ的入口地址是0x1c，IRQ的入口地址是0x18.0x18处只能放一条指令，为了不与0x1c处的FIQ冲突，这个位置只能跳转；而0x1c处之后没有任何中断向量表了，这样可以直接在1c处防止FIQ的中断处理程序，由于跳转的范围限制，至少少了一条跳转指令。（这条其实不是很理解）</li>
+</ol>
+<h3 id="ARM中断"><a href="#ARM中断" class="headerlink" title="ARM中断"></a>ARM中断</h3><p>通过特定指令触发的软件中断，引起CPU执行流程的改变，在ARMv7中有三个：SVC，SMC和HVC。</p>
+<ul>
+<li>SVC（supervisor call instruction)：通常在用户进程切换到内核进程中使用，比如syscall会让CPU进入到SVC mode；</li>
+<li>HVC（Hypervisor call instruction）：为ARM虚拟化技术的扩展指令，触发CPU进入HYP mode；</li>
+<li>而SMC（Secure Monitor Call）会触发CPU进入monitor mode。</li>
+</ul>
+<h2 id="ARM寄存器"><a href="#ARM寄存器" class="headerlink" title="ARM寄存器"></a>ARM寄存器</h2><p>关于arm的banked register的概念，翻译成中文的意思是影子寄存器。ARM有16个通用寄存器，这16个通用寄存器用4个bit来表示。但<strong>在不同的模式下，同样的4bit可能会指向不同的物理寄存器，这些物理寄存器就被称之为影子寄存器。</strong></p>
+<p>不考虑TrustZone时，ARM中通用寄存器的数目：</p>
+<ul>
+<li>1个状态寄存器CPSR（Current Program Status Register，当前程序状态寄存器）（也就是R16）</li>
+<li>5个异常模式下的状态寄存器的banked register（IRQ，FIQ，Abort，UND，SVC）</li>
+<li>16个通用寄存器R0~R15</li>
+<li>10个异常模式下的R13和R14的banked register</li>
+<li>5个FIQ模式下的R8~R12的banked register</li>
+</ul>
+<p>CPSR可以在任何模式下被访问，每一种模式下的banked register是它专门的物理状态寄存器，称为SPSR（Saved Program Status Register，备份的程序状态寄存器），当异常发生时，SPSR用于保存CPSR的当前值，从异常退出时则由SPSR来恢复CPSR。</p>
+<p>寄存器R13一般被用作堆栈指针SP。而处理器的每种运行模式都有自己独立的物理寄存器R13，在用户应用程序的初始化部分，一般都要初始化每种模式下的R13，使其指向该运行模式的栈空间。当程序运行进入异常模式时，将需要保护的寄存器放入R13所指向的堆栈，而当程序从异常模式返回时，则从对应的堆栈中恢复，采用这种方式从而保证异常发生后程序的正常执行。</p>
+<p>R14是子程序链接寄存器LR（Link Register），当执行子程序调用指令（BL）时，R14可得到R15的备份。</p>
+<p>常用的banked registers如下图所示。HYP模式是ARM为虚拟化扩展引入的Hypervisor mode，与TrustZone无关。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/9774008-185c71d033e78961.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/662/format/webp" alt="img"></p>
+<p>另一类寄存器为CP15协处理器，主要用于系统配置，比如配置异常向量表、开关MMU等。一般在OS初始化时，首先会配置这些寄存器。与security extension相关的两个重要寄存器是SCR和MVBAR。</p>
+<h3 id="SCR表格"><a href="#SCR表格" class="headerlink" title="SCR表格"></a>SCR表格</h3><table>
+<thead>
+<tr>
+<th>Bits</th>
+<th>Name</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>[0]</td>
+<td>NS bit</td>
+<td>0：secure；1：non-secure</td>
+</tr>
+<tr>
+<td>[1]</td>
+<td>IRQ</td>
+<td>0：IRQ异常触发CPU进入IRQ mode；<br>1：IRQ异常触发进入monitor mode</td>
+</tr>
+<tr>
+<td>[2]</td>
+<td>FIQ</td>
+<td>0：FIQ异常触发CPU进入FIQ mode；<br>1：IRQ异常触发进入monitor mode</td>
+</tr>
+<tr>
+<td>[3]</td>
+<td>EA</td>
+<td>0：external abort异常触发CPU进入ABT mode； <br>1：external abort异常触发CPU进入monitor mode</td>
+</tr>
+<tr>
+<td>[4]</td>
+<td>FW</td>
+<td>0：non-secure mode下CPSR的F bit不可写；<br>1：non-secure mode下CPSR的F bit可写</td>
+</tr>
+<tr>
+<td>[5]</td>
+<td>AW</td>
+<td>0：non-secure mode下CPSR的A bit不可写；<br>1：non-secure mode下CPSR的A bit可写</td>
+</tr>
+<tr>
+<td>[6:31]</td>
+<td>reserved</td>
+<td>-</td>
+</tr>
+</tbody></table>
+<h3 id="MVBAR"><a href="#MVBAR" class="headerlink" title="MVBAR"></a>MVBAR</h3><table>
+<thead>
+<tr>
+<th>Bits</th>
+<th>Name</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>[5:31]</td>
+<td>Monitor Vector Base Address</td>
+<td>Monitor mode异常向量表的基地址</td>
+</tr>
+<tr>
+<td>[0:4]</td>
+<td>Reserved</td>
+<td>-</td>
+</tr>
+</tbody></table>
+<p>SCR和MVBAR都只能在secure state下才能修改。</p>
+<h3 id="CPU状态"><a href="#CPU状态" class="headerlink" title="CPU状态"></a>CPU状态</h3><p>引入banked register的目的是，在当中断或者异常产生的时候，CPU会将当前“CPU的状态”保存在banked register中。从CPU角度来看，它的“状态”包括：</p>
+<ol>
+<li>PC（也就是R15）值；</li>
+<li>CPSR的值</li>
+</ol>
+<p>当中断或异常发生的时候，CPU只是：</p>
+<ol>
+<li>被保存在当前模式下的R14中的PC值；</li>
+<li>被保存在当前模式下的banked register中的CPSR值</li>
+</ol>
+<p>而通用寄存器R0中的是应用的状态，保存应用的状态是相对比较昂贵的，因为要保存至少13个寄存器（R0-12）。</p>
+<h2 id="ARM-Cortex-A、R、M系列"><a href="#ARM-Cortex-A、R、M系列" class="headerlink" title="ARM Cortex-A、R、M系列"></a>ARM Cortex-A、R、M系列</h2><p>ARM Cortex-A(Application)：适用于应用领域，支持ARM和Thumb指令集，并支持虚拟地址和内存管理。</p>
+<p>ARM Cortex-R(Realtime)：适用于高实时性领域，支持ARM和Thumb指令集，只支持物理地址，并支持内存管理</p>
+<p>ARM Cortex-M(MicroController)：适用于微处理器领域，只支持Thumb指令集</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.cnblogs.com/locean/p/4945057.html" target="_blank" rel="noopener">ARM之FIQ（快速中断）IRQ（中断）</a></li>
+<li><a href="https://www.jianshu.com/p/d786a65bbdc9" target="_blank" rel="noopener">ARM Trustzone技术（三）ARMv7-A Exceptions&amp;Interrupts Handling的安全扩展</a></li>
+<li><a href="https://blog.csdn.net/qq405180763/article/details/39203037" target="_blank" rel="noopener">ARM寄存器（R13/R14/R15)</a></li>
+<li><a href="[https://baike.baidu.com/item/%E5%BD%B1%E5%AD%90%E5%AF%84%E5%AD%98%E5%99%A8/6435933](https://baike.baidu.com/item/影子寄存器/6435933)">影子寄存器</a></li>
+<li><a href="https://www.jianshu.com/p/ee41a4544874" target="_blank" rel="noopener">ARM Trustzone技术（二）ARMv7-A Processor mode&amp;registers的安全扩展</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">实验</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ARM</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">keystone</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">qemu</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">汇编</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/keystone//" class="article-tag-list-link color4">keystone</a>
+        			<a href="/categories/ARM//" class="article-tag-list-link color4">ARM</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/06/20/ARM基本知识/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2020/06/20/TrustZone笔记-1/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">TrustZone介绍</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ARM基本知识"><span class="toc-number">1.</span> <span class="toc-text">ARM基本知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#处理器模式"><span class="toc-number">1.0.1.</span> <span class="toc-text">处理器模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FIQ和IRQ的区别"><span class="toc-number">1.0.2.</span> <span class="toc-text">FIQ和IRQ的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ARM中断"><span class="toc-number">1.0.3.</span> <span class="toc-text">ARM中断</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ARM寄存器"><span class="toc-number">1.1.</span> <span class="toc-text">ARM寄存器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SCR表格"><span class="toc-number">1.1.1.</span> <span class="toc-text">SCR表格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MVBAR"><span class="toc-number">1.1.2.</span> <span class="toc-text">MVBAR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CPU状态"><span class="toc-number">1.1.3.</span> <span class="toc-text">CPU状态</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ARM-Cortex-A、R、M系列"><span class="toc-number">1.2.</span> <span class="toc-text">ARM Cortex-A、R、M系列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">1.3.</span> <span class="toc-text">参考资料</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -242,9 +461,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
