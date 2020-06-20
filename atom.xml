@@ -36,9 +36,9 @@
     
       <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
     
-      <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
-    
       <category term="big4 paper" scheme="http://yoursite.com/tags/big4-paper/"/>
+    
+      <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
     
   </entry>
   
