@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2021/01/29/CIMT/</loc>
+    
+    <lastmod>2021-01-29T14:22:49.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2021/01/29/SoK-TrustZone/</loc>
     
     <lastmod>2021-01-29T13:31:27.346Z</lastmod>
@@ -19,13 +26,6 @@
     <loc>http://yoursite.com/2020/06/20/Sanctuary-NDSS2019/</loc>
     
     <lastmod>2021-01-29T09:54:02.675Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2021/01/29/CIMT/</loc>
-    
-    <lastmod>2020-08-26T15:46:43.087Z</lastmod>
     
   </url>
   

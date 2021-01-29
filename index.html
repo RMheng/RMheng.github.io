@@ -149,253 +149,6 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-CIMT" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-	<!-- 目录内容 -->
-	
-		<!-- 目录内容结束 -->
-
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>遇到的问题：</p>
-<p>TrustZone的制造商希望通过约束安全世界中的第三方应用程序的安装来最小化可信计算基（TCB）</p>
-<p>但是第三方的开发人员更希望能够在安全世界中自由地安装自己的应用。</p>
-<p>解决方法：在普通世界中构造了一个Isolated Execution Environment（IEEs）来保护安全敏感的应用程序。</p>
-<p>本文所完成的工作：</p>
-<p>针对IEE的数据保护模型（data protection models)和ARM cache属性（cache attributes），发现了三种基于cache的漏洞（CITM 漏洞），这些漏洞能够被用来操纵保护在IEE内部的敏感数据。</p>
-<p>另外，由于映射到IEE内存中的缓存的安全措施的低效和不连贯的，普通世界中的攻击者能够通过以下几点措施降低IEE数据的安全性：</p>
-<p>1）并发执行；</p>
-<p>2）在安全敏感的应用程序被suspend或者终止（finished）时绕过强制的安全措施；</p>
-<p>3）在IEE上下文切换进程中国措施使用不完整的安全措施。</p>
-<p>完成的工作：</p>
-<p>1）作者通过在一些著名的IEE systems中，包括SANCTUARY，Ginseng和TrustICE进行案例研究揭示了CITM漏洞的广泛存在；</p>
-<p>2）CITM漏洞是能够在硬件测试床上利用的</p>
-<p>3）分析导致CITM的漏洞的根本原因，并提供了解决对策。</p>
-<p>实验证明我们的防御测试具有一个很小的开销。</p>
-<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>IEEs的主要思想是通过一个安全世界中的trusted reference monitor确保只有授权的IEE app能够访问IEE敏感资源。</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200824180749550.png" alt="image-20200824180749550"></p>
-<p>Ginseng：在普通世界中构造第三方应用程序，同时避免部署安全世界中的application-specific logic（ Ginseng [55] constructs the IEEs to protect secrets of third-party applications in the normal world without deploying any application-specific logic in the secure world.这段的意思是否是不依赖于安全世界中的特殊逻辑）</p>
-<p>SANCTUARY：将它的IEEs定位在per-core环境中来保护IEE指定的内存（避免这些受保护的内存被其他非安全的内核访问）</p>
-<p>TrustICE：通过IEE monitor动态控制IEE memory的安全属性来保护IEE内存。</p>
-<h3 id="操作流程"><a href="#操作流程" class="headerlink" title="操作流程"></a>操作流程</h3><ul>
-<li>攻击者在并发执行中通过cross-core缓存操作操纵IEE数据；（侧信道攻击？）（在多核系统上，仅仅core-wise的隔离是无法保证安全的，因为缓存是允许cross-core的访问，因此能够被攻击者利用）–》针对Sancutary</li>
-<li>通过将不安全的缓存映射到用于安全措施的IEE内存中来绕过switch out操作后的安全防护操作；–》针对Ginseng</li>
-<li>针对动态控制内存的安全属性的方法，作者认为在switch out过程中能够窃取敏感IEE数据，而在switch in的过程中可以伪造IEE数据。–》针对TrustICE</li>
-</ul>
-<p>本文指出了为了确保IEE数据的安全性，除了内存以外，保护缓存安全的重要性。</p>
-<h3 id="根本原因"><a href="#根本原因" class="headerlink" title="根本原因"></a>根本原因</h3><ul>
-<li>缓存和内存安全属性的非相关性（这个非相关性如何理解？）</li>
-<li>缓存和内存读写操作的不同步</li>
-</ul>
-<h3 id="本文的工作"><a href="#本文的工作" class="headerlink" title="本文的工作"></a>本文的工作</h3><ul>
-<li>为IEE内存安全配置cache attributes</li>
-<li>在进行上下文切换时，清除cache mapping to the IEE 内存（难道其他三个没有进行这步的操作吗？）</li>
-</ul>
-<h2 id="名次解释"><a href="#名次解释" class="headerlink" title="名次解释"></a>名次解释</h2><p>switch out：从IEE到untrusted rich OS的上下文切换，switch out之前是secure的</p>
-<p>switch in：逆过程。switch in之前是non-secure的</p>
-<p>cross-core cache：意味着这个cache是被多个核共享的，比如l2 cache</p>
-<h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><p>L1-cache被进一步分为 I-cache（指令cache）和D-cache（数据cache）</p>
-<p>L1-cache和L2-cache都被配置为N-way Set Associative cache。</p>
-<p>全部的cache空间被分为N equally-sized块，也就是N路，每一路用k cache lines进行索引，每个cache line是一个数据单元。内存被分块成大小为一个cache line的多个数据块。j = i mod k</p>
-<p>inner cacheability domain–&gt;L1 cache</p>
-<p>outer cacheability domain–&gt;L2 cache</p>
-<p>cacheability domain’s attributes:</p>
-<ul>
-<li>non-cacheable：内存上的任何读写操作都不会经过该cacheability domain；</li>
-<li>write-through：在当前的cache上进行的写操作会立刻被传送到下一级别的storage；（L1 cache上的读写会被forwarded 到L2 cache——》主存）</li>
-<li>write-back：当前cache上的改变暂存在缓冲区中，当被驱逐时写入下一级的存储部件中</li>
-<li>write-allocate：当进行写操作时出现cache miss，该写结果将会被分配一个新的cache line，如果write-allocate未被设置，cache-missed write会对next level storage进行修改</li>
-</ul>
-<p>invalidation指令：储存在cache中的数据全部失效；</p>
-<p>cleaning指令：将目标缓存上的内容强制写入下一级存储设备或者主存</p>
-<h2 id="Threat-Model"><a href="#Threat-Model" class="headerlink" title="Threat Model"></a>Threat Model</h2><p>normal world中的rich OS是不可信的；</p>
-<p>攻击者具有root权限，目的是破坏IEE中的敏感数据的机密性和完整性；</p>
-<p>TrustZone能够提供normal world和secure world之间的安全隔离，安全世界中运行的app是可信的，并且是不会被rich OS降低安全性的；</p>
-<p>安全敏感的app在IEE中运行，不会故意泄露信息。</p>
-<h2 id="CITM漏洞"><a href="#CITM漏洞" class="headerlink" title="CITM漏洞"></a>CITM漏洞</h2><h3 id="IEE数据保护模型"><a href="#IEE数据保护模型" class="headerlink" title="IEE数据保护模型"></a>IEE数据保护模型</h3><p>本部分介绍IEE中的两种数据保护模型。</p>
-<p>（1）安全敏感app能够和不可信app同时运行在normal world中的两个或多个core中。（在安全敏感app执行时，不可信app是可以运行的）</p>
-<p>当安全敏感app在normal world中的一个核上运行时，不可信进程可以同时运行在不同的核或者以分时的状态（in a time-sharing manner）运行在相同的内核中。该模型的安全措施：–》SANCTUARY&amp;Ginseng</p>
-<ul>
-<li>在并发执行时，敏感app使用core-isolated storage（不允许其他core访问的内存或者说是core上的寄存器）传递隐私数据；</li>
-<li>在敏感app suspend或者执行结束时，它core-isolated storage中的所有的隐私数据会在switch out过程中被清除；</li>
-<li>在安全敏感的app重新运行时，在switch in过程中由IEE monitor负责恢复或者分配新的core-isolated storage</li>
-</ul>
-<p>（2）不可信进程不被允许同时和安全敏感 app运行在normal world中。</p>
-<p>在normal world中的任何时间，所有的core只能同时运行安全敏感的app或者是不可信进程。但是在IEE进行上下文切换的过程中，仍然需要继续安全操作。除了在model中介绍的措施外，还需要配置：</p>
-<ul>
-<li>在switch out进程中，对于normal world来说，IEE内存无法被访问；</li>
-<li>在switch in进程中，允许normal world对IEE内存的访问。</li>
-</ul>
-<h2 id="CITM漏洞-1"><a href="#CITM漏洞-1" class="headerlink" title="CITM漏洞"></a>CITM漏洞</h2><p>当不可信rich OS操纵normal world中的cache时，两种数据保护模型的安全性都将被降低。从攻击者的角度，可以从两个方面进行攻击：</p>
-<ul>
-<li>manipulating the core-isolated memory (在并发执行中)</li>
-<li>篡改IEE的上下文切换</li>
-</ul>
-<h3 id="漏洞1：在并发执行时操纵core-isolated内存"><a href="#漏洞1：在并发执行时操纵core-isolated内存" class="headerlink" title="漏洞1：在并发执行时操纵core-isolated内存"></a>漏洞1：在并发执行时操纵core-isolated内存</h3><p>在多核系统上，与安全敏感的app并发执行的恶意OS可以通过操纵normal world中的cache来窃取或者修改core-isolated 内存中的IEE数据。因为安全敏感的APP运行在normal world中，而它相应的cache line被标记为non-secure，所以能够被不可信rich OS操纵。（伪造页表，用一个物理地址指向一个core-isolated memory page，恶意OS能够通过访问相应的虚拟地址操纵它的cache line）</p>
-<p>产生的原因：ARM平台提供了保证memory isolation的硬件特性，但缺少相应的针对cache isolation的特性。（比如，TZC-400的Identity-based Filtering features可以用于隔离内存，但不能保证cache的隔离）</p>
-<h3 id="漏洞2：在IEE的switch-out过程中绕过安全措施"><a href="#漏洞2：在IEE的switch-out过程中绕过安全措施" class="headerlink" title="漏洞2：在IEE的switch out过程中绕过安全措施"></a>漏洞2：在IEE的switch out过程中绕过安全措施</h3><p>switch in过程是IEE monitor在secure world中完成的，所以被cache line被配置为secure，所以是很难绕过安全检查并利用，但是switch out不管是由normal world还是secure world中的IEE执行，都是可以绕过安全操作的。</p>
-<p>memory cleaning是在normal world中被执行的，相应的cache line是non-secure的，所以有可能通过控制non-secure cache限制cache中的内存写操作或者保持内存不变。比如，当内存被设置为write-back，write-allocate时，所有的内存写都会被暂存在缓冲区中直到cache set被驱逐。攻击者通过使用lockdown技术阻止cache eviction，进而直到敏感app被悬挂或者终止时，隐私数据都没有被安全地写入IEE内存。</p>
-<p>当安全措施需要在secure world中执行时，IEE需要在不涉及rich OS的情况下将控制权转移到secure world中的IEE monitor。从normal world到secure world的上下文切换是由rich OS kernel中的Secure Monitor Call（SMC）高特权指令完成的。SMC是无法由进程或者app直接触发的，所以安全敏感app通过故意访问secure memroy来故意触发一个external abort。但是只要是在normal world中被访问，安全内存所被映射的cache lines就是non-secure的。（即使是secure world中的secure memory，一旦被normal world中的non-secure cache 映射了，就会变成non-secure），OS就会操纵相应的cache lines来绕过上下文切换和安全措施（data cleaning）。</p>
-<h3 id="漏洞3：IEE-cache上下文切换时不完整的安全措施"><a href="#漏洞3：IEE-cache上下文切换时不完整的安全措施" class="headerlink" title="漏洞3：IEE cache上下文切换时不完整的安全措施"></a>漏洞3：IEE cache上下文切换时不完整的安全措施</h3><p>某些IEE系统在上下文切换中的内存保护是通过动态控制IEE内存的安全属性来完成的（TrustICE）（在switch in过程是不安全的，在switch out过程是安全的）</p>
-<p>switch out阶段不合适的cache cleaning可能会导致IEE data leakage；有害数据可能在switch in阶段被加载入安全敏感的APP。漏洞3是由于cache上不完整的安全措施，而漏洞2是在上下文切换的时候绕过安全检查。</p>
-<p>Model1–》3种漏洞</p>
-<p>Model2–》2和3</p>
-<p>漏洞1,2–》当内存用于存储IEE数据，能够被利用（为什么？）</p>
-<p>漏洞3–》只有在IEE执行switch out的安全措施使才有此要求</p>
-<h2 id="4-3-Cache-lockdown技术"><a href="#4-3-Cache-lockdown技术" class="headerlink" title="4.3 Cache lockdown技术"></a>4.3 Cache lockdown技术</h2><p>cache lockdown：允许程序加载代码和数据到cache中，并标记它们不被eviction（驱逐）–》提高更快的系统反应速度，减少执行时间</p>
-<p>但是CITM中的漏洞2可以利用该lockdown技术，将cache中针对内存的写操作锁住，从而使memory-cleaning操作无效。</p>
-<p>实现cache lockdown的三个方法：</p>
-<ul>
-<li>一些ARM开发板允许用户通过配置L2 auxiliary cache control register来lock L2 cahce ways。–》ARMv8处理器目前已经不支持该基于硬件的locking control 寄存器；</li>
-<li>攻击者将自己控制的内存区域设置为outer cacheable，其他内存区域全部设置为outer non-cacheable，从而独占L2缓存–》huge overhead</li>
-<li>更细粒度地控制内存页面的缓存属性从而独占L2缓存</li>
-</ul>
-<p>相同编号的blocks构成了一个page cache set，攻击者将想要控制的内存页面标记为outer cacheable，其他标记为non-cacheable。</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200825222106254.png" alt="image-20200825222106254"></p>
-<p>page1和page6分享相同的page cache set，page1设置为cacheable，而page6被设置为non-cacheable（这边即使是修改了page1，由于page1没有被驱逐，所以page1的修改不会被写入到内存中）</p>
-<p>本文选择了使用第三种方法，针对L2 cache实施了cache lockdown。</p>
-<h2 id="5-case-study-of-CITM-attacks"><a href="#5-case-study-of-CITM-attacks" class="headerlink" title="5 case study of CITM attacks"></a>5 case study of CITM attacks</h2><p>SANCTUARY实际上是在ARM fast models virtualization tools上完成的，本文作者在i.MX6Quad开发板上模拟了SANCTUARY的cache操作，Ginseng在HiKey620开发板，TrustICE在i.MX6Quad SABRE开发板上实现。</p>
-<h2 id="5-1-SANCTUARY：操作L1-cache"><a href="#5-1-SANCTUARY：操作L1-cache" class="headerlink" title="5.1 SANCTUARY：操作L1 cache"></a>5.1 SANCTUARY：操作L1 cache</h2><p>每个IEE运行在拥有core-isolated内存的core中，并且每次运行时IEE不会被其他core干扰。</p>
-<h3 id="SANCTUARY的数据保护机制。"><a href="#SANCTUARY的数据保护机制。" class="headerlink" title="SANCTUARY的数据保护机制。"></a>SANCTUARY的数据保护机制。</h3><p>switch out：当IEE结束运行，隐私数据将会被IEE中的微内核清除（向受保护的core-isolated memory中写入全0，并使L1 cache无效）（L2cache在SANCTUARY中被禁止给core-isolated的内存使用）</p>
-<p>switch in：在启动IEE之前，secure world中的IEE monitor将会为IEE建造一个干净的环境。在敏感app加载之前，L1 cache也会被invalided。</p>
-<p>由于在switch in和switch out过程中，core-isolated memory和L1 cache都被安全地清空，所以对于漏洞3是免疫的。由于data cleaning操作是被IEE中的微内核完成的，所以对于漏洞2也是免疫的。如果想要绕过data cleaning，那么就必须锁住L1 cache，但是L1 cache的eviction是由该内核以及core-isolated内存页表的cache属性决定的，攻击者无法通过操纵另一个内核来控制eviction。（core-isolated内存的cache属性是由IEE中的微内核来控制和保护的）</p>
-<p>SANCTUARY给每个内核分配一个独特的Non-Secure Access IDentifier(NSAID)，并且通过配置TZC-400给每个CPU（根据NSAID）分配独立的内存区域。ARM平台上的NSAID都是相同的，所以这部分是在ARM的快速模型虚拟化工具上来完成的。</p>
-<p>受保护的内存区域通过配置cache属性为outer non-cacheable来避免缓存到L2 cache中，而L1 cache一般位于每个内核的内部，不会直接被其他内核访问，但除此之外，SANCTUARY就没有在并发执行时给予其他的保护。</p>
-<h3 id="SANCTUARY中的漏洞"><a href="#SANCTUARY中的漏洞" class="headerlink" title="SANCTUARY中的漏洞"></a>SANCTUARY中的漏洞</h3><p>通过调研，作者发现了名为shareability的缓存特性，该特性能够通过操作一个内核的L1 data cache进而读/写另一个内核的L1 data cache。–》缓存的一致性</p>
-<p>inner shareability domain：在一个cluster中的core的数据一致性（一个cluster表示one group of cores）</p>
-<p>outer shareability domain：所有的cluster的core的数据一致性</p>
-<p>当处理器运行在Symmetric Multi-Processing(对称多核处理器，SMP)模式时，shareability属性将会被配置。（SMP模式在多核平台中是默认设置的）当shareability属性被设置，Snoop Control Unit（窥探控制单元，SCU）会通过处理直接的核之间cache-to-cache转移来保证数据一致性。如果设置为inner shareable，在某个内核中的L1 data缓存中的某个值的修改会同步到该簇上其他内核的L1数据缓存。但是non-secure cache中的数据不会扩散到secure cache。</p>
-<p>结论：当内核都运行在normal world中，访问相同的物理内存地址，并且该物理内存的内存页表的缓存属性都是inner shareable或者outer shareable时，某个内核上的L1数据缓存可能会被另一个内核上的L1数据缓存读取或者篡改。（当设置为non-shareable时，就不会被窃取或者篡改）</p>
-<p>（IEE能否去将SANCTUARY所在内核的内存页表的缓存属性设置为non-shareable）</p>
-<h3 id="攻击"><a href="#攻击" class="headerlink" title="攻击"></a>攻击</h3><p>首先，为core1构造一个page table entry，将它的物理页表的缓存属性设置为shareable，并将它的物理地址指向core0的内存页。接下来，进入core1中对应的虚拟地址，core0中的L1数据缓存中的隐私数据就能够通过shareability属性被窃取或者修改。</p>
-<p>（这边有个问题是：一个内存能否被两个内核共同访问吗？making its physical address point to a memory page of core_0）</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826093249629.png" alt="image-20200826093249629"></p>
-<p>对IEE内存范围的获取是通过排除法，排除已知的不可信内存，而TEE内存是secure的，IEE内存是non-secure的，对TEE内存的访问会返回0或者触发中断，在读取IEE内存时当内存数据在cache中缓存时，是会得到真实的数据值的，虽然cache要比内存小很多，但经过多次探测，也能确定IEE内存的地址范围。</p>
-<h2 id="Ginseng：映射到不安全的缓存"><a href="#Ginseng：映射到不安全的缓存" class="headerlink" title="Ginseng：映射到不安全的缓存"></a>Ginseng：映射到不安全的缓存</h2><p>Ginseng是在多核平台上保护选定功能的敏感数据的IEE系统。为了避免被同时运行的有害OS攻击，Ginseng选择将敏感数据仅存放在寄存器中，而不是core-isolated内存，所以这就对漏洞1免疫。另外，由于寄存器中的数据不经过缓存，所以也不受漏洞3的影响。</p>
-<p>Ginseng在switch out过程中依赖于secure world中的TEE monitor来执行data cleaning操作。（因为IEE中的rich OS是不可信的，所以需要借助于TEE）通过试图访问TEE中的安全内存来触发一个安全中断，从而由IEE进入TEE。但是secure memory所映射的缓存是non-secure的，通过操纵该缓存，可以阻止从IEE到TEE monitor的控制流切换，从而绕过data cleaning操作。</p>
-<h3 id="数据保护措施"><a href="#数据保护措施" class="headerlink" title="数据保护措施"></a>数据保护措施</h3><p>Ginseng提供了一个编译器，通过静态污点分析识别携带隐私数据的变量，并将它们保存在寄存器中。包含隐私数据的函数将会被判定为隐私函数，在退出前要进行代码完整性检查。</p>
-<p>Ginseng引入了六种安全的API函数，用于将控制流从normal world中的用户空间直接转移到GService（Ginseng中的IEE monitor）</p>
-<ul>
-<li>ss_write(),ss_read()：用于和GService安全通信</li>
-<li>其余四种被编译器自动插入到程序中，</li>
-<li>ss_saveCleanv()：被插入在敏感函数中的每次函数调用之前，用于加密隐私数据，将加密后的数据保存在内存中，并清除相应的寄存器</li>
-<li>ss_readV()：被插入在敏感函数的每次函数调用之后，解密隐私数据，并恢复这些数据在寄存器中</li>
-<li>ss_start()：被插入在每个敏感函数的开始，用于进行诸如代码完整性检查等准备工具</li>
-<li>ss_end()：插入在敏感函数的末尾，清楚寄存器中的数据防止数据泄露。</li>
-</ul>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826140050212.png" alt="image-20200826140050212"></p>
-<p>当需要GService进行安全敏感操作时，需要从normal world中的用户空间上下文切换到运行在secure world中的GService。cross-world的上下文切换是通过SMC指令来完成的。通过配置TZASC，每个API函数被分配了一个独特的安全内存，调用一个安全的API函数将会触发一个security violation，因为它试图在普通世界读取安全内存。</p>
-<p>在处理该violation时，处理器会在normal world中发出一个external abort（EA）, GService在Secure Configuration Register中设置了external abort比特位，所以GService无需kernel的参与就可以直接处理EA和secure API发出的请求。</p>
-<h3 id="Ginseng中的漏洞2"><a href="#Ginseng中的漏洞2" class="headerlink" title="Ginseng中的漏洞2"></a>Ginseng中的漏洞2</h3><p>ss_saveCleanv首先加载__channel_save_clean的地址（指向ss_saveCleanv函数的安全内存的虚拟地址）到寄存器4中，然后将该地址为x4的安全内存中的数据加载到寄存器x0中。</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826161849045.png" alt="image-20200826161849045"></p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826160551699.png" alt="image-20200826160551699"></p>
-<ol>
-<li>当执行“安全内存加载”指令（第18行），处理器首先会尝试去缓存中加载数据；</li>
-<li>由于缓存中不会存放敏感数据，所以应是cache miss；cache根据提供的地址去secure memory中获取数据；</li>
-<li>由于是从normal world中尝试去访问secure world中的数据，所以会触发一个external abort，该EA被GService捕获；</li>
-<li>GService根据该安全API的要求，加密敏感数据并清除相应的寄存器；</li>
-<li>控制流回到secure API ss_saveCleanV()；</li>
-<li>调用非敏感函数insensitive_func()</li>
-</ol>
-<p>其中，1中的cache是non-secure cache，这儿可以被攻击者利用。</p>
-<p>在HiKey620开发板（8-core ARM Cortex-A53 processor）上实现了原型系统</p>
-<p>攻击过程就是红线描述的过程，最重要的是其中的步骤0</p>
-<p>步骤0在缓存中填充了映射secure memory的缓存行，这样在步骤1的时候就会cache hit，那么步骤2-5都不会执行，就直接执行了步骤6中的insensitive function。而insensitive_func()可能会被攻击者利用读取未被清零的敏感寄存器，insensitive function和sensitive function都运行在相同的内核中，但缺少了安全检查。所以，我们可以通过修改libc.so库利用printf()函数来读取寄存器中的隐私数据，比如说keys。</p>
-<p>接下来详细阐述cache0的攻击过程：writeSM是用于向cache中写入__channel_save_clean（ss_saveCleanV()的安全内存）的函数。</p>
-<ol>
-<li>__channel_save_clean的虚拟地址被加载到寄存器x4中；</li>
-<li>由于__channel_save_clean的虚拟地址-物理地址映射被保存在rich OS内核中，攻击者可以很容易地获得它的物理地址；</li>
-<li>将寄存器x0中的数据保存到地址值为x4的安全内存。该数据会被首先写入到安全内存__channel_save_clean的缓存中，因为Ginseng中的安全内存被设置为write-back和write-allocate，所以数据会被暂时存放在缓存中，直到缓存满了之后才被驱逐。</li>
-<li>作者利用lockdown技术将映射到同一个page cache set的内存页表设置为outer non-cacheable（阻止缓存到l2缓存中）。</li>
-</ol>
-<p>通过在ss_saveCleanV()之前调用writeSM函数，本文作者成功实现了绕过GService中的安全保护。</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826170916865.png" alt="image-20200826170916865"></p>
-<h2 id="5-3-TrustICE：不完整的cache-cleaning"><a href="#5-3-TrustICE：不完整的cache-cleaning" class="headerlink" title="5.3 TrustICE：不完整的cache cleaning"></a>5.3 TrustICE：不完整的cache cleaning</h2><p>TrustICE是在一个单核平台上实现的IEE系统，安全敏感app运行在包含一个用户程序和一个微内核的IEE中，该app不会受到rich OS的干扰。</p>
-<h3 id="5-3-1-数据保护措施"><a href="#5-3-1-数据保护措施" class="headerlink" title="5.3.1 数据保护措施"></a>5.3.1 数据保护措施</h3><p>TrustICE静态地将物理内存分成了三个分离的区域给normal world中的rich OS，normal world中的IEE和secure world中的Trusted Domain Controller（TrustICE中的IEE monitor）。隐私数据保护是通过动态配置IEE内存的安全属性完成的。</p>
-<ul>
-<li><p>当系统boot up时，可信区域控制器设置IEE内存为安全的。</p>
-</li>
-<li><p>在新建一个IEE之前（switch in），可信区域控制器从IEE内存中给该IEE分配一块内存空间，并将其属性设置为non-secure。</p>
-</li>
-<li><p>当IEE结束运行时（switch out），IEE中的微内核通过调用SMC指令将当前控制流直接转移到secure world。在将控制权转交给rich OS之前，可信区域控制器将配置相应的IEE内存空间为secure。</p>
-</li>
-</ul>
-<h3 id="TrustICE中的漏洞3"><a href="#TrustICE中的漏洞3" class="headerlink" title="TrustICE中的漏洞3"></a>TrustICE中的漏洞3</h3><p>TrustICE遵从了model2，所以对漏洞1来说是免疫的。</p>
-<p>当malicious OS运行时，IEE内存被设置为secure；当security-sensitive app退出时IEE被设置为non-secure。在switch out过程中，通过动态配置IEE内存为secure，保证数据的安全性。该保护是无法绕过的，因为这是通过在secure world中调用SMC指令强制将控制流从IEE中的微内核转移到secure world。所以不受漏洞2的干扰。</p>
-<p>虽然在上下文切换的过程中，内存得到了严格的保护，但相应的缓存还是non-secure的，并且没有被完全清理干净，因此，可以利用漏洞3。</p>
-<h3 id="5-3-3-攻击过程"><a href="#5-3-3-攻击过程" class="headerlink" title="5.3.3 攻击过程"></a>5.3.3 攻击过程</h3><p>在normal world中构造一个页表条目，该页表条目的的物理地址指向IEE内存页，并且该内存页的cache属性被设置为write-back和write-allocate。</p>
-<p>switch out：由于TrustICE并不会去清除缓存行中的数据，所以能够访问残留在对应缓存行的残留数据</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826210642807.png" alt="image-20200826210642807"></p>
-<p>switch in：rich OS根据IEE内存页向缓存中写入malicious data，并使用lockdown技术锁住这些缓存行。当IEE执行时，它首先读到的是被污染后的缓存行，而不是IEE内存页中的合法数据。</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826210712579.png" alt="image-20200826210712579"></p>
-<h2 id="应对措施"><a href="#应对措施" class="headerlink" title="应对措施"></a>应对措施</h2><p>本文作者通过配置IEE内存中的缓存属性以及在进行上下文切换时清除IEE内存来消除CITM漏洞。</p>
-<h2 id="6-1-抵御措施"><a href="#6-1-抵御措施" class="headerlink" title="6.1 抵御措施"></a>6.1 抵御措施</h2><p>产生CITM漏洞的主要原因在于缓存和主存这两级内存架构之间的不连贯性。</p>
-<p>漏洞1的原因：内存隔离并不能自动确保缓存隔离。比如在SANCTUARY中，当一个特定内核的内存区域通过TZC-400的identity-based filtering features获得了一块独立的内存区域，相应的L1缓存仍然能够在内核之间共享。</p>
-<p>解决方法：将该core-isolated内存的cache属性设置为outer non-cacheable，non-shareable。</p>
-<p>漏洞2产生的主要原因：内存和缓存中的读写操作是不同步的。Ginseng中的cross-world的切换就通过限制安全缓存中的读写绕过了。预加载并提前将恶意数据锁定在对应于secure memory的缓存中，IEE在读取安全内存时也会先hit预加载的恶意花奴才能。</p>
-<p>解决方法：使内存和缓存中的读写同步。可以将IEE内存中cache属性设置为write-through,non-write-allocate.</p>
-<p>漏洞3：缓存行是被自动设置的，当被一个运行在normal world中的内核访问时，该缓存行就被定义为non-secure；反之，如果被一个运行在secure world中的内核访问时，该缓存行就被定义为secure。所以，在TrustICE上完成的CITM攻击是通过在switch out之后读取IEE内存的non-secure缓存，并且在switch in之前在non-secure缓存中写入并锁定恶意数据。</p>
-<p>解决办法：在switch in和switch out过程中清除缓存行，那么攻击者就不会读取缓存中残留的数据或者是在缓存中留下恶意数据。</p>
-<p>综上所述，CITM漏洞可以通过以下几点来进行消除：</p>
-<ul>
-<li>配置IEE内存的页表属性为inner write-through non write-allocate,outer non-cacheable, non-shareable</li>
-<li>在进行上下文切换时清除IEE内存对应的缓存。缓存清除可以通过调用IEE中的invalidation和cleaning指令来完成。在switch in中调用invalidation来保证cache的干净，在switch out中调用cleaning来同步cache和内存的数据，接着调用invalidation来清除cache数据。</li>
-</ul>
-<h2 id="defense-overhead"><a href="#defense-overhead" class="headerlink" title="defense overhead"></a>defense overhead</h2><p>设备：i.MX6Quad SABRE开发板（quad-core ARM Cortex-A9处理器 at 1.2GHz with 1GB DDR3 SDRAM)</p>
-<p>强制缓存属性的情况，在一个IEE中运行一个AES加密app</p>
-<p>第一列是大部分的IEE，第三列是本文中介绍的defense系统，由于关闭了L2，所以导致开销达到了90%，但是和同样关闭了L2的SANCTUARY相比，开销是忽略不计的。而第三列是开启了L2的defense系统，与第一列的开销类似。</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826225035890.png" alt="image-20200826225035890"></p>
-<p>评估在rich OS中引入额外的cross-domain上下文切换，该上下文切换针对针对页表更新操作。相比较没有进行保护时，仅有2.65%的额外开销。</p>
-<p>数据库的I/O操作需要17.74%是由于从硬盘到内存的数据拷贝需要修改一堆页表映射。</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826225341791.png" alt="image-20200826225341791"></p>
-<p>在涉及到频繁的页表更新操作时的开销，所有的开销都小于10%</p>
-<p><img src="/2021/01/29/CIMT/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200826230608632.png" alt="image-20200826230608632"></p>
-<p>讨论</p>
-<p>intel SGX：对于SGX来说，CITM攻击是无效的。因为SGX中的敏感信息都放在EPC（enclave page cache）上。EPC的页表和对应的缓存只能由运行着enclave的处理器来访问（避免恶意OS对缓存行的操纵）。并且，每个EPC页只会被分配给一个enclave。（避免另一个恶意enclave对EPC页缓存行的访问）–》该解决方法搭载在intel架构上，而移动设备往往是使用的arm处理器</p>
-<p>基于虚拟化的解决办法：ARMv7中引入了hyp CPU模式，该模式运行在一个高特权的hypervisor中，一般认为该hypervisor是安全且可信的。在利用该hypervisor的解决办法中，IEE内存通过两个阶段的地址转换机制来进行管理。第一步，是由OS内核来完成的，将虚拟地址转化成一个intermediate physical address（过渡物理地址，IPA）。在第二阶段，由hypervisor将IPA进一步转化成一个真正的物理地址。为了抵御恶意OS，hypervisor通常会根据IPA到PA的映射来进一步确认分配给IEE和rich OS的隔离物理地址空间。–》依赖于一个可靠的hypervisor，本文的TrustZone-based IEE系统基于一个secure world中的small-sized的IEE来保护安全敏感程序免受normal world中的不可信os和hypervisor的攻击。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/01/29/CIMT/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
     <article id="post-keystone-2020" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -464,6 +217,104 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/01/29/keystone-2020/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-CIMT" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/01/29/CIMT/">CITM CCS20</a>
+    </h1>
+  
+
+        
+        <a href="/2021/01/29/CIMT/" class="archive-article-date">
+  	<time datetime="2021-01-28T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-29</time>
+</a>
+        
+      </header>
+    
+	<!-- 目录内容 -->
+	
+		<!-- 目录内容结束 -->
+
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Cache-in-the-Middle (CITM) Attacks : Manipulating Sensitive Data in Isolated Execution Environments的精读笔记~</p>
+<p>这篇论文是我在组会讲解的第一篇论文，也很感激第一篇讲的是这篇，因为这篇完全就是中国人写的感觉，推荐阅读原文，非常好读懂</p>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">TrustZone</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">papaer</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">System Security</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/TrustZone//" class="article-tag-list-link color5">TrustZone</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/01/29/CIMT/">展开全文 >></a>
         </p>
       
 
@@ -624,11 +475,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ARM</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">TrustZone</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">TrustZone</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ARM</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
@@ -814,11 +665,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ARM</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">TrustZone</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">TrustZone</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ARM</a>
         		</li>
       		
 		</ul>
@@ -1334,6 +1185,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">papaer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">System Security</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">ARM</a>
               </li>
              
@@ -1366,14 +1229,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">paper</a>
               </li>
              
@@ -1386,11 +1241,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
+                <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Keystone</a>
+                <a href="javascript:void(0)" class="js-tag color4">keystone</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">qemu</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1402,11 +1261,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">keystone</a>
+                <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">qemu</a>
+                <a href="javascript:void(0)" class="js-tag color4">Keystone</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1473,6 +1332,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               <a href="http://aryb1n.github.io" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>Aryb1n</a>
             </li>
           
+            <li class="search-li">
+              <a href="https://heartever.github.io/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>Teacher</a>
+            </li>
+          
         </ul>
   		
     	</section>
@@ -1481,7 +1344,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
     
     	<section class="tools-section tools-section-me" q-show="aboutme">
   	  	
-  	  		<div class="aboutme-wrap" id="js-aboutme">仓鼠研究所所长</div>
+  	  		<div class="aboutme-wrap" id="js-aboutme">平平无奇的信工所20级研究生\n仓鼠研究所名誉副所长\n</div>
   	  	
     	</section>
     
