@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2021-01-29T13:31:15.281Z</updated>
+  <updated>2021-02-28T09:41:48.614Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>leaky -CCS17</title>
+    <link href="http://yoursite.com/2021/02/28/leaky%E8%AE%BA%E6%96%87/"/>
+    <id>http://yoursite.com/2021/02/28/leaky论文/</id>
+    <published>2021-02-28T14:17:15.000Z</published>
+    <updated>2021-02-28T09:41:48.614Z</updated>
+    
+    <content type="html"><![CDATA[<p>Leaky Cauldron on the Dark Land: Understanding Memory Side-Channel Hazards in SGX </p><p>论文阅读摘要，建议阅读原文</p><a id="more"></a><h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>简单介绍了一下背景：目前的研究热点是针对在当时新提出来的page-fault attack（OS级别的攻击者通过产生page faults来观察SGX中受保护的进程的page-level访问模式）。虽然提出了很多保护措施，但是这些保护措施的功效其实还是未知的。</p><p>提出本篇论文做出的工作：</p><ul><li>系统地分析了SGX所面临的侧信道攻击的威胁（主要在内存管理上，从TLB到DRAM模块）</li><li>当从page channel中恢复EdDSA密钥时对enclave program进行细粒度的监控时能够避免高频率的AEXs（如何避免AEXs的同时在cache和cross-enclave DRAM中恢复EdDSA密钥）</li><li>揭露现有针对SGX的安全研究和side-channel weakness之间的鸿沟</li><li>启发如何安全地使用SGX这样的一个系统</li></ul><h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>第一段简单地介绍了TEE和SGX的概念，然后介绍了SGX存在的问题。SGX强调简单的设计理念导致很多资源都是部分或者是全部被untrusted OS所控制，因此很容易受到侧信道攻击的影响。</p><p>第二部分介绍了侧信道攻击的影响，当攻击者完全控制住了OS，他能够通过构造一个完全没有噪音的环境，在该环境中观察中断来操纵页表中运行的代码。在page level的级别定义程序运行轨迹，从而提取出运行的文本信息。（攻击者获得了对OS的控制权，他就能够操纵运行在enclave-mode中的页表代码怎么做的呢？通过在一个由攻击者构造的环境中观察中断，他能够根据page level的执行轨迹提取出运行的文本信息，从popular application libraries得到图片信息。)</p><p>第二部分讲的就是侧信道攻击的实现方法以及可能带来的危害。</p><p>提到了intel官方对于侧信道攻击的态度：intel官方非常清楚SGX是无法防御侧信道攻击的，他们把问题的解决留给了软件方。</p><p>提出的问题是对可能存在的攻击面的不完全理解会导致不能很好地防御。（提出问题）</p><p>第三部分，也就是理解侧信道攻击这部分，作者提出了本文最重要的三个点：</p><ul><li>不仅仅只有page faults会泄露程序的内存访问布局</li><li>不是所有的侧信道攻击都会触发大量的AEX（asynchronous enclave exits）</li><li>需要对side-channel进行一个更细粒度的观察，比如说在cache-line层面上</li></ul><p>作者所作出的工作：</p><ul><li>探索memory side-channel攻击面（该研究从address translation到memory operation之间的每一步都考虑在内）</li><li>通过一种更有效的侧信道攻击来减少副作用。（避免跟踪程序碎片进入和退出的轨迹，转而测量不同页面之间的执行时间从而推测它们之间的执行路径；另外，提供了一种新的方法来刷新TLBs，该方法利用了intel的HyperThreading，并通过与enclave code共享的CPU core的攻击进程，从而减少所需要的中断数量）（这部分主要是介绍了本文作者所完成的工作：提出了一种新的方法SPM，该方法已有的侧信道攻击方法相比优势所在，简单介绍了该方法运用了什么技术，用SPM技术最后呈现的效果如何）</li><li>提高了攻击空间粒度。（page-fault attacks的访问粒度在4KB，而本文是64B）</li></ul><p>影响</p><p>贡献：</p><ul><li>第一篇对SGX内存侧信道攻击面的in-depth研究</li><li>提出了新的攻击</li><li>提出了缓解措施，强调对类似于SGX等安全措施的更好的理解</li></ul><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>背景主要从虚拟地址和物理地址管理，对内存隔离的安全检查以及内存加密三个方面进行表述。</p><p>虚拟地址和物理地址管理</p><p>SGX为enclave应用程序和相关的控制结构保留了一段Processor Reserved Memory（PRM），而EPC就是PRM的一个子集。虚拟地址转换成物理地址是通过untrusted system software来完成，比如TLB，CPU在enclave和非enclave之间的切换通过EENTER和EEXIT指令来完成。</p><p>然后SGX分成enclave和非enclave，接下来就介绍对内存隔离是如何保证的。如何enclave的地址被映射到了非PRM中或者非enclave的地址被映射到了PRM中，就会出现page fault。</p><p>最后介绍安全内存是如何来保证安全性的，也就是内存加密的介绍。如果有EPC被驱逐出来，就会通过加密手段对该内存进行加密，另外通过MAC机制保证加密的完整性。</p><h2 id="攻击模型"><a href="#攻击模型" class="headerlink" title="攻击模型"></a>攻击模型</h2><p>关注的重点在于威胁enclave programs的机密性的侧信道分析。</p><p>假设攻击者将恶意代码加载到enclave中，攻击者能够获取enclave binary在虚拟地址空间的基地址</p><p>以及攻击者能够在执行攻击之前获取对相同配置的机器的访问。</p><h1 id="理解攻击面"><a href="#理解攻击面" class="headerlink" title="理解攻击面"></a>理解攻击面</h1><p>通过对individual vectors的分析得到的攻击面总结了SGX中侧信道攻击面。</p><h2 id="攻击面"><a href="#攻击面" class="headerlink" title="攻击面"></a>攻击面</h2><p>作者从虚拟地址到物理地址的转换进行考虑，首先评估address translation caches，并且walk through 内存中的page tables。</p><p><strong>Address Translation Cache</strong>。这一部分负责完成虚拟地址到物理地址的转换工作来进行讨论，主要介绍TLB（translation lookaside buffer），如果TLB都miss了，就要进行虚拟地址到物理地址的转化，intel中的话就需要进行4步转换操作。</p><p>vector1. shared TLBs and paging-structure caches under hyperthreading</p><p>当超线程被开启的时候，enclave模式下的TLB和paging-structure caches会和非enclave mode下的代码共享。</p><p>vector2. Flushing selected entries in TLB and paging-structure caches at AEX.</p><p>vector3. referenced PTEs are cached as data.</p><p>第三章的攻击面从地址转换cache，页表，缓存内存层次三个方面选择了8个可能存在攻击的点进行讨论，而实施侧信道攻击的影响可以从空间粒度，时间角度以及AEXs，中断频率等方面观察。</p><p>第四章介绍了新的侧信道攻击（sneaky page monitoring attacks），使用这样的攻击在带来相同攻击效果的同时会极大地减少AEXs。在介绍sneaky攻击时，利用页表的accessed flag，时间监控，利用超线程的TLB flushing这三个攻击面实施的侧信道攻击。然后介绍了这三种攻击分别在三个软件工具上的实现效果来证明攻击的有效性。在第四章的最后部分，作者在最新的Libgcrypt库中以较少的EAXs恢复EdDSA密钥。</p><p>第五章考虑以一种更为细粒度的方式实施cache-DRAM侧信道攻击，本部分通过提高空间粒度来显示了更为有效的攻击效果，分别介绍了cross-enclave Prime-Probe cache attack，cross-enclave DRAMA攻击以及一个cache-DRAM攻击。最后根据构造的timer评价了实施攻击的准确性，作者根据结果总结得出如果实施64byte粒度的cache-DRAM攻击，将能够达到和flush-reload cache攻击相似的攻击结果。</p><p>第六章首先讨论的是对前文所介绍的攻击面进行讨论和总结，比如说应用64byte的cache-DRAM攻击能和FLUSH+RELOAD达到相同的效果（但是由于EPC只能由一个enclave拥有一次，也就是它只有在这个enclave运行的时候才能被拥有，所以该攻击是无法在SGX上执行的），并简单介绍了一些其他没有被介绍的攻击面。</p><p>接下来介绍的是现有的缓解措施的效果。这部分是对现有的5种不同角度考虑的tee安全防御措施的效果进行了讨论，指出他们的作用并提出了他们所存在的问题。</p><p>第三部分是根据前面的攻击和上面的讨论得出的一些思考，比如SGX开发者必须意识到可能存在的攻击民并在软件开发时尽量避免，给予软件层面的保护并进行硬件保护。</p><p>第七章就是介绍相关的工作</p><p>第八章是对本文工作的总结</p><p>第九章是致谢以及本工作依托的项目。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Leaky Cauldron on the Dark Land: Understanding Memory Side-Channel Hazards in SGX &lt;/p&gt;
+&lt;p&gt;论文阅读摘要，建议阅读原文&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="SGX" scheme="http://yoursite.com/categories/SGX/"/>
+    
+    
+      <category term="SGX" scheme="http://yoursite.com/tags/SGX/"/>
+    
+  </entry>
   
   <entry>
     <title>Keystone EuroSys20</title>
