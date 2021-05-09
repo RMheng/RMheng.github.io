@@ -211,11 +211,11 @@
       <category term="ARM" scheme="http://yoursite.com/categories/ARM/"/>
     
     
+      <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
+    
       <category term="paper" scheme="http://yoursite.com/tags/paper/"/>
     
       <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
-    
-      <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
     
   </entry>
   
@@ -261,9 +261,9 @@
       <category term="ARM" scheme="http://yoursite.com/categories/ARM/"/>
     
     
-      <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
-    
       <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
+    
+      <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
     
   </entry>
   
