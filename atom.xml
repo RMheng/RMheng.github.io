@@ -162,9 +162,9 @@
       <category term="TrustZone" scheme="http://yoursite.com/categories/TrustZone/"/>
     
     
-      <category term="paper" scheme="http://yoursite.com/tags/paper/"/>
-    
       <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
+    
+      <category term="paper" scheme="http://yoursite.com/tags/paper/"/>
     
       <category term="System Security" scheme="http://yoursite.com/tags/System-Security/"/>
     
@@ -212,11 +212,11 @@
       <category term="ARM" scheme="http://yoursite.com/categories/ARM/"/>
     
     
-      <category term="paper" scheme="http://yoursite.com/tags/paper/"/>
+      <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
     
       <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
     
-      <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
+      <category term="paper" scheme="http://yoursite.com/tags/paper/"/>
     
   </entry>
   
@@ -262,9 +262,9 @@
       <category term="ARM" scheme="http://yoursite.com/categories/ARM/"/>
     
     
-      <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
-    
       <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
+    
+      <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
     
   </entry>
   
