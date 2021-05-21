@@ -58,7 +58,7 @@
 <meta property="og:image" content="http://yoursite.com/2021/03/30/2021-05-09-Browser-NDSS17/image-20210327094903410.png">
 <meta property="og:image" content="http://yoursite.com/2021/03/30/2021-05-09-Browser-NDSS17/image-20210327101200107.png">
 <meta property="og:image" content="http://yoursite.com/2021/03/30/2021-05-09-Browser-NDSS17/image-20210327111906064.png">
-<meta property="og:updated_time" content="2021-05-21T12:01:59.237Z">
+<meta property="og:updated_time" content="2021-05-21T12:07:23.550Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Browser-NDSS17">
 <meta name="twitter:description" content="(Cross-) Browser Fingerprinting via OS and Hardware Level Features 春季学期web追踪前沿分享的论文，由于本人的web知识浅薄，整理的笔记难免有偏颇的地方。 基于操作系统和硬件特征来进行单浏览器和跨浏览器指纹追踪。">
@@ -451,7 +451,7 @@
 <li>第二部分为2.5KLoC用于分析，比如生成并在收集到的指纹上应用masks。</li>
 </ul>
 <h2 id="5-Data-Collection"><a href="#5-Data-Collection" class="headerlink" title="5 Data Collection"></a>5 Data Collection</h2><p>本论文是从众包网站上收集数据：Amazon Mechanical Turks, MacroWorkers. 如果众包工人愿意用两个不同的浏览器登录指定的网站，将会得到额外的奖励。</p>
-<p>为了保证获取完全真实的数据，在每个众包员工访问的链接中插入唯一标识符，比如<a href="http://oururl.com/?id=ABC。这个特殊标签会保存在客户端浏览器中作为一个cookie，如果该用户重新访问该浏览器，将会得到一样的身份标识符。每个众包员工只能接一次这个工作。" target="_blank" rel="noopener">http://oururl.com/?id=ABC。这个特殊标签会保存在客户端浏览器中作为一个cookie，如果该用户重新访问该浏览器，将会得到一样的身份标识符。每个众包员工只能接一次这个工作。</a></p>
+<p>为了保证获取完全真实的数据，在每个众包员工访问的链接中插入唯一标识符，比如<code>http://oururl.com/?id=ABC</code>。这个特殊标签会保存在客户端浏览器中作为一个cookie，如果该用户重新访问该浏览器，将会得到一样的身份标识符。每个众包员工只能接一次这个工作。</p>
 <p>对于cross-browser fingerprinting，数据集被等分10份：一个用于生成掩码，其余用于验证。</p>
 <h3 id="A-Comparing-Our-Dataset-with-AmIUnique-and-Panopticlick"><a href="#A-Comparing-Our-Dataset-with-AmIUnique-and-Panopticlick" class="headerlink" title="A. Comparing Our Dataset with AmIUnique and Panopticlick"></a>A. Comparing Our Dataset with AmIUnique and Panopticlick</h3><p>本篇论文方法，AmIUnique, Panopticlick三种得到的数据集在normalized Shannon’s entropy（归一化香农熵）上的对比。</p>
 <p>其中，HM意味着最坏的可能性：也就是所有的指纹都有着相同的概率，也就是所有的指纹都一样。（<em>这儿有个问题：为什么熵最大的时候，是最坏的可能性，这不是意味着没有重复吗？还是说一个物理机器上的不同浏览器之间的重复值基本没有？</em>）</p>
@@ -802,7 +802,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">日记</a>
+                <a href="javascript:void(0)" class="js-tag color3">读书</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -810,11 +810,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">keystone</a>
+                <a href="javascript:void(0)" class="js-tag color3">日记</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">qemu</a>
+                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -826,19 +826,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
+                <a href="javascript:void(0)" class="js-tag color4">keystone</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">读书</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
+                <a href="javascript:void(0)" class="js-tag color5">qemu</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -851,10 +851,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">web</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -879,6 +875,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">读后感</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
               </li>
              
               <li class="article-tag-list-item">
