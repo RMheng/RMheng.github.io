@@ -6,24 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>HypSec -Usenix Sec19 | rww&#39;s Blog</title>
+  <title>HypSec-Usenix Sec19 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="Protecting Cloud Virtual Machines from Hypervisor and Host Operating System Exploits">
 <meta name="keywords" content="OS,virtualization">
 <meta property="og:type" content="article">
-<meta property="og:title" content="HypSec -Usenix Sec19">
+<meta property="og:title" content="HypSec-Usenix Sec19">
 <meta property="og:url" content="http://yoursite.com/2021/04/22/2021-05-09-HypSec/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="Protecting Cloud Virtual Machines from Hypervisor and Host Operating System Exploits">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/2021/04/22/2021-05-09-HypSec/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210409113004021.png">
-<meta property="og:image" content="http://yoursite.com/2021/04/22/2021-05-09-HypSec/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210410103736933.png">
-<meta property="og:image" content="http://yoursite.com/2021/04/22/2021-05-09-HypSec/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210412165136608.png">
-<meta property="og:updated_time" content="2021-05-21T11:21:38.521Z">
+<meta property="og:updated_time" content="2021-05-21T16:16:49.491Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HypSec -Usenix Sec19">
+<meta name="twitter:title" content="HypSec-Usenix Sec19">
 <meta name="twitter:description" content="Protecting Cloud Virtual Machines from Hypervisor and Host Operating System Exploits">
-<meta name="twitter:image" content="http://yoursite.com/2021/04/22/2021-05-09-HypSec/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210409113004021.png">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -167,7 +163,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      HypSec -Usenix Sec19
+      HypSec-Usenix Sec19
     </h1>
   
 
@@ -214,7 +210,7 @@
 <h2 id="3-Design"><a href="#3-Design" class="headerlink" title="3 Design"></a>3 Design</h2><h3 id="3-1-Boot-and-Initialization"><a href="#3-1-Boot-and-Initialization" class="headerlink" title="3.1 Boot and Initialization"></a>3.1 Boot and Initialization</h3><p><strong>Corevisor boot</strong></p>
 <p>HypSec relies on the hostvisor bootstrapping code to install the corevisor securely at boot time since the hostvisor is initially benign.</p>
 <p>在安装完毕后，corevisor获得硬件的所有控制权，并且deprivileges the hostvisors</p>
-<p><img src="/2021/04/22/2021-05-09-HypSec/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210409113004021.png" alt="image-20210409113004021"></p>
+<p>![image-20210409113004021](HypSec-Usenix sec19/image-20210409113004021.png)</p>
 <p>当新的VM创建的时候：</p>
 <ul>
 <li>hostvisor calls VM CREATE to request the corevisor to allocate VM state in corevisor memory, including an NPT and VCPU state, a per virtual CPU(VCPU) data structure.</li>
@@ -248,7 +244,7 @@
 </ul>
 <p><strong>Memory protection</strong></p>
 <p>corevisor通过hNPT(host Nested Page Table)将vhPA转化成hPA，每个vhPA都被映射到一个确定的hPA。hostvisor负责的是hVAs到vhPAs的转换（也就是虚拟机中的虚拟地址到物理地址的转换），hostvisor是没有权限来访问NPT，一旦尝试非法映射，corevisor就会中断映射。hostvisor中的地址转换是动态的，而hostvisor和corevisor之间的地址分配是静态的。 </p>
-<p><img src="/2021/04/22/2021-05-09-HypSec/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210410103736933.png" alt="image-20210410103736933"></p>
+<p>![image-20210410103736933](HypSec-Usenix sec19/image-20210410103736933.png)</p>
 <p><strong>Memory allocation</strong></p>
 <ul>
 <li>step1: 当guest OS尝试将gVA映射到一个unmapped gPA，就会发生一个nested page fault，陷入到corevisor中；</li>
@@ -280,7 +276,7 @@
 <p>secure boot：ARM TrustZone-based framework such as OP-TEE</p>
 <p>Ed25519来验证boot images</p>
 <p>AES：support encrypted VM migration and snapshort </p>
-<p><img src="/2021/04/22/2021-05-09-HypSec/C:%5CUsers%5Crww%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210412165136608.png" alt="image-20210412165136608"></p>
+<p>![image-20210412165136608](HypSec-Usenix sec19/image-20210412165136608.png)</p>
 <p>关于Dune论文</p>
 <p>用硬件特性<code>VT-x</code>来实现普通进程。<code>VT-x</code>是X86下的虚拟扩展，管理的进程有自己的<code>CR3</code>寄存器(guest root mode)，让不可信的进程通过<code>VT-x</code>扩展跑在guest root mode，该进程也无法从分配的内存中逃逸。</p>
 <p>SGX中存在的问题，在于使用的page table是和非enclave共用的，如果SGX跑在<code>VT-x</code>模式下，是guest non-root下的page table是不是能减少一些侧信道攻击的问题？</p>
@@ -552,11 +548,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">读书</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">生活</a>
+                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -568,7 +560,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">日记</a>
+                <a href="javascript:void(0)" class="js-tag color3">读书</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">生活</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -580,11 +576,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
+                <a href="javascript:void(0)" class="js-tag color3">日记</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">汇编</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -604,15 +604,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -624,15 +616,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">web</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">英语</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">读后感</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">web</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
               </li>
             
             <div class="clearfix"></div>
