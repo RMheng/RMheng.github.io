@@ -26,7 +26,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/06/20/2021-01-29-Sanctuary-NDSS2019/8.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/20/2021-01-29-Sanctuary-NDSS2019/9.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/20/2021-01-29-Sanctuary-NDSS2019/10.png">
-<meta property="og:updated_time" content="2021-05-24T11:35:30.667Z">
+<meta property="og:updated_time" content="2021-05-24T11:41:48.844Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Sanctuary-NDSS2019">
 <meta name="twitter:description" content="本篇文章是对SANTUARY:ARMing TrustZone with User-space Enclaves这篇论文的阅读笔记。">
@@ -250,7 +250,7 @@
 <li>EL1：OS kernel</li>
 <li>EL0：used for execution of application</li>
 </ul>
-<p><img src="/2020/06/20/2021-01-29-Sanctuary-NDSS2019/1.png" alt="1.png"></p>
+<p><img src="/2020/06/20/2021-01-29-Sanctuary-NDSS2019/1.png" alt="1"></p>
 <p>SMC（secure monitor call）：从normal world到secure world的上下文切换指令。当一个内核发出SMC指令时，在多核系统中的其他内核都可以仍然处于normal world mode。</p>
 <p>内存地址空间也被分为secure world和normal world，这种隔离是由TrustZone地址空间控制器来完成的。</p>
 <p>运行TrustZone的设备是在secure world中启动的。在secure world启动完毕之后Trusted OS（TOS），secure world就会切换到normal world，并开始启动老式操作系统（LOS）。（secure boot：在运行之前引导加载器以加密形式检查TOS。事实上，很多vendor就是通过secure boot锁定终端用户的修改，来保证安全世界的完整性。比如说，通过哈希获得安全验证码，一旦修改后，验证码不能对得上，就无法启动）</p>
@@ -581,8 +581,8 @@
     </a>
   
   
-    <a href="/2020/06/20/2020-06-20-TrustZone笔记-1/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">TrustZone介绍</div>
+    <a href="/2020/06/20/2020-06-20-ARM-basic/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ARM基础知识</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -721,10 +721,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">SGX</a>
               </li>
              
@@ -734,6 +730,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Ubuntu</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -757,14 +757,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ARM</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">keystone</a>
               </li>
              
@@ -773,7 +765,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ARM</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">汇编</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -781,11 +781,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">System Security</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
+                <a href="javascript:void(0)" class="js-tag color4">web</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -801,14 +805,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">英语</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">读后感</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">OS</a>
               </li>
              
@@ -817,7 +813,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">web</a>
+                <a href="javascript:void(0)" class="js-tag color3">英语</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">读后感</a>
               </li>
              
               <li class="article-tag-list-item">
