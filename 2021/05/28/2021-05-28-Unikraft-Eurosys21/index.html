@@ -12,17 +12,17 @@
 <meta name="keywords" content="OS">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Unikraft-Eurosys21">
-<meta property="og:url" content="http://yoursite.com/2021/05/28/2021-05-28-Unikraft/index.html">
+<meta property="og:url" content="http://yoursite.com/2021/05/28/2021-05-28-Unikraft-Eurosys21/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="Unikraft: Fast, Specialized Unikernels the Easy Way.">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/2021/05/28/2021-05-28-Unikraft/image-20210523213724734.png">
-<meta property="og:image" content="http://yoursite.com/2021/05/28/2021-05-28-Unikraft/image-20210524152648074.png">
-<meta property="og:updated_time" content="2021-05-28T12:11:03.413Z">
+<meta property="og:image" content="http://yoursite.com/2021/05/28/2021-05-28-Unikraft-Eurosys21/image-20210523213724734.png">
+<meta property="og:image" content="http://yoursite.com/2021/05/28/2021-05-28-Unikraft-Eurosys21/image-20210524152648074.png">
+<meta property="og:updated_time" content="2021-05-28T12:14:48.142Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Unikraft-Eurosys21">
 <meta name="twitter:description" content="Unikraft: Fast, Specialized Unikernels the Easy Way.">
-<meta name="twitter:image" content="http://yoursite.com/2021/05/28/2021-05-28-Unikraft/image-20210523213724734.png">
+<meta name="twitter:image" content="http://yoursite.com/2021/05/28/2021-05-28-Unikraft-Eurosys21/image-20210523213724734.png">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -159,7 +159,7 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-2021-05-28-Unikraft" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-2021-05-28-Unikraft-Eurosys21" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
@@ -171,7 +171,7 @@
   
 
         
-        <a href="/2021/05/28/2021-05-28-Unikraft/" class="archive-article-date">
+        <a href="/2021/05/28/2021-05-28-Unikraft-Eurosys21/" class="archive-article-date">
   	<time datetime="2021-05-28T08:48:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-05-28</time>
 </a>
         
@@ -216,7 +216,7 @@
 <p><strong>taking existing OSes and adds or remove functionality</strong></p>
 <p>Existing monolithic OSes do have APIs for each components, but most components depend on each other, which indicates that removing or replacing any single component in the Linux kernel is very difficult.</p>
 <p>So, try to modular certain parts of a monolithic kernel.</p>
-<img src="/2021/05/28/2021-05-28-Unikraft/image-20210523213724734.png" alt="image-20210523213724734" style="zoom: 67%;">
+<img src="/2021/05/28/2021-05-28-Unikraft-Eurosys21/image-20210523213724734.png" alt="image-20210523213724734" style="zoom: 67%;">
 
 <p><strong>bypass the OS altogether</strong></p>
 <p>apps must be coded against the new network, such as DPDK, netmap…</p>
@@ -227,7 +227,7 @@
 <li>Micro-libraries: software components which implement one of the core Unikraft APIs; they have minimal dependencies and can be arbitrarily small;</li>
 <li>Build system: provides a Kconfig-based menu for users to select which micro-libraries to use in an application build.</li>
 </ul>
-<p><img src="/2021/05/28/2021-05-28-Unikraft/image-20210524152648074.png" alt="image-20210524152648074"></p>
+<p><img src="/2021/05/28/2021-05-28-Unikraft-Eurosys21/image-20210524152648074.png" alt="image-20210524152648074"></p>
 <p>接下来作者介绍了四个Unikraft API: uknetdev(network), ukalloc(allocation), uksched(scheduling) and uklock(lock)</p>
 <h2 id="4-Application-Support-and-Porting"><a href="#4-Application-Support-and-Porting" class="headerlink" title="4 Application Support and Porting"></a>4 Application Support and Porting</h2><p>Unikraft rely on the <strong>target application’s native build system</strong>, and use the <strong>statically-compiled object files to link them into Unikraft’s final linking step</strong>.(将Unikraft的boot过程与特定的application绑定？前面确实提到了希望一个application一个OS，所以这边的Unikraft相当于就是一个微型OS，只为选定的app服务？)=&gt;用了<code>musl</code></p>
 <p>To support musl, which depends on Linux syscalls, Unikraft created a micro-library called syscall shim: each library that implements a system call handler register it, via a macro, with this micro-library. The shim layer then generates a system call interface at libc-level.（这里写一下我的理解：<em>每个库用宏向micro-library注册了system call处理函数，从而在libc-level生成system call接口</em>）</p>
@@ -320,7 +320,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2021/05/28/2021-05-28-Unikraft/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2021/05/28/2021-05-28-Unikraft-Eurosys21/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -475,6 +475,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">SGX</a>
               </li>
              
@@ -491,10 +495,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">日记</a>
               </li>
              
@@ -507,15 +507,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">keystone</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">qemu</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -543,6 +543,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
               </li>
              
@@ -551,19 +555,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">web</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">英语</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">读后感</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -572,6 +564,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">virtualization</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">英语</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">读后感</a>
               </li>
              
               <li class="article-tag-list-item">
