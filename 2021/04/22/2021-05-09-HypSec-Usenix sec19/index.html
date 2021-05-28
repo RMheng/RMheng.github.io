@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Tag: ARM | rww&#39;s Blog</title>
+  <title>HypSec-Usenix sec19 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="system security | computer architecture | Lions come in March | Animation | for better">
-<meta property="og:type" content="website">
-<meta property="og:title" content="rww&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/tags/ARM/index.html">
+  <meta name="description" content="Protecting Cloud Virtual Machines from Hypervisor and Host Operating System Exploits">
+<meta name="keywords" content="OS,virtualization">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HypSec-Usenix sec19">
+<meta property="og:url" content="http://yoursite.com/2021/04/22/2021-05-09-HypSec-Usenix sec19/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
+<meta property="og:description" content="Protecting Cloud Virtual Machines from Hypervisor and Host Operating System Exploits">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-05-28T13:02:06.664Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="rww&#39;s Blog">
+<meta name="twitter:title" content="HypSec-Usenix sec19">
+<meta name="twitter:description" content="Protecting Cloud Virtual Machines from Hypervisor and Host Operating System Exploits">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -152,185 +156,286 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2021-05-09-HypSec-Usenix sec19" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      HypSec-Usenix sec19
+    </h1>
+  
+
+        
+        <a href="/2021/04/22/2021-05-09-HypSec-Usenix sec19/" class="archive-article-date">
+  	<time datetime="2021-04-22T02:27:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-22</time>
+</a>
+        
+      </header>
     
+	<!-- 目录内容 -->
+	
+		<!-- 目录内容结束 -->
+
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Protecting Cloud Virtual Machines from Hypervisor and Host Operating System Exploits</p>
+<a id="more"></a>
+
+<h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><ul>
+<li>an untrusted host: perform most complex hypervisor functionality without access to virtual machine data</li>
+<li>a trusted  core: provide access control to virtual machine data and perform basic CPU and memory virtualization</li>
+</ul>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>目前，应用程序和硬件虚拟化的几个设计提供了几个很好的机会来解决安全问题：</p>
+<ul>
+<li>modern hardware includes virtualization support to protect and run the hypervisor at a higher privilege level than VMs</li>
+<li>applications are increasingly designed to use end-to-end encryption for I/O channels （应用程序可以提供更好的I/O通信加密，所以可以减少hypervisor的工作）</li>
+</ul>
+<p>本文的思路:分成两部分</p>
+<p><strong>corevisor</strong> (a small trusted core):</p>
+<ul>
+<li>has full access to hardware resources(VM data)</li>
+<li>provides basic CPU and memory virtualization</li>
+<li>mediates all exceptions and interrupts</li>
+<li>ensures that only a VM and the corevisor can access the VM’s data in CPU and memory</li>
+</ul>
+<p><strong>hostvisor</strong> (a large untrusted hos):</p>
+<ul>
+<li>I/O and interrupt virtualization</li>
+<li>resource management such as CPU scheduling, memory management, and device management </li>
+<li>can leverage a host OS</li>
+<li>may import or export encrypted VM data from the system to boot VM images or support hypervisor features such as snapshots and migration, but otherwise has no access to VM data</li>
+</ul>
+<h2 id="3-Design"><a href="#3-Design" class="headerlink" title="3 Design"></a>3 Design</h2><h3 id="3-1-Boot-and-Initialization"><a href="#3-1-Boot-and-Initialization" class="headerlink" title="3.1 Boot and Initialization"></a>3.1 Boot and Initialization</h3><p><strong>Corevisor boot</strong></p>
+<p>HypSec relies on the hostvisor bootstrapping code to install the corevisor securely at boot time since the hostvisor is initially benign.</p>
+<p>在安装完毕后，corevisor获得硬件的所有控制权，并且deprivileges the hostvisors</p>
+<p>![image-20210409113004021](2021-05-09-HypSec-Usenix sec19/image-20210409113004021.png)</p>
+<p>当新的VM创建的时候：</p>
+<ul>
+<li>hostvisor calls VM CREATE to request the corevisor to allocate VM state in corevisor memory, including an NPT and VCPU state, a per virtual CPU(VCPU) data structure.</li>
+<li>hostvisor calls VM BOOT to request the corevisor to authenticate the loaded VM image.</li>
+<li>if loaded successfully, the hostvisor can then call VM ENTER to execute the VM</li>
+</ul>
+<p>hostvisor存储VM images并且将他们加载到内存中，而corevisor负责的是验证VM images的公钥签名。</p>
+<h3 id="3-2-CPU"><a href="#3-2-CPU" class="headerlink" title="3.2 CPU"></a>3.2 CPU</h3><p>Hypervisors通过执行以下四个主要功能来提供CPU虚拟化：</p>
+<ul>
+<li>handling traps from the VM</li>
+<li>emulating privileged CPU instructions executed by the guest OS to ensure the hypervisor retains control of CPU hardware</li>
+<li>save and restore VM CPU state, including GPRs and system registers such as page table base registers, as needed when switching among VMs and between a VM and the hypervisor</li>
+<li>scheduling VCPUs on physical CPUs</li>
+</ul>
+<p>为了让TCB尽可能的小，限制访问corevisor的VM CPU，corevisor需要干的活：handle all traps from the VM, instruction emulation, and world switches between VMs and the hostvisor；而VCPU调度可以由hostvisor来完成。</p>
+<p>corevisor maintains VCPU execution context in the VCPU state in-memory data structure（该data structure是由VM CREATE分配的）</p>
+<p>corevisor maintains the hostvisor’s CPU context in a similar Host state data structure.</p>
+<p>所有的保存和恢复VM CPU state都是由corevisor来完成的，有且仅有corevisor能够运行VM。</p>
+<p>当VM执行的指令需要hostvisor的sharing values时，这些值可以放在GPR(genral purpose registers)。由corevisor基于正在执行的CPU指令决定是否以及什么时候从GPRs中复制值，以及复制什么值。</p>
+<h3 id="3-3-Memory"><a href="#3-3-Memory" class="headerlink" title="3.3 Memory"></a>3.3 Memory</h3><p>Hypervisor通过执行以下三个功能来提供memory virtualization：</p>
+<ul>
+<li>memory protection to ensure VMs cannot access unauthorized physical memory</li>
+<li>memory allocation to provide physical memory to VMs</li>
+<li>memory reclamation to reclaim physical memory from VMs</li>
+</ul>
+<p>guest OS 通过page tables将gVA映射到gPA，然后由hypervisor管理NPT将gPAs(guest physical memory address)映射到hPA(host physical memory address)</p>
+<p>HypSec保护VM内存免受hostvisor的破坏，而将TCB大小控制的很小，尽可能地分隔corevisor的大小</p>
+<ul>
+<li>corevisor负责内存保护，包括configure NPT hardware</li>
+<li>hostvisor负责memory allocation and reclamation</li>
+</ul>
+<p><strong>Memory protection</strong></p>
+<p>corevisor通过hNPT(host Nested Page Table)将vhPA转化成hPA，每个vhPA都被映射到一个确定的hPA。hostvisor负责的是hVAs到vhPAs的转换（也就是虚拟机中的虚拟地址到物理地址的转换），hostvisor是没有权限来访问NPT，一旦尝试非法映射，corevisor就会中断映射。hostvisor中的地址转换是动态的，而hostvisor和corevisor之间的地址分配是静态的。 </p>
+<p>![image-20210410103736933](2021-05-09-HypSec-Usenix sec19/image-20210410103736933.png)</p>
+<p><strong>Memory allocation</strong></p>
+<ul>
+<li>step1: 当guest OS尝试将gVA映射到一个unmapped gPA，就会发生一个nested page fault，陷入到corevisor中；</li>
+<li>step2: faulted gPA如果是一个合法的VM内存地址，将NPT Base Register指向HNPT</li>
+<li>step3: 切换到hostvisor，为gPA分配physical page</li>
+<li>step4: 切换到corevisor，验证分配的vhPA没有被分配给其他的VM（通过VMID），并经更新更新到sNPT</li>
+<li>corevisor更新NPT Base Register指向sNPT</li>
+<li>corevisor返回VM</li>
+</ul>
+<p>（文章中提到<em>The corevisor does not shadow guest OS updates in its page table; it only shadows hostvisor updates to the vNPT.</em>这部分是指shadow的内容比较少？shadow page table的作用其实就是记录GVA-&gt;HPA的映射关系)</p>
+<p><strong>Memory Reclamation</strong></p>
+<p>corevisor负责将回收到的内存清楚然后分配给需要的VM。</p>
+<p><strong>Advanced VM Memory Management</strong></p>
+<p>当VM希望和hostvisor分享内存时，可以调用GRANT_MEM和REVOKE_MEM并传递相关的参数，corevisor会通过控制hNPT中的memory region’s mapping来实施访问控制策略。</p>
+<p>merging similar memory pages (KSM)</p>
+<h3 id="3-4-Interrupts"><a href="#3-4-Interrupts" class="headerlink" title="3.4 Interrupts"></a>3.4 Interrupts</h3><p>corevisor configures the hardware to route all physical interrupts and trap all accesses to the interrupt controller to the corevisor.</p>
+<p>hostvisor处理大部分的中断功能：handle physical interrupts and provide the virtual interrupt controller interface（在hostvisor处理中断后，corevisor保护所有的VM CPU以及内存状态）</p>
+<p>在一次MMIO write中</p>
+<ul>
+<li>VM passes the value to be stored in a GPR</li>
+<li>the write traps to the corevisor, which identifies the instruction and memory address</li>
+<li>corevisor copies the value to be written from the GPR to the intermediate VM state to make the value valuable to the hostvisor</li>
+</ul>
+<h3 id="3-5-Input-Output"><a href="#3-5-Input-Output" class="headerlink" title="3.5 Input/Output"></a>3.5 Input/Output</h3><p>modern hypervisors通常依赖于OS kernel以及对应的设备驱动来支持I/O virtualization，这增加了hypervisor的TCB。</p>
+<p>HypSec中介绍了一种end-to-end I/O安全方法，依靠VMs来进行I/O保护（TLS/SSL来保护网络通信，全磁盘加密用于存储）。</p>
+<p>passthrough I/O：corevisor控制IOMMU进行inter-device isolation，并保证passthrough device无法访问到VM自己的I/O buffer.</p>
+<h2 id="4-Implementation"><a href="#4-Implementation" class="headerlink" title="4. Implementation"></a>4. Implementation</h2><p>secure DMA: corevisor uses trap-and-emulate on hostvisor accesses to the SMMU</p>
+<p>virtualize interrupts: 利用hardware features from the VGIC and KVM/ARM’s existing support (support emulated device via MMIO, paravirtualized device via virtio, and passthrough devices)</p>
+<p>secure boot：ARM TrustZone-based framework such as OP-TEE</p>
+<p>Ed25519来验证boot images</p>
+<p>AES：support encrypted VM migration and snapshort </p>
+<p>![image-20210412165136608](2021-05-09-HypSec-Usenix sec19/image-20210412165136608.png)</p>
+<p>关于Dune论文</p>
+<p>用硬件特性<code>VT-x</code>来实现普通进程。<code>VT-x</code>是X86下的虚拟扩展，管理的进程有自己的<code>CR3</code>寄存器(guest root mode)，让不可信的进程通过<code>VT-x</code>扩展跑在guest root mode，该进程也无法从分配的内存中逃逸。</p>
+<p>SGX中存在的问题，在于使用的page table是和非enclave共用的，如果SGX跑在<code>VT-x</code>模式下，是guest non-root下的page table是不是能减少一些侧信道攻击的问题？</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/20/2021-01-29-Sanctuary-NDSS2019/" class="archive-article-date">
-  	<time datetime="2020-06-20T13:27:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/20/2021-01-29-Sanctuary-NDSS2019/">Sanctuary-NDSS2019</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">TrustZone</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">OS</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">paper</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ARM</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">virtualization</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/ARM//" class="article-tag-list-link color4">ARM</a>
+        			<a href="/categories/OS//" class="article-tag-list-link color3">OS</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2021/04/22/2021-05-09-HypSec-Usenix sec19/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/20/2020-06-20-TrustZone笔记-1/" class="archive-article-date">
-  	<time datetime="2020-06-20T10:23:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-20</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2021/05/09/2021-05-09-五月的生活/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          五月的生活
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/03/30/2021-05-09-Browser-NDSS17/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Browser-NDSS17</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/20/2020-06-20-TrustZone笔记-1/">TrustZone介绍</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">TrustZone</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ARM</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/ARM//" class="article-tag-list-link color4">ARM</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#摘要"><span class="toc-number">1.</span> <span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#介绍"><span class="toc-number">2.</span> <span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Design"><span class="toc-number">3.</span> <span class="toc-text">3 Design</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-Boot-and-Initialization"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 Boot and Initialization</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-CPU"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 CPU</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-Memory"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 Memory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-Interrupts"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 Interrupts</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-Input-Output"><span class="toc-number">3.5.</span> <span class="toc-text">3.5 Input/Output</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-Implementation"><span class="toc-number">4.</span> <span class="toc-text">4. Implementation</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/06/20/2020-06-20-ARM-basic/" class="archive-article-date">
-  	<time datetime="2020-06-20T10:23:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/06/20/2020-06-20-ARM-basic/">ARM基础知识</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ARM</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">汇编</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/ARM//" class="article-tag-list-link color4">ARM</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -353,9 +458,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
