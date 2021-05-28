@@ -78,9 +78,9 @@
       <category term="日记" scheme="http://yoursite.com/categories/%E6%97%A5%E8%AE%B0/"/>
     
     
-      <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
-    
       <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
+    
+      <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
     
   </entry>
   
@@ -252,11 +252,35 @@
       <category term="ARM" scheme="http://yoursite.com/categories/ARM/"/>
     
     
-      <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
-    
       <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
     
       <category term="paper" scheme="http://yoursite.com/tags/paper/"/>
+    
+      <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>TrustZone介绍</title>
+    <link href="http://yoursite.com/2020/06/20/2020-06-20-TrustZone%E7%AC%94%E8%AE%B0-1/"/>
+    <id>http://yoursite.com/2020/06/20/2020-06-20-TrustZone笔记-1/</id>
+    <published>2020-06-20T10:23:34.000Z</published>
+    <updated>2020-06-20T13:18:17.654Z</updated>
+    
+    <content type="html"><![CDATA[<p>本篇基于一些是对TrustZone的介绍，同样基于ARMv7.</p><a id="more"></a><h1 id="TrustZone"><a href="#TrustZone" class="headerlink" title="TrustZone"></a>TrustZone</h1><p>TPM（Trusted Platform Module）加解密的动作在芯片中进行，将信息存储在芯片中。但TPM无法给予运行时攻击。攻击者可能会在运行时进行破解，直接在内存中读取解密过的东西。</p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/0.jpg" alt="img"></p><p>而TrustZone仅相信trust app，也就是由他保护的硬件，只有trust app才能够访问。这样，即使攻击者获得了操作系统的权限，也无法访问到敏感数据。这就是常说的“支持TrustZone技术的芯片能够提供对外围硬件资源的硬件级别的保护和安全隔离”。</p><p>TrustZone 是ARM公司未来解决可能遇到的软硬件问题提出来的一种硬件解决方案。关键思想在于<strong>隔离</strong>。</p><h2 id="TrustZone构成"><a href="#TrustZone构成" class="headerlink" title="TrustZone构成"></a>TrustZone构成</h2><p>该技术将CPU的工作装填分成了正常世界状态（Normal World Status，NWS）和安全世界状态（Secure World Status，SWS）。</p><p>设备启动之后CPU运行在普通世界，执行的是普通世界的APP。当触发了SMC系统调用进入安全世界后，CPU就跑在安全世界，运行安全世界的APP。此时，普通世界的APP是无法访问到安全APP所用的资源，包括内存、缓存、touch、display等，攻击者也无法获取到信息。</p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/1.jpg" alt="img"></p><p>可选部分是看SOC是否支持保护外设功能。</p><p>软件部分所要完成的核心工作就是基于第二点可虚拟化内核，使用SMC调用，使CPU进行安全世界，从而跑安全世界的APP。内核虚拟化是指通过CPU虚拟化出两个内核，并且把安全世界的OS运行在内核0中，普通世界的OS运行在内核1中。两个OS独立运行在不同的虚拟内核中，通过时间片进行两个内核见切换执行。</p><p>TrustZone的硬件架构主要体现在内核虚拟化、内存隔离、外设/总线隔离技术和中断隔离技术。</p><h2 id="外设-总线隔离技术"><a href="#外设-总线隔离技术" class="headerlink" title="外设/总线隔离技术"></a>外设/总线隔离技术</h2><h3 id="AXI总线"><a href="#AXI总线" class="headerlink" title="AXI总线"></a>AXI总线</h3><p>AXI总线上每个读写信道都增加了一个额外的控制信号</p><ul><li>AWPROT[1]：总线写事务控制信号——低电平为安全写事务，高电平为非安全写事务</li><li>ARPROT[1]：总线读事务控制信号——低电平为安全读事务，高电平为非安全读事务</li></ul><p>当设备向总线提出读写事务请求时必须将控制信号发送到总线上。总线根据这个信号和CPU当前所处于的世界来判断是否能够读写。</p><h3 id="外设如何隔离？"><a href="#外设如何隔离？" class="headerlink" title="外设如何隔离？"></a>外设如何隔离？</h3><p>外设是与APB相连的，但APB总线没有诸如AXI总线上的相关安全控制信号，所以这里引入了APB-to-AXI桥，外设还是与APB总线连接，而APB-to-AXI桥上的TZPCDECPORT信号决定配置外设是否安全。该桥保证非安全世界无法访问外设。</p><p>TZPCDECPORT输入信号可以在SoC设计时静态地设置，也可以通过TrustZone保护控制器（TrustZone Protection Controller，TZPC）进行编程，在程序运行时动态地设置，也就是可以通过TZPC动态配置地外设是安全或者是非安全的。</p><h2 id="内存隔离技术"><a href="#内存隔离技术" class="headerlink" title="内存隔离技术"></a>内存隔离技术</h2><h3 id="RAM，ROM如何隔离？"><a href="#RAM，ROM如何隔离？" class="headerlink" title="RAM，ROM如何隔离？"></a>RAM，ROM如何隔离？</h3><p>CPU core MMU 的安全隔离主要针对的是CPU内存空间的安全访问控制，TrustZone通过地址空间控制器（TrustZone Address Space Controller，TZASC）和存储适配器（TrustZone Memory Adaptor，TZMA）来保障物理内存（DRAM）的安全。针对on-SoC的静态内存（ROM和SRAM）的区域划分，通过使用TZMA来完成。</p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/2.jpg" alt="img"></p><p>TZASC可以把内存地址空间划分为一系列的内存空间，对两个世界的APP分别配置（通过新增一条地址线表示NS位），运行在安全世界的被配置为安全的，并防止非安全事务访问安全内存空间。另外，TZASC将设备分区为几个安全设备，防止非安全事务访问安全设备。（<em>TZASC只能用来支持存储映射设备，不能用于块设备？</em>）</p><p>cache和内存为了支持TrustZone的安全策略，也做了相应的扩展。cache的tag增加了NS位，用于标识这一行的安全状态。低电平标识安全状态，而高电平标识处于非安全状态。内存管理单元（memory management unit，MMU）的tag增加了NSTID位，功能与NS一样。</p><p>TZC400接在SRAM上用于保护SRAM内存，可接在DDRC上用于保护DDR内存。保护内存，将内存划分成16个region，每个Master都有一个nsaid标识。设置每个region对nsaid的访问权限，也可以设置每个region的secure/non-secure权限。访问的控制流程：如果PE是以secure发起的访问，则直接检查该region的secure权限；如果是以non-secure发起的访问，则先检查的non-secure权限，再检查该region的nsaid权限。</p><h2 id="中断隔离技术"><a href="#中断隔离技术" class="headerlink" title="中断隔离技术"></a>中断隔离技术</h2><h3 id="如何进入安全世界"><a href="#如何进入安全世界" class="headerlink" title="如何进入安全世界"></a>如何进入安全世界</h3><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/3.jpg" alt="img"></p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/4.jpg" alt="img"></p><p>上面两张图显示了如何在两个世界中进行切换，这里引入了特殊机制——监控模式（MON），负责不同执行环境的切换。</p><ol><li>普通世界的APP通过syscall svc指令进入kernel space OS（SVC mode）；</li><li>kernel space OS通过smc指令进入monitor mode；</li><li>运行在monitor mode的代码首先保存non-secure状态的CPU contexts（上下文），比如说lr，sp，spsr等等，然后将CPU NS位置为0，表示进入secure status，通过rfe（return from exception）进入secure OS；</li><li>secure OS唤醒secure APP处理完相应的安全资源访问请求后，发送smc指令，再次回到monitor mode；</li><li>运行在monitor mode下的代码同样首先保存secure状态的CPU contexts，然后将CPU NS位置为1，表示进入non-secure status，并恢复non-secure状态下的CPU contexts，通过rfe指令重新回到non-secure OS。</li></ol><p>除了软件调用SMC，上图1中的”2步骤“显示了也可以通过配置硬件中断触发进入monitor模式，比如FIQ，IRQ，external data abort，external prefetch abort，都可以通过配置系统寄存器来决定哪些硬件中断可以触发CPU陷入monitor mode。</p><p><strong>ARM处理器是如何知道当前处于什么状态的？</strong></p><p>支持TrustZone的ARM处理器的协处理器CP15有个安全配置寄存器（Secure Configuration Register，SCR），该寄存器的NS位用于指明当前的系统状态。NS为低电平时，处于安全状态；否则，就处于非安全状态。</p><p>从上面的图中可以看出来，系统的安全状态与系统的应用模式和特权模式无关。两个世界都有用户模式和特权模式，但在不同模式下所具有的权限是不一样的，NS位只能被运行在处于特权模式的安全世界中的APP改变，系统在非安全状态下不能访问SCR。 而当系统位于monitor模式下，不管NS是0还是1，都可以访问所有安全世界的资源。</p><p><strong>如何进入monitor模式？</strong></p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/5.jpg" alt="img"></p><p>进入monitor模式有以下三个方法：</p><ul><li>SMC是一个特殊指令，类似于软件中断指令（software interrupt，SWI），由此进入monitor模式；</li><li>外部中止预取指令外部中止和数据中止，外部中止是访问存储系统时发生，但不被MMU所检测到异常，通常发生在普通世界访问安全世界资源时发生；</li><li>中断，包括FIQ（Fast Interrupt Request，快速中断请求），IRQ（Interrupt Request，中断请求）（FIQ是安全世界的中断源，IRQ是普通世界的中断源）</li></ul><p>第一类进入monitor模式是无条件的，而后两种则依赖于SCR的配置。</p><ul><li>针对第二类，EA=0时，表示外部中止时处理器进入中止模式；EA=1时，表示外部中止时处理器进入monitor模式</li><li>针对第三类（IRQ），IRQ=0时，表示发生IRQ时处理器进入中止模式；IRQ=1时，表示发生IRQ时处理器进入monitor模式</li><li>针对第三类（FIQ），FIQ=0时，表示发生FIQ时处理器进入中止模式；FIQ=1时，表示发生FIQ时处理器进入monitor模式</li></ul><p><strong>如何从安全世界返回普通世界？</strong></p><p>也要从monitor模式切换回来（应该是上述流程图的反向）。</p><p>运行在安全世界的软件有权改变SCR的NS位，但不建议这么做，因为一旦NS位被置为1，系统就会立马切换到non-secure状态，此时pipline中缓存的secure state下运行的指令、data register中保存的secure data都会变成non-secure，这样会使得非安全世界看到流水线的指令以及正在寄存器中的数据的可能。通常只有monitor可能直接修改主SCR的NS位。</p><p><strong>TrustZone的中断控制器</strong></p><p>在ARM传统的向量中断控制器（VIC）基础上，还添加了TrustZone中断控制器（TZIC）。TZIC和VIC通过菊花链的方式连接组成两级中断控制系统，从而做到普通中断和安全中断的隔离，安全中断无法被普通世界截获。TZIC是第一级中断控制器，所有中断源的中断请求都连在TZIC上，最先截获设备的中断请求，通过对TZIC的TZICIntSelect寄存器进行编程，可以对中断源产生的中断类型进行设置。这儿举个例子，如果TZICIntSelect中的某一位为1，相应的中断源请求被配置为FIQ中断，如果为0，则该中断源的中断请求就被交给VIC来处理。</p><p>TZICIntSelect寄存器复位值为0，也就是默认所有中断都交给VIC处理。这样，对于不支持TrustZone的软件系统来说，可以把TZIC看作是全透明的。</p><p>下图中，中断1和2在TZICIntSelect中都设置为1，所以直接交给了TZIC处理；</p><p>中断3在TZICIntSelect设置为0，交给VIC处理；</p><p>中断4在TZICIntSelect中设置为0，交给VIC处理，但在VICIntSelect中也设置为0，又交还给了TZIC。</p><p>也就是中断1,2,4都属于FIQ，而中断3属于IRQ。</p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/5.jpg" alt="img"></p><p><strong>TrustZone的异常向量表</strong></p><p>异常向量表的作用就是告诉CPU在不同的异常发生后，入口函数分别在哪里。</p><p>支持TrustZone的ARM处理器有三个异常向量表：普通世界的异常向量表，安全世界的异常向量表和monitor的异常向量表。</p><p>配置Vector table除了需要指定各个exception handler的入口函数以外，最重要的是指定vector table的地址，这样CPU才能计算出各个入口函数的地址。系统开机时，安全世界的异常向量表基地址是0x00000000（normal vectors）或0xffff0000（high vectors），取决于处理器输入信号VINTHI（cp15寄存器SCTLR的V bit），其他两个向量表的基地址开机时未定义，使用前必须软件设置。</p><p>与以往的ARM处理器不同的是，每个异常向量表的位置在运行时可以动态移动，将新的向量表基地址写入CP15的VBAR寄存器即可，monitor的向量表基地址由monitor的异常向量表基地址寄存器指定。</p><p>另外，普通世界与安全世界的向量表基地址除了与VBAR有关，还与处理器的V位有段，v=1，则向量表基地址采用高地址，而与VBAR无关。普通世界和安全世界的V位是独立的。</p><h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul><li><a href="https://blog.csdn.net/hovan/article/details/42520879" target="_blank" rel="noopener">trust zone之我见</a></li><li><a href="https://zhuanlan.zhihu.com/p/88629648" target="_blank" rel="noopener">浅析ARM TrustZone与Intel SGX</a></li><li><a href="https://www.jianshu.com/p/3f952f2c8bf4" target="_blank" rel="noopener">ARM Trustzone技术（一）综述</a></li><li><a href="https://paper.seebug.org/296/" target="_blank" rel="noopener">TrustZone安全技术研究</a></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本篇基于一些是对TrustZone的介绍，同样基于ARMv7.&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="ARM" scheme="http://yoursite.com/categories/ARM/"/>
+    
+    
+      <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
+    
+      <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
     
   </entry>
   
@@ -281,30 +305,6 @@
       <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
     
       <category term="汇编" scheme="http://yoursite.com/tags/%E6%B1%87%E7%BC%96/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>TrustZone介绍</title>
-    <link href="http://yoursite.com/2020/06/20/2020-06-20-TrustZone%E7%AC%94%E8%AE%B0-1/"/>
-    <id>http://yoursite.com/2020/06/20/2020-06-20-TrustZone笔记-1/</id>
-    <published>2020-06-20T10:23:34.000Z</published>
-    <updated>2020-06-20T13:18:17.654Z</updated>
-    
-    <content type="html"><![CDATA[<p>本篇基于一些是对TrustZone的介绍，同样基于ARMv7.</p><a id="more"></a><h1 id="TrustZone"><a href="#TrustZone" class="headerlink" title="TrustZone"></a>TrustZone</h1><p>TPM（Trusted Platform Module）加解密的动作在芯片中进行，将信息存储在芯片中。但TPM无法给予运行时攻击。攻击者可能会在运行时进行破解，直接在内存中读取解密过的东西。</p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/0.jpg" alt="img"></p><p>而TrustZone仅相信trust app，也就是由他保护的硬件，只有trust app才能够访问。这样，即使攻击者获得了操作系统的权限，也无法访问到敏感数据。这就是常说的“支持TrustZone技术的芯片能够提供对外围硬件资源的硬件级别的保护和安全隔离”。</p><p>TrustZone 是ARM公司未来解决可能遇到的软硬件问题提出来的一种硬件解决方案。关键思想在于<strong>隔离</strong>。</p><h2 id="TrustZone构成"><a href="#TrustZone构成" class="headerlink" title="TrustZone构成"></a>TrustZone构成</h2><p>该技术将CPU的工作装填分成了正常世界状态（Normal World Status，NWS）和安全世界状态（Secure World Status，SWS）。</p><p>设备启动之后CPU运行在普通世界，执行的是普通世界的APP。当触发了SMC系统调用进入安全世界后，CPU就跑在安全世界，运行安全世界的APP。此时，普通世界的APP是无法访问到安全APP所用的资源，包括内存、缓存、touch、display等，攻击者也无法获取到信息。</p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/1.jpg" alt="img"></p><p>可选部分是看SOC是否支持保护外设功能。</p><p>软件部分所要完成的核心工作就是基于第二点可虚拟化内核，使用SMC调用，使CPU进行安全世界，从而跑安全世界的APP。内核虚拟化是指通过CPU虚拟化出两个内核，并且把安全世界的OS运行在内核0中，普通世界的OS运行在内核1中。两个OS独立运行在不同的虚拟内核中，通过时间片进行两个内核见切换执行。</p><p>TrustZone的硬件架构主要体现在内核虚拟化、内存隔离、外设/总线隔离技术和中断隔离技术。</p><h2 id="外设-总线隔离技术"><a href="#外设-总线隔离技术" class="headerlink" title="外设/总线隔离技术"></a>外设/总线隔离技术</h2><h3 id="AXI总线"><a href="#AXI总线" class="headerlink" title="AXI总线"></a>AXI总线</h3><p>AXI总线上每个读写信道都增加了一个额外的控制信号</p><ul><li>AWPROT[1]：总线写事务控制信号——低电平为安全写事务，高电平为非安全写事务</li><li>ARPROT[1]：总线读事务控制信号——低电平为安全读事务，高电平为非安全读事务</li></ul><p>当设备向总线提出读写事务请求时必须将控制信号发送到总线上。总线根据这个信号和CPU当前所处于的世界来判断是否能够读写。</p><h3 id="外设如何隔离？"><a href="#外设如何隔离？" class="headerlink" title="外设如何隔离？"></a>外设如何隔离？</h3><p>外设是与APB相连的，但APB总线没有诸如AXI总线上的相关安全控制信号，所以这里引入了APB-to-AXI桥，外设还是与APB总线连接，而APB-to-AXI桥上的TZPCDECPORT信号决定配置外设是否安全。该桥保证非安全世界无法访问外设。</p><p>TZPCDECPORT输入信号可以在SoC设计时静态地设置，也可以通过TrustZone保护控制器（TrustZone Protection Controller，TZPC）进行编程，在程序运行时动态地设置，也就是可以通过TZPC动态配置地外设是安全或者是非安全的。</p><h2 id="内存隔离技术"><a href="#内存隔离技术" class="headerlink" title="内存隔离技术"></a>内存隔离技术</h2><h3 id="RAM，ROM如何隔离？"><a href="#RAM，ROM如何隔离？" class="headerlink" title="RAM，ROM如何隔离？"></a>RAM，ROM如何隔离？</h3><p>CPU core MMU 的安全隔离主要针对的是CPU内存空间的安全访问控制，TrustZone通过地址空间控制器（TrustZone Address Space Controller，TZASC）和存储适配器（TrustZone Memory Adaptor，TZMA）来保障物理内存（DRAM）的安全。针对on-SoC的静态内存（ROM和SRAM）的区域划分，通过使用TZMA来完成。</p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/2.jpg" alt="img"></p><p>TZASC可以把内存地址空间划分为一系列的内存空间，对两个世界的APP分别配置（通过新增一条地址线表示NS位），运行在安全世界的被配置为安全的，并防止非安全事务访问安全内存空间。另外，TZASC将设备分区为几个安全设备，防止非安全事务访问安全设备。（<em>TZASC只能用来支持存储映射设备，不能用于块设备？</em>）</p><p>cache和内存为了支持TrustZone的安全策略，也做了相应的扩展。cache的tag增加了NS位，用于标识这一行的安全状态。低电平标识安全状态，而高电平标识处于非安全状态。内存管理单元（memory management unit，MMU）的tag增加了NSTID位，功能与NS一样。</p><p>TZC400接在SRAM上用于保护SRAM内存，可接在DDRC上用于保护DDR内存。保护内存，将内存划分成16个region，每个Master都有一个nsaid标识。设置每个region对nsaid的访问权限，也可以设置每个region的secure/non-secure权限。访问的控制流程：如果PE是以secure发起的访问，则直接检查该region的secure权限；如果是以non-secure发起的访问，则先检查的non-secure权限，再检查该region的nsaid权限。</p><h2 id="中断隔离技术"><a href="#中断隔离技术" class="headerlink" title="中断隔离技术"></a>中断隔离技术</h2><h3 id="如何进入安全世界"><a href="#如何进入安全世界" class="headerlink" title="如何进入安全世界"></a>如何进入安全世界</h3><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/3.jpg" alt="img"></p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/4.jpg" alt="img"></p><p>上面两张图显示了如何在两个世界中进行切换，这里引入了特殊机制——监控模式（MON），负责不同执行环境的切换。</p><ol><li>普通世界的APP通过syscall svc指令进入kernel space OS（SVC mode）；</li><li>kernel space OS通过smc指令进入monitor mode；</li><li>运行在monitor mode的代码首先保存non-secure状态的CPU contexts（上下文），比如说lr，sp，spsr等等，然后将CPU NS位置为0，表示进入secure status，通过rfe（return from exception）进入secure OS；</li><li>secure OS唤醒secure APP处理完相应的安全资源访问请求后，发送smc指令，再次回到monitor mode；</li><li>运行在monitor mode下的代码同样首先保存secure状态的CPU contexts，然后将CPU NS位置为1，表示进入non-secure status，并恢复non-secure状态下的CPU contexts，通过rfe指令重新回到non-secure OS。</li></ol><p>除了软件调用SMC，上图1中的”2步骤“显示了也可以通过配置硬件中断触发进入monitor模式，比如FIQ，IRQ，external data abort，external prefetch abort，都可以通过配置系统寄存器来决定哪些硬件中断可以触发CPU陷入monitor mode。</p><p><strong>ARM处理器是如何知道当前处于什么状态的？</strong></p><p>支持TrustZone的ARM处理器的协处理器CP15有个安全配置寄存器（Secure Configuration Register，SCR），该寄存器的NS位用于指明当前的系统状态。NS为低电平时，处于安全状态；否则，就处于非安全状态。</p><p>从上面的图中可以看出来，系统的安全状态与系统的应用模式和特权模式无关。两个世界都有用户模式和特权模式，但在不同模式下所具有的权限是不一样的，NS位只能被运行在处于特权模式的安全世界中的APP改变，系统在非安全状态下不能访问SCR。 而当系统位于monitor模式下，不管NS是0还是1，都可以访问所有安全世界的资源。</p><p><strong>如何进入monitor模式？</strong></p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/5.jpg" alt="img"></p><p>进入monitor模式有以下三个方法：</p><ul><li>SMC是一个特殊指令，类似于软件中断指令（software interrupt，SWI），由此进入monitor模式；</li><li>外部中止预取指令外部中止和数据中止，外部中止是访问存储系统时发生，但不被MMU所检测到异常，通常发生在普通世界访问安全世界资源时发生；</li><li>中断，包括FIQ（Fast Interrupt Request，快速中断请求），IRQ（Interrupt Request，中断请求）（FIQ是安全世界的中断源，IRQ是普通世界的中断源）</li></ul><p>第一类进入monitor模式是无条件的，而后两种则依赖于SCR的配置。</p><ul><li>针对第二类，EA=0时，表示外部中止时处理器进入中止模式；EA=1时，表示外部中止时处理器进入monitor模式</li><li>针对第三类（IRQ），IRQ=0时，表示发生IRQ时处理器进入中止模式；IRQ=1时，表示发生IRQ时处理器进入monitor模式</li><li>针对第三类（FIQ），FIQ=0时，表示发生FIQ时处理器进入中止模式；FIQ=1时，表示发生FIQ时处理器进入monitor模式</li></ul><p><strong>如何从安全世界返回普通世界？</strong></p><p>也要从monitor模式切换回来（应该是上述流程图的反向）。</p><p>运行在安全世界的软件有权改变SCR的NS位，但不建议这么做，因为一旦NS位被置为1，系统就会立马切换到non-secure状态，此时pipline中缓存的secure state下运行的指令、data register中保存的secure data都会变成non-secure，这样会使得非安全世界看到流水线的指令以及正在寄存器中的数据的可能。通常只有monitor可能直接修改主SCR的NS位。</p><p><strong>TrustZone的中断控制器</strong></p><p>在ARM传统的向量中断控制器（VIC）基础上，还添加了TrustZone中断控制器（TZIC）。TZIC和VIC通过菊花链的方式连接组成两级中断控制系统，从而做到普通中断和安全中断的隔离，安全中断无法被普通世界截获。TZIC是第一级中断控制器，所有中断源的中断请求都连在TZIC上，最先截获设备的中断请求，通过对TZIC的TZICIntSelect寄存器进行编程，可以对中断源产生的中断类型进行设置。这儿举个例子，如果TZICIntSelect中的某一位为1，相应的中断源请求被配置为FIQ中断，如果为0，则该中断源的中断请求就被交给VIC来处理。</p><p>TZICIntSelect寄存器复位值为0，也就是默认所有中断都交给VIC处理。这样，对于不支持TrustZone的软件系统来说，可以把TZIC看作是全透明的。</p><p>下图中，中断1和2在TZICIntSelect中都设置为1，所以直接交给了TZIC处理；</p><p>中断3在TZICIntSelect设置为0，交给VIC处理；</p><p>中断4在TZICIntSelect中设置为0，交给VIC处理，但在VICIntSelect中也设置为0，又交还给了TZIC。</p><p>也就是中断1,2,4都属于FIQ，而中断3属于IRQ。</p><p><img src="/2020/06/20/2020-06-20-TrustZone笔记-1/5.jpg" alt="img"></p><p><strong>TrustZone的异常向量表</strong></p><p>异常向量表的作用就是告诉CPU在不同的异常发生后，入口函数分别在哪里。</p><p>支持TrustZone的ARM处理器有三个异常向量表：普通世界的异常向量表，安全世界的异常向量表和monitor的异常向量表。</p><p>配置Vector table除了需要指定各个exception handler的入口函数以外，最重要的是指定vector table的地址，这样CPU才能计算出各个入口函数的地址。系统开机时，安全世界的异常向量表基地址是0x00000000（normal vectors）或0xffff0000（high vectors），取决于处理器输入信号VINTHI（cp15寄存器SCTLR的V bit），其他两个向量表的基地址开机时未定义，使用前必须软件设置。</p><p>与以往的ARM处理器不同的是，每个异常向量表的位置在运行时可以动态移动，将新的向量表基地址写入CP15的VBAR寄存器即可，monitor的向量表基地址由monitor的异常向量表基地址寄存器指定。</p><p>另外，普通世界与安全世界的向量表基地址除了与VBAR有关，还与处理器的V位有段，v=1，则向量表基地址采用高地址，而与VBAR无关。普通世界和安全世界的V位是独立的。</p><h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul><li><a href="https://blog.csdn.net/hovan/article/details/42520879" target="_blank" rel="noopener">trust zone之我见</a></li><li><a href="https://zhuanlan.zhihu.com/p/88629648" target="_blank" rel="noopener">浅析ARM TrustZone与Intel SGX</a></li><li><a href="https://www.jianshu.com/p/3f952f2c8bf4" target="_blank" rel="noopener">ARM Trustzone技术（一）综述</a></li><li><a href="https://paper.seebug.org/296/" target="_blank" rel="noopener">TrustZone安全技术研究</a></li></ul>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;本篇基于一些是对TrustZone的介绍，同样基于ARMv7.&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="ARM" scheme="http://yoursite.com/categories/ARM/"/>
-    
-    
-      <category term="ARM" scheme="http://yoursite.com/tags/ARM/"/>
-    
-      <category term="TrustZone" scheme="http://yoursite.com/tags/TrustZone/"/>
     
   </entry>
   
@@ -370,9 +370,9 @@
       <category term="读书杂谈" scheme="http://yoursite.com/categories/%E8%AF%BB%E4%B9%A6%E6%9D%82%E8%B0%88/"/>
     
     
-      <category term="读书" scheme="http://yoursite.com/tags/%E8%AF%BB%E4%B9%A6/"/>
-    
       <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
+    
+      <category term="读书" scheme="http://yoursite.com/tags/%E8%AF%BB%E4%B9%A6/"/>
     
   </entry>
   
@@ -420,9 +420,9 @@
       <category term="日记" scheme="http://yoursite.com/categories/%E6%97%A5%E8%AE%B0/"/>
     
     
-      <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
-    
       <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
+    
+      <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
     
   </entry>
   
