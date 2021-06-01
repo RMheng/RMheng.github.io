@@ -18,7 +18,8 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/2021/06/01/2021-06-01-trusting%20computing/image-20200610153017985.png">
 <meta property="og:image" content="http://yoursite.com/2021/06/01/2021-06-01-trusting%20computing/image-20200611152941103.png">
-<meta property="og:updated_time" content="2021-06-01T13:37:26.261Z">
+<meta property="og:image" content="http://yoursite.com/2021/06/01/2021-06-01-trusting%20computing/image-20200914110304034.png">
+<meta property="og:updated_time" content="2021-06-01T13:42:57.518Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="关于我对可信计算的理解">
 <meta name="twitter:description" content="可信计算课程的期末报告">
@@ -222,7 +223,8 @@
 <p>cache coherence一直是体系结构中研究非常多的一个方向，在体系结构中考虑的更多是如何保证数据的正确性，但在安全领域的研究人员，看这个问题却是如何利用该机制获取机密信息，不同领域看相同的问题会有不同的角度，因为有不同的借鉴。对于我们来说，我觉得做科研可以了解不同方向的论文，不必让自己的知识栈局限在某个领域内，换个角度看问题也许就能有很多很新颖的发现。</p>
 <p>在Sok[2]这篇文章中提到了有相当一部分的TEE相关的安全漏洞和滥用安全世界的接口有关。SANCTUARY同样是通过安全世界给普通世界提供的安全接口来提供服务，但论文中并没有提到对这些安全接口的保护。</p>
 <p>最后谈一下与SANCTUARY架构非常接近的Keystone[4]，虽然架构相似，但Keystone的出发点和SANCTUARY并不一样，Keystone着眼于构造一个用于配置、建立以及实例化可定制TEEs的框架，实现上就是通过模块化来定制TEE。在内存隔离上，SANCTUARY是利用TZC-400，而Keystone利用RISC-V机器模式的PMP(physical memory protection)。另外，Keystone着重强调将资源管理和安全检查解耦，最高权限的SM(security monitor)用最少的代码实施安全策略，而在S(Supervisor)-mode的RT(runtime)负责安全区中执行的用户代码的生命周期、内存管理、系统调用、与SM进行通信等操作。我认为Keystone和SANCTUARY虽然出发点不同，但最后实现的架构有很多近似的地方。</p>
-<p>![image-20200914110304034](2021-06-01-trusting computing/image-20200914110304034.png)</p>
+<img src="/2021/06/01/2021-06-01-trusting computing/image-20200914110304034.png" alt="image-20200914110304034" style="zoom:80%;">
+
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] Schell R R. Information security: science, pseudoscience, and flying pigs[C]//Seventeenth Annual Computer Security Applications Conference. IEEE, 2001: 205-216.</p>
 <p>[2] Cerdeira D, Santos N, Fonseca P, et al. Sok: Understanding the prevailing security vulnerabilities in trustzone-assisted tee systems[C]//2020 IEEE Symposium on Security and Privacy (SP). IEEE, 2020: 1416-1432.</p>
 <p>[3] Herley C, Van Oorschot P C. Sok: Science, security and the elusive goal of security as a scientific pursuit[C]//2017 IEEE symposium on security and privacy (SP). IEEE, 2017: 99-120.</p>
@@ -480,23 +482,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ARM</a>
+                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">汇编</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">读书</a>
+                <a href="javascript:void(0)" class="js-tag color3">日记</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -504,7 +498,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">日记</a>
+                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">读书</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -516,15 +514,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ARM</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">汇编</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
+                <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -532,7 +534,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">Keystone</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">System Security</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -552,11 +562,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Keystone</a>
+                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -573,10 +579,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">读后感</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
               </li>
             
             <div class="clearfix"></div>
