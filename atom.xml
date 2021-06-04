@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2021-06-01T13:42:57.518Z</updated>
+  <updated>2021-06-04T15:39:51.009Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,30 +15,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>关于我对可信计算的理解</title>
-    <link href="http://yoursite.com/2021/06/01/2021-06-01-trusting%20computing/"/>
-    <id>http://yoursite.com/2021/06/01/2021-06-01-trusting computing/</id>
-    <published>2021-06-01T13:31:53.000Z</published>
-    <updated>2021-06-01T13:42:57.518Z</updated>
-    
-    <content type="html"><![CDATA[<p>可信计算课程的期末报告</p><a id="more"></a><h2 id="1-可信计算和密码学的关系"><a href="#1-可信计算和密码学的关系" class="headerlink" title="1 可信计算和密码学的关系"></a>1 可信计算和密码学的关系</h2><p>可信计算是安全科学中的一个分支，所以先从我对安全科学的理解来谈。众所周知，密码学是所有安全学科的基础。密码学可以说是安全中最接近于科学的小方向，平时更受工业界追捧的工程安全可能处于安全科学领域鄙视链的最底端。Shamir在2002年图灵奖获奖致辞时就直言非密码学的安全为”a mess”。Schell在2001年描述安全领域为”pseudo-science and flying pigs”(伪科学并且充斥着谎话)[1][3]。</p><p>密码学证明安全的过程，最安全的是形式化证明，形式化证明虽然不能保证100%的安全性，但可以保证相对来说非常高的安全性；其次是规约性证明，用理论来证明密码算法的安全性；最不能保证安全的是用攻击来证明安全性。一个密码学算法的最终应用大多要经过严格的理论证明和形式化证明，最终才能走向应用接受现实的攻击实验。</p><p>但在系统安全领域内，大部分论文的安全性分析都是尝试用攻击来证明安全性，这也是硬件隔离机制和密码学的安全性证明很大的不同。可信并不等于安全，可信技术是通过构造一个信任链来让用户信任安全机制的技术。事实上，工业界中的硬件隔离机制也都是先用攻击来证明安全性，当实践已经能证明具有比较高的安全性后，再去考虑形式化验证，这相对密码学来说是个相反的过程。这样相反的论证过程也在一定程度上验证了当前很多可信机制如同漏水大锅一样层出不穷的漏洞。</p><h2 id="2-从SANCTUARY看TEE技术"><a href="#2-从SANCTUARY看TEE技术" class="headerlink" title="2 从SANCTUARY看TEE技术"></a>2 从SANCTUARY看TEE技术</h2><p>体系结构课程上沈海华老师经常喜欢说的一句话就是：体系结构架构师前三十年铆足劲提升性能，分支预测流水线，无所不用其极，近十年的meltdown, spectre攻击无一不是当初强调性能给自己挖的坑。安全是一个negative的因素，强调安全必然会带来性能的下降，结合应用实现，我们需要不断地做安全和性能之间的tradeoff，TEE(Trusted Execution Environment, 可信执行环境)就是tradeoff的产物。值得注意的是很多TEE，比如ARM TrustZone, Intel SGX, AMD SEV等公开的层出不穷的漏洞缺陷大部分都是利用TEE越权。TEE进程一般拥有比普通应用程序更高的权限，通过利用TEE上的漏洞能够以更高的权限获得系统的机密数据和代码。当TEE概念被提出并实现出来后，很多厂家都知道了TEE这么一个好东西后，都希望把自己的机密数据存入TEE中，这带来的后果就是TA(Ttrusted Application, 可信应用程序)数量的不断增大，直接导致了TCB(Trusted Computing Base, 可信计算基)的不断增大。可信计算基的增大意味着攻击面的增大，假设一个TA存在着缺陷，是否会影响到其他TA？这是需要考虑的不同TA之间的隔离性，遗憾的是，很多生产厂家的TEE中不同TAs之间的隔离是非常弱的。</p><p>在可信计算课程中由我为大家介绍的这篇论文《SANCTUARY: ARMing TrustZone with User-space Enclaves》[5]就是基于上述的TrustZone的设计缺陷构造了一个在性能，安全，开发难度之间进行tradeoff的TEE。</p><p>在进行分析后，作者认为目前各大主流TEE不能满足功能丰富的安全移动服务。针对上面提到的现有TEE的问题，SANCTUARY中通过提出了以下三点进行缓解：</p><ul><li>将安全敏感的应用程序移植到IEE(Isolated Execution Environment, 隔离执行环境)中，从而减少TCB的大小；</li><li>移植到IEE之间的应用程序通过动态划分和重分配资源来达到SA(Sanctuary Application)之间的隔离；</li><li>利用TZASC(TrustZone Address Space Controller，TrustZone地址空间控制器)等硬件来保证系统组件之间的隔离。</li></ul><p>TrustZone具有很高的权限，SANCTUARY相当于构造了一个普通权限的TEE，可以访问安全接口但不能直接运行在高权限上。这当然不是凭空产生的想法，SGX是最负盛名的用户态TEE，SANCTUARY的目标实现的就是在ARM架构上的类SGX的TEE。有趣的是，同年有类似想法的还有Keystone，阅读Keystone论文的话就会发现SANCTUARY和Keystone的架构惊人的相似，但Keystone运行在RISC-V架构上。</p><p>一个完整的SANCTUARY实例包括了处于EL0的Sanctuary App(SA)和处于EL1的Sanctuary Lib(SL), SL主要是为SA初始化运行环境并提供服务接口。SANCTUARY的架构图如下图所示。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200610153017985.png" alt="image-20200610153017985" style="zoom:50%;"><p>SANCTUARY从4个方面尝试去达成自己的安全目标。下面的篇幅我将打破文章结构介绍，从这四个方面介绍SANCTUARY为实现自己的安全目标所完成的一系列努力。</p><h3 id="2-1-如何实现严格的隔离？"><a href="#2-1-如何实现严格的隔离？" class="headerlink" title="2.1 如何实现严格的隔离？"></a>2.1 如何实现严格的隔离？</h3><p>TEE是基于硬件机制的隔离，首要任务就是保证严格的独立性。SANCTUARY从两个方面来对独立性进行保证：空间和时间。</p><p>空间独立性上主要是为SANCTUARY静态分配物理资源考虑，每个Sanctuary实例都被分配了一个独立的CPU core，利用TZC-400根据CPU core ID为每个Sanctuary实例分配物理内存。每个CPU core的地址范围的上下界都是通过四个地址范围寄存器来保存记录，而每个CPU core对这些地址范围的访问权限也是通过一个访问许可寄存器记录的。另外，为了抵御缓存侧信道攻击，不允许Sanctuary实例映射到L3缓存中（也就是将Sanctuary实例的物理内存都设置为outer uncacheable）</p><p>时间独立性主要是从SANCTUARY的动态加载来考虑，Sanctuary实例是从可信固件中启动CPU core，并且在退出使用之前将内存中的敏感信息全部清空。</p><h3 id="2-2-如何动态分配内核？"><a href="#2-2-如何动态分配内核？" class="headerlink" title="2.2 如何动态分配内核？"></a>2.2 如何动态分配内核？</h3><p>本部分简单介绍SANCTUARY建立和结束运行的过程。</p><h4 id="2-2-1-Sanctuary建立"><a href="#2-2-1-Sanctuary建立" class="headerlink" title="2.2.1 Sanctuary建立"></a>2.2.1 Sanctuary建立</h4><ul><li>当需要执行SA中的敏感代码时，由LA(Legacy Application，普通世界中的应用程序)触发并加载SL和SA的二进制文件后移交给普通世界中位于EL2的KM(kernel module)；</li><li>KM选择一个CPU core来运行Sanctuary实例并采用热拔插技术来关闭这个被选择的CPU core；</li><li>KM请求STA的服务(Static Trusted App)的服务，从而进入monitor模式，在模式切换的过程中，可信固件检查所选择的CPU core是否被合理地关闭而后将控制权转交给STA，后者对SANCTUARY内存进行配置。</li></ul><h4 id="2-2-2-Sanctuary退出"><a href="#2-2-2-Sanctuary退出" class="headerlink" title="2.2.2 Sanctuary退出"></a>2.2.2 Sanctuary退出</h4><p>当LA对SA发出请求表明自己不需要SANCTUARY的服务时，SA首先清除上下文，通过sealing保存自己的状态并将L1缓存等设备中关于自己的进程信息清除。可信固件在检查SANCTUARY core是否被真正关闭，STA将SANCTUARY内存以及其他相关的数据全部清零，防止信息泄露。最后，恢复之前的配置，释放SANCTUARY内存区域和CPU core。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200611152941103.png" alt="image-20200611152941103" style="zoom:50%;"><h3 id="2-3-如何提供和SGX类似的安全服务？"><a href="#2-3-如何提供和SGX类似的安全服务？" class="headerlink" title="2.3 如何提供和SGX类似的安全服务？"></a>2.3 如何提供和SGX类似的安全服务？</h3><p>类似的，SANCTUARY需要提供远程认证和密封服务。为了提供远程认证服务，SA和安全世界之间有共享内存，Sanctuary将自己的完整性测量结果与通向代理TA(trusted application, 可信应用程序)的信道相链接，该共享内存就是一个安全信道。而代理TA负责建立一个SA到远程服务器连接的安全信道，所有通过代理TA传输的数据都用平台密钥认证过，并与SA的身份绑定。</p><p>类似于SGX中的sealing服务，用从SA二进制文件计算得到的散列值排除出的唯一加密密钥对机密信息进行加密后存到普通世界的内存中，利用该技术，能够在安全地永久存储SANCTUARY数据信息。</p><h3 id="2-4-是否能够在现实场景中提供足够的性能？"><a href="#2-4-是否能够在现实场景中提供足够的性能？" class="headerlink" title="2.4 是否能够在现实场景中提供足够的性能？"></a>2.4 是否能够在现实场景中提供足够的性能？</h3><p>论文中作者通过构造了一个OTP双因素认证的例子，通过展现该实验构造Provision Key和产生OTP的时间来证明SANCTUARY使用普通世界和安全世界的组件所需要的时间是不会影响用户体验的。</p><h2 id="3-对SANCTUARY的讨论"><a href="#3-对SANCTUARY的讨论" class="headerlink" title="3 对SANCTUARY的讨论"></a>3 对SANCTUARY的讨论</h2><p>计算机领域中有一句很著名的话：“计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决“。SANCTUARY其实就是用了这个思想，TrustZone中只有安全世界和非安全世界，SANCTUARY就构造了一个中间层——隔离执行环境，既能保证安全敏感的应用程序的安全执行，也能保证安全世界中的TCB尽可能小。</p><p>SANCTUARY巧妙地用了已有的多核机制和内存地址控制器来进行硬件资源的隔离，但却忽略了cache coherence的影响。所谓cache coherence是在保证了不同cache之间如果有共享数据，在这些共享数据被修改时该如何维护其他CPU core读到该数据时的正确性。在CITM[6]这篇论文中构造了一个方法，利用CPU的shareability属性来操纵Sanctuary实例中的机密数据泄露或者被篡改。</p><p>cache coherence一直是体系结构中研究非常多的一个方向，在体系结构中考虑的更多是如何保证数据的正确性，但在安全领域的研究人员，看这个问题却是如何利用该机制获取机密信息，不同领域看相同的问题会有不同的角度，因为有不同的借鉴。对于我们来说，我觉得做科研可以了解不同方向的论文，不必让自己的知识栈局限在某个领域内，换个角度看问题也许就能有很多很新颖的发现。</p><p>在Sok[2]这篇文章中提到了有相当一部分的TEE相关的安全漏洞和滥用安全世界的接口有关。SANCTUARY同样是通过安全世界给普通世界提供的安全接口来提供服务，但论文中并没有提到对这些安全接口的保护。</p><p>最后谈一下与SANCTUARY架构非常接近的Keystone[4]，虽然架构相似，但Keystone的出发点和SANCTUARY并不一样，Keystone着眼于构造一个用于配置、建立以及实例化可定制TEEs的框架，实现上就是通过模块化来定制TEE。在内存隔离上，SANCTUARY是利用TZC-400，而Keystone利用RISC-V机器模式的PMP(physical memory protection)。另外，Keystone着重强调将资源管理和安全检查解耦，最高权限的SM(security monitor)用最少的代码实施安全策略，而在S(Supervisor)-mode的RT(runtime)负责安全区中执行的用户代码的生命周期、内存管理、系统调用、与SM进行通信等操作。我认为Keystone和SANCTUARY虽然出发点不同，但最后实现的架构有很多近似的地方。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200914110304034.png" alt="image-20200914110304034" style="zoom:80%;"><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] Schell R R. Information security: science, pseudoscience, and flying pigs[C]//Seventeenth Annual Computer Security Applications Conference. IEEE, 2001: 205-216.</p><p>[2] Cerdeira D, Santos N, Fonseca P, et al. Sok: Understanding the prevailing security vulnerabilities in trustzone-assisted tee systems[C]//2020 IEEE Symposium on Security and Privacy (SP). IEEE, 2020: 1416-1432.</p><p>[3] Herley C, Van Oorschot P C. Sok: Science, security and the elusive goal of security as a scientific pursuit[C]//2017 IEEE symposium on security and privacy (SP). IEEE, 2017: 99-120.</p><p>[4] Lee D, Kohlbrenner D, Shinde S, et al. Keystone: An open framework for architecting trusted execution environments[C]//Proceedings of the Fifteenth European Conference on Computer Systems. 2020: 1-16.</p><p>[5] Brasser F, Gens D, Jauernig P, et al. SANCTUARY: ARMing TrustZone with User-space Enclaves[C]//NDSS. 2019.</p><p>[6] Wang J, Sun K, Lei L, et al. Cache-in-the-Middle (CITM) Attacks: Manipulating Sensitive Data in Isolated Execution Environments[C]//Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security. 2020: 1001-1015.</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;可信计算课程的期末报告&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="可信计算" scheme="http://yoursite.com/categories/%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97/"/>
-    
-    
-      <category term="TEE" scheme="http://yoursite.com/tags/TEE/"/>
-    
-      <category term="可信计算" scheme="http://yoursite.com/tags/%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97/"/>
-    
-  </entry>
   
   <entry>
     <title>vmx.c部分代码解读(一)</title>
@@ -66,6 +42,30 @@
       <category term="虚拟化" scheme="http://yoursite.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
       <category term="linux" scheme="http://yoursite.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>关于我对可信计算的理解</title>
+    <link href="http://yoursite.com/2021/06/01/2021-06-01-trusting%20computing/"/>
+    <id>http://yoursite.com/2021/06/01/2021-06-01-trusting computing/</id>
+    <published>2021-06-01T13:31:53.000Z</published>
+    <updated>2021-06-01T13:42:57.518Z</updated>
+    
+    <content type="html"><![CDATA[<p>可信计算课程的期末报告</p><a id="more"></a><h2 id="1-可信计算和密码学的关系"><a href="#1-可信计算和密码学的关系" class="headerlink" title="1 可信计算和密码学的关系"></a>1 可信计算和密码学的关系</h2><p>可信计算是安全科学中的一个分支，所以先从我对安全科学的理解来谈。众所周知，密码学是所有安全学科的基础。密码学可以说是安全中最接近于科学的小方向，平时更受工业界追捧的工程安全可能处于安全科学领域鄙视链的最底端。Shamir在2002年图灵奖获奖致辞时就直言非密码学的安全为”a mess”。Schell在2001年描述安全领域为”pseudo-science and flying pigs”(伪科学并且充斥着谎话)[1][3]。</p><p>密码学证明安全的过程，最安全的是形式化证明，形式化证明虽然不能保证100%的安全性，但可以保证相对来说非常高的安全性；其次是规约性证明，用理论来证明密码算法的安全性；最不能保证安全的是用攻击来证明安全性。一个密码学算法的最终应用大多要经过严格的理论证明和形式化证明，最终才能走向应用接受现实的攻击实验。</p><p>但在系统安全领域内，大部分论文的安全性分析都是尝试用攻击来证明安全性，这也是硬件隔离机制和密码学的安全性证明很大的不同。可信并不等于安全，可信技术是通过构造一个信任链来让用户信任安全机制的技术。事实上，工业界中的硬件隔离机制也都是先用攻击来证明安全性，当实践已经能证明具有比较高的安全性后，再去考虑形式化验证，这相对密码学来说是个相反的过程。这样相反的论证过程也在一定程度上验证了当前很多可信机制如同漏水大锅一样层出不穷的漏洞。</p><h2 id="2-从SANCTUARY看TEE技术"><a href="#2-从SANCTUARY看TEE技术" class="headerlink" title="2 从SANCTUARY看TEE技术"></a>2 从SANCTUARY看TEE技术</h2><p>体系结构课程上沈海华老师经常喜欢说的一句话就是：体系结构架构师前三十年铆足劲提升性能，分支预测流水线，无所不用其极，近十年的meltdown, spectre攻击无一不是当初强调性能给自己挖的坑。安全是一个negative的因素，强调安全必然会带来性能的下降，结合应用实现，我们需要不断地做安全和性能之间的tradeoff，TEE(Trusted Execution Environment, 可信执行环境)就是tradeoff的产物。值得注意的是很多TEE，比如ARM TrustZone, Intel SGX, AMD SEV等公开的层出不穷的漏洞缺陷大部分都是利用TEE越权。TEE进程一般拥有比普通应用程序更高的权限，通过利用TEE上的漏洞能够以更高的权限获得系统的机密数据和代码。当TEE概念被提出并实现出来后，很多厂家都知道了TEE这么一个好东西后，都希望把自己的机密数据存入TEE中，这带来的后果就是TA(Ttrusted Application, 可信应用程序)数量的不断增大，直接导致了TCB(Trusted Computing Base, 可信计算基)的不断增大。可信计算基的增大意味着攻击面的增大，假设一个TA存在着缺陷，是否会影响到其他TA？这是需要考虑的不同TA之间的隔离性，遗憾的是，很多生产厂家的TEE中不同TAs之间的隔离是非常弱的。</p><p>在可信计算课程中由我为大家介绍的这篇论文《SANCTUARY: ARMing TrustZone with User-space Enclaves》[5]就是基于上述的TrustZone的设计缺陷构造了一个在性能，安全，开发难度之间进行tradeoff的TEE。</p><p>在进行分析后，作者认为目前各大主流TEE不能满足功能丰富的安全移动服务。针对上面提到的现有TEE的问题，SANCTUARY中通过提出了以下三点进行缓解：</p><ul><li>将安全敏感的应用程序移植到IEE(Isolated Execution Environment, 隔离执行环境)中，从而减少TCB的大小；</li><li>移植到IEE之间的应用程序通过动态划分和重分配资源来达到SA(Sanctuary Application)之间的隔离；</li><li>利用TZASC(TrustZone Address Space Controller，TrustZone地址空间控制器)等硬件来保证系统组件之间的隔离。</li></ul><p>TrustZone具有很高的权限，SANCTUARY相当于构造了一个普通权限的TEE，可以访问安全接口但不能直接运行在高权限上。这当然不是凭空产生的想法，SGX是最负盛名的用户态TEE，SANCTUARY的目标实现的就是在ARM架构上的类SGX的TEE。有趣的是，同年有类似想法的还有Keystone，阅读Keystone论文的话就会发现SANCTUARY和Keystone的架构惊人的相似，但Keystone运行在RISC-V架构上。</p><p>一个完整的SANCTUARY实例包括了处于EL0的Sanctuary App(SA)和处于EL1的Sanctuary Lib(SL), SL主要是为SA初始化运行环境并提供服务接口。SANCTUARY的架构图如下图所示。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200610153017985.png" alt="image-20200610153017985" style="zoom:50%;"><p>SANCTUARY从4个方面尝试去达成自己的安全目标。下面的篇幅我将打破文章结构介绍，从这四个方面介绍SANCTUARY为实现自己的安全目标所完成的一系列努力。</p><h3 id="2-1-如何实现严格的隔离？"><a href="#2-1-如何实现严格的隔离？" class="headerlink" title="2.1 如何实现严格的隔离？"></a>2.1 如何实现严格的隔离？</h3><p>TEE是基于硬件机制的隔离，首要任务就是保证严格的独立性。SANCTUARY从两个方面来对独立性进行保证：空间和时间。</p><p>空间独立性上主要是为SANCTUARY静态分配物理资源考虑，每个Sanctuary实例都被分配了一个独立的CPU core，利用TZC-400根据CPU core ID为每个Sanctuary实例分配物理内存。每个CPU core的地址范围的上下界都是通过四个地址范围寄存器来保存记录，而每个CPU core对这些地址范围的访问权限也是通过一个访问许可寄存器记录的。另外，为了抵御缓存侧信道攻击，不允许Sanctuary实例映射到L3缓存中（也就是将Sanctuary实例的物理内存都设置为outer uncacheable）</p><p>时间独立性主要是从SANCTUARY的动态加载来考虑，Sanctuary实例是从可信固件中启动CPU core，并且在退出使用之前将内存中的敏感信息全部清空。</p><h3 id="2-2-如何动态分配内核？"><a href="#2-2-如何动态分配内核？" class="headerlink" title="2.2 如何动态分配内核？"></a>2.2 如何动态分配内核？</h3><p>本部分简单介绍SANCTUARY建立和结束运行的过程。</p><h4 id="2-2-1-Sanctuary建立"><a href="#2-2-1-Sanctuary建立" class="headerlink" title="2.2.1 Sanctuary建立"></a>2.2.1 Sanctuary建立</h4><ul><li>当需要执行SA中的敏感代码时，由LA(Legacy Application，普通世界中的应用程序)触发并加载SL和SA的二进制文件后移交给普通世界中位于EL2的KM(kernel module)；</li><li>KM选择一个CPU core来运行Sanctuary实例并采用热拔插技术来关闭这个被选择的CPU core；</li><li>KM请求STA的服务(Static Trusted App)的服务，从而进入monitor模式，在模式切换的过程中，可信固件检查所选择的CPU core是否被合理地关闭而后将控制权转交给STA，后者对SANCTUARY内存进行配置。</li></ul><h4 id="2-2-2-Sanctuary退出"><a href="#2-2-2-Sanctuary退出" class="headerlink" title="2.2.2 Sanctuary退出"></a>2.2.2 Sanctuary退出</h4><p>当LA对SA发出请求表明自己不需要SANCTUARY的服务时，SA首先清除上下文，通过sealing保存自己的状态并将L1缓存等设备中关于自己的进程信息清除。可信固件在检查SANCTUARY core是否被真正关闭，STA将SANCTUARY内存以及其他相关的数据全部清零，防止信息泄露。最后，恢复之前的配置，释放SANCTUARY内存区域和CPU core。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200611152941103.png" alt="image-20200611152941103" style="zoom:50%;"><h3 id="2-3-如何提供和SGX类似的安全服务？"><a href="#2-3-如何提供和SGX类似的安全服务？" class="headerlink" title="2.3 如何提供和SGX类似的安全服务？"></a>2.3 如何提供和SGX类似的安全服务？</h3><p>类似的，SANCTUARY需要提供远程认证和密封服务。为了提供远程认证服务，SA和安全世界之间有共享内存，Sanctuary将自己的完整性测量结果与通向代理TA(trusted application, 可信应用程序)的信道相链接，该共享内存就是一个安全信道。而代理TA负责建立一个SA到远程服务器连接的安全信道，所有通过代理TA传输的数据都用平台密钥认证过，并与SA的身份绑定。</p><p>类似于SGX中的sealing服务，用从SA二进制文件计算得到的散列值排除出的唯一加密密钥对机密信息进行加密后存到普通世界的内存中，利用该技术，能够在安全地永久存储SANCTUARY数据信息。</p><h3 id="2-4-是否能够在现实场景中提供足够的性能？"><a href="#2-4-是否能够在现实场景中提供足够的性能？" class="headerlink" title="2.4 是否能够在现实场景中提供足够的性能？"></a>2.4 是否能够在现实场景中提供足够的性能？</h3><p>论文中作者通过构造了一个OTP双因素认证的例子，通过展现该实验构造Provision Key和产生OTP的时间来证明SANCTUARY使用普通世界和安全世界的组件所需要的时间是不会影响用户体验的。</p><h2 id="3-对SANCTUARY的讨论"><a href="#3-对SANCTUARY的讨论" class="headerlink" title="3 对SANCTUARY的讨论"></a>3 对SANCTUARY的讨论</h2><p>计算机领域中有一句很著名的话：“计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决“。SANCTUARY其实就是用了这个思想，TrustZone中只有安全世界和非安全世界，SANCTUARY就构造了一个中间层——隔离执行环境，既能保证安全敏感的应用程序的安全执行，也能保证安全世界中的TCB尽可能小。</p><p>SANCTUARY巧妙地用了已有的多核机制和内存地址控制器来进行硬件资源的隔离，但却忽略了cache coherence的影响。所谓cache coherence是在保证了不同cache之间如果有共享数据，在这些共享数据被修改时该如何维护其他CPU core读到该数据时的正确性。在CITM[6]这篇论文中构造了一个方法，利用CPU的shareability属性来操纵Sanctuary实例中的机密数据泄露或者被篡改。</p><p>cache coherence一直是体系结构中研究非常多的一个方向，在体系结构中考虑的更多是如何保证数据的正确性，但在安全领域的研究人员，看这个问题却是如何利用该机制获取机密信息，不同领域看相同的问题会有不同的角度，因为有不同的借鉴。对于我们来说，我觉得做科研可以了解不同方向的论文，不必让自己的知识栈局限在某个领域内，换个角度看问题也许就能有很多很新颖的发现。</p><p>在Sok[2]这篇文章中提到了有相当一部分的TEE相关的安全漏洞和滥用安全世界的接口有关。SANCTUARY同样是通过安全世界给普通世界提供的安全接口来提供服务，但论文中并没有提到对这些安全接口的保护。</p><p>最后谈一下与SANCTUARY架构非常接近的Keystone[4]，虽然架构相似，但Keystone的出发点和SANCTUARY并不一样，Keystone着眼于构造一个用于配置、建立以及实例化可定制TEEs的框架，实现上就是通过模块化来定制TEE。在内存隔离上，SANCTUARY是利用TZC-400，而Keystone利用RISC-V机器模式的PMP(physical memory protection)。另外，Keystone着重强调将资源管理和安全检查解耦，最高权限的SM(security monitor)用最少的代码实施安全策略，而在S(Supervisor)-mode的RT(runtime)负责安全区中执行的用户代码的生命周期、内存管理、系统调用、与SM进行通信等操作。我认为Keystone和SANCTUARY虽然出发点不同，但最后实现的架构有很多近似的地方。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200914110304034.png" alt="image-20200914110304034" style="zoom:80%;"><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] Schell R R. Information security: science, pseudoscience, and flying pigs[C]//Seventeenth Annual Computer Security Applications Conference. IEEE, 2001: 205-216.</p><p>[2] Cerdeira D, Santos N, Fonseca P, et al. Sok: Understanding the prevailing security vulnerabilities in trustzone-assisted tee systems[C]//2020 IEEE Symposium on Security and Privacy (SP). IEEE, 2020: 1416-1432.</p><p>[3] Herley C, Van Oorschot P C. Sok: Science, security and the elusive goal of security as a scientific pursuit[C]//2017 IEEE symposium on security and privacy (SP). IEEE, 2017: 99-120.</p><p>[4] Lee D, Kohlbrenner D, Shinde S, et al. Keystone: An open framework for architecting trusted execution environments[C]//Proceedings of the Fifteenth European Conference on Computer Systems. 2020: 1-16.</p><p>[5] Brasser F, Gens D, Jauernig P, et al. SANCTUARY: ARMing TrustZone with User-space Enclaves[C]//NDSS. 2019.</p><p>[6] Wang J, Sun K, Lei L, et al. Cache-in-the-Middle (CITM) Attacks: Manipulating Sensitive Data in Isolated Execution Environments[C]//Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security. 2020: 1001-1015.</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;可信计算课程的期末报告&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="可信计算" scheme="http://yoursite.com/categories/%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97/"/>
+    
+    
+      <category term="TEE" scheme="http://yoursite.com/tags/TEE/"/>
+    
+      <category term="可信计算" scheme="http://yoursite.com/tags/%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97/"/>
     
   </entry>
   
@@ -131,9 +131,9 @@
       <category term="日记" scheme="http://yoursite.com/categories/%E6%97%A5%E8%AE%B0/"/>
     
     
-      <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
-    
       <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
+    
+      <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
     
   </entry>
   
@@ -423,9 +423,9 @@
       <category term="读书杂谈" scheme="http://yoursite.com/categories/%E8%AF%BB%E4%B9%A6%E6%9D%82%E8%B0%88/"/>
     
     
-      <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
-    
       <category term="读书" scheme="http://yoursite.com/tags/%E8%AF%BB%E4%B9%A6/"/>
+    
+      <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
     
   </entry>
   
@@ -473,9 +473,9 @@
       <category term="日记" scheme="http://yoursite.com/categories/%E6%97%A5%E8%AE%B0/"/>
     
     
-      <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
-    
       <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
+    
+      <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
     
   </entry>
   
