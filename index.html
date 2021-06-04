@@ -154,6 +154,131 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-2021-06-04-KVM-vmx" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/06/01/2021-06-04-KVM-vmx/">vmx.c部分代码解读(一)</a>
+    </h1>
+  
+
+        
+        <a href="/2021/06/01/2021-06-04-KVM-vmx/" class="archive-article-date">
+  	<time datetime="2021-06-01T13:31:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-01</time>
+</a>
+        
+      </header>
+    
+	<!-- 目录内容 -->
+	
+		<!-- 目录内容结束 -->
+
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="根据MSR调整CPU中部分功能的开启"><a href="#根据MSR调整CPU中部分功能的开启" class="headerlink" title="根据MSR调整CPU中部分功能的开启"></a>根据MSR调整CPU中部分功能的开启</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> __<span class="function">init <span class="keyword">int</span> <span class="title">adjust_vmx_controls</span><span class="params">(u32 ctl_min, u32 ctl_opt,</span></span></span><br><span class="line"><span class="function"><span class="params">				      u32 msr, u32 *result)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	u32 vmx_msr_low, vmx_msr_high;</span><br><span class="line">	u32 ctl = ctl_min | ctl_opt;</span><br><span class="line"></span><br><span class="line">	rdmsr(msr, vmx_msr_low, vmx_msr_high);</span><br><span class="line"></span><br><span class="line">	ctl &amp;= vmx_msr_high; <span class="comment">/* bit == 0 in high word ==&gt; must be zero */</span></span><br><span class="line">	ctl |= vmx_msr_low;  <span class="comment">/* bit == 1 in low word  ==&gt; must be one  */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Ensure minimum (required) set of control bits are supported. */</span></span><br><span class="line">	<span class="keyword">if</span> (ctl_min &amp; ~ctl)</span><br><span class="line">		<span class="keyword">return</span> -EIO;</span><br><span class="line"></span><br><span class="line">	*result = ctl;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该函数用于根据<code>MSR</code>寄存器的实际值，校准控制字符(<strong>c</strong>on<strong>t</strong>ro<strong>l</strong>)，其中特定的若干位设置为1，表明开启CPU的某些功能。</p>
+<ul>
+<li><code>ctl_min</code>: 必须开启的设置（minimal required）</li>
+<li><code>ctl_opt</code>: 可选设置</li>
+<li><code>msr</code>: <code>MSR</code>寄存器的地址，表示读取该<code>MSR</code>的控制字符</li>
+<li><code>result</code>: 输出值的地址，用于保存校准值</li>
+</ul>
+<p><code>u32 ctl = ctl_min | ctl_opt</code>临时变量对<code>ctl_min</code>和<code>ctl_opt</code>取或，保留了两个参数中的所有置一位。</p>
+<p>接着<code>rdmsr</code>读取指定<code>MSR</code>寄存器的控制字符。该字符用64位表示特定设置的要求：低32位保存在<code>vmx_msr_low</code>，保证低32位为0的位必须为0：<code>ctl |= vmx_msr_low</code>；高32位保存在<code>vmx_msr_high</code>， 保证高32位为1的为必须为1：<code>ctl &amp;= vmx_msr_high</code></p>
+<p>最后一个判断语句<code>if (ctl_min &amp; ~ctl)</code>是判断开始设置的必须开启的设置是否还是开启的。如果满足，则写入最终结果。</p>
+<h3 id="APIC控制访问"><a href="#APIC控制访问" class="headerlink" title="APIC控制访问"></a>APIC控制访问</h3><p>其实暂时对APIC不是很理解(</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_X86_64</span></span><br><span class="line">	<span class="comment">//如果开启了CPU_BASED_TPR_SHADOW,就可以关闭CPU_BASED_CR8_LOAD_EXITING, CPU_BASED_CR8_STORE_EXITING，因为CR8被映射到TPR（读写TPR就等于读写CR8），这样设置的话，当CPU试图访问CR8就不会引起VM exit</span></span><br><span class="line">	<span class="keyword">if</span> ((_cpu_based_exec_control &amp; CPU_BASED_TPR_SHADOW))  <span class="comment">//0x00200000</span></span><br><span class="line">		_cpu_based_exec_control &amp;= ~CPU_BASED_CR8_LOAD_EXITING &amp;</span><br><span class="line">					   ~CPU_BASED_CR8_STORE_EXITING;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="vmx-get-cpu"><a href="#vmx-get-cpu" class="headerlink" title="vmx_get_cpu"></a><code>vmx_get_cpu</code></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//called before using a cpu</span></span><br><span class="line"><span class="comment">//@vcpu: VCPU that will be loaded</span></span><br><span class="line"><span class="comment">//disable preemption. Call vmx_put_cpu() when finished</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">vmx_get_cpu</span><span class="params">(struct vmx_vcpu *vcpu)</span></span></span><br><span class="line"><span class="function"> <span class="comment">/*</span></span></span><br><span class="line"><span class="function"><span class="comment">1. 获取当前处理器，禁止内核抢占，`int cur_cpu = get_cpu()`</span></span></span><br><span class="line"><span class="function"><span class="comment">2. 设置当前local_vcpu为vcpu（我的理解：相当于上下文切换到vcpu）</span></span></span><br><span class="line"><span class="function"><span class="comment">3. 如果vcpu的cpu不是cur_cpu，执行下面的操作。否则，则直接执行`vmcs_load`指令。</span></span></span><br><span class="line"><span class="function"><span class="comment">   3.1 如vcpu已有cpu，则运行函数`__vmx_get_cpu_hepler(vcpu)`: 清空vcpu的vmcs，并且将local_vcpu置为NULL；</span></span></span><br><span class="line"><span class="function"><span class="comment">   3.2. vpid_sync_context: 首先明确一点，VPID用于区分TLB中不同进程的TLB。`vpid_sync_context`调用`INVVPID`使旧vcpu中的vpid失效</span></span></span><br><span class="line"><span class="function"><span class="comment">   3.3. ept_sync_context：刷新指定的vcpu的ept，`INVEPT`是使EPT中的TLB项失效，当EPT页表有更新时，CPU执行`INVEPT`使旧TLB失效。</span></span></span><br><span class="line"><span class="function"><span class="comment">4. 设置vcpu-&gt;launched为0</span></span></span><br><span class="line"><span class="function"><span class="comment">5. 执行`vmcs_load`指令</span></span></span><br><span class="line"><span class="function"><span class="comment">6. `__vmx_set_cpu`，获得该CPU的host_gdt (set per-cpu TSS and GDT when switch processors)</span></span></span><br><span class="line"><span class="function"><span class="comment">7. 设置vcpu的值为cur_cpu.</span></span></span><br><span class="line"><span class="function"><span class="comment"></span></span></span><br><span class="line"><span class="function"><span class="comment">在执行完毕该函数之后，要调用`put_cpu()`恢复内核抢占。</span></span></span><br><span class="line"><span class="function"><span class="comment"> */</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="刷新EPT"><a href="#刷新EPT" class="headerlink" title="刷新EPT"></a>刷新EPT</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">vmx_ept_sync_vcpu</span><span class="params">(struct vmx_vcpu *vcpu)</span> </span>&#123;</span><br><span class="line">    smp_call_function_single(vcpu-&gt;cpu, __vmx_sync_helper, (<span class="keyword">void</span> *)vcpu, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//smp_call_function_single该函数表示在cpu核上运行__vmx_sync_helper(void* vcpu)函数</span></span><br><span class="line"><span class="comment">//__vmx_sync_helper调用了ept_sync_context(vcpu-&gt;eptp);</span></span><br><span class="line"><span class="comment">//ept_sync_context()：如果设置了vmx_invept_context, 则只对某个进程的EPT(invalidate all mappings associated with bits 51:12 of the EPT pointer(EPTP)specified in the INVEPT descriptor.)进行无效化更新（__invept)；否则对所有EPT表中的所有项更新.</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="一些杂七杂八的零碎函数"><a href="#一些杂七杂八的零碎函数" class="headerlink" title="一些杂七杂八的零碎函数"></a>一些杂七杂八的零碎函数</h2><p>//GFP_kernel</p>
+<p>用来标记分配内核空间内存的方式。如果内存不够的时候，会等待内核释放内存，直到可以分配相应大小的内存，GFP_kernel用在可以睡眠的场合</p>
+<p>gfp是get free page</p>
+<p>CPU通过<code>GDTR</code>寄存器知道<code>GDT</code>表的位置，通过<code>IDTR</code>寄存器知道<code>IDT</code>表的位置，通过<code>TR</code>寄存器确定<code>TSS</code>的位置</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://blog.csdn.net/basicthinker/article/details/6603541" target="_blank" rel="noopener">Linux/Xen源代码片段解读</a></li>
+<li><a href="https://blog.csdn.net/q1007729991/article/details/52650822" target="_blank" rel="noopener">任务状态段（TSS）</a></li>
+<li><a href="https://github.com/xzffwy/dune_des" target="_blank" rel="noopener">dune_des</a></li>
+<li><a href="https://xem.github.io/minix86/manual/intel-x86-and-64-manual-vol3/o_fe12b1e2a880e0ce.html" target="_blank" rel="noopener">INVEPT</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">OS</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">虚拟化</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/虚拟化//" class="article-tag-list-link color4">虚拟化</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/06/01/2021-06-04-KVM-vmx/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-2021-06-01-trusting computing" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -834,11 +959,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">RISC-V</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">paper</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">paper</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">RISC-V</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
@@ -991,99 +1116,6 @@
 
 
   
-    <article id="post-2021-01-29-SoK-TrustZone" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/01/29/2021-01-29-SoK-TrustZone/">SoK S&amp;P20</a>
-    </h1>
-  
-
-        
-        <a href="/2021/01/29/2021-01-29-SoK-TrustZone/" class="archive-article-date">
-  	<time datetime="2021-01-28T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-01-29</time>
-</a>
-        
-      </header>
-    
-	<!-- 目录内容 -->
-	
-		<!-- 目录内容结束 -->
-
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>S&amp;P2020中关于TrustZone的SoK精读笔记~</p>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">TrustZone</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">paper - System Security</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/TrustZone//" class="article-tag-list-link color5">TrustZone</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/01/29/2021-01-29-SoK-TrustZone/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1181,6 +1213,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">SGX</a>
               </li>
              
@@ -1190,14 +1230,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">Ubuntu</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1213,7 +1245,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">读书</a>
+                <a href="javascript:void(0)" class="js-tag color4">ARM</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">汇编</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1225,11 +1261,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ARM</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">汇编</a>
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1237,15 +1269,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">paper</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Keystone</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1253,11 +1277,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
+                <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
+                <a href="javascript:void(0)" class="js-tag color3">读书</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">英语</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">读后感</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1269,11 +1301,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">web</a>
+                <a href="javascript:void(0)" class="js-tag color4">虚拟化</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
+                <a href="javascript:void(0)" class="js-tag color1">linux</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">web</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1285,11 +1321,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">英语</a>
+                <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">读后感</a>
+                <a href="javascript:void(0)" class="js-tag color4">Keystone</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">Linux</a>
               </li>
             
             <div class="clearfix"></div>
