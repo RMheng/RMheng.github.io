@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Tag: virtualization | rww&#39;s Blog</title>
+  <title>new to system call | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="system security | computer architecture | Lions come in March | Animation | for better">
-<meta property="og:type" content="website">
-<meta property="og:title" content="rww&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/tags/virtualization/index.html">
+  <meta name="description" content="从入门到入土的system call">
+<meta name="keywords" content="OS,Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="new to system call">
+<meta property="og:url" content="http://yoursite.com/2021/06/11/2021-06-11-new-to-system-call/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
+<meta property="og:description" content="从入门到入土的system call">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-06-11T12:00:57.425Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="rww&#39;s Blog">
+<meta name="twitter:title" content="new to system call">
+<meta name="twitter:description" content="从入门到入土的system call">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -152,36 +156,116 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2021-06-11-new-to-system-call" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/04/22/2021-05-09-HypSec-Usenix19/" class="archive-article-date">
-  	<time datetime="2021-04-22T02:27:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-22</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/04/22/2021-05-09-HypSec-Usenix19/">HypSec-Usenix19</a>
+    <h1 class="article-title" itemprop="name">
+      new to system call
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2021/06/11/2021-06-11-new-to-system-call/" class="archive-article-date">
+  	<time datetime="2021-06-11T03:30:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-11</time>
+</a>
+        
+      </header>
+    
+	<!-- 目录内容 -->
+	
+		<!-- 目录内容结束 -->
+
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>从入门到入土的system call</p>
+<a id="more"></a>
+
+<h2 id="Arguemnt-Passing-in-Linux"><a href="#Arguemnt-Passing-in-Linux" class="headerlink" title="Arguemnt Passing in Linux"></a>Arguemnt Passing in Linux</h2><table>
+<thead>
+<tr>
+<th>Register</th>
+<th>Argument User Space</th>
+<th>Argument Kernel Space</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>%rax</td>
+<td>Not Used</td>
+<td>System Call Number</td>
+</tr>
+<tr>
+<td>%rdi</td>
+<td>Argument1</td>
+<td>Argument</td>
+</tr>
+<tr>
+<td>%rsi</td>
+<td>Argument2</td>
+<td>Argument</td>
+</tr>
+<tr>
+<td>%rdx</td>
+<td>Argument3</td>
+<td>Argument</td>
+</tr>
+<tr>
+<td>%r10</td>
+<td>Not Used</td>
+<td>Argument</td>
+</tr>
+<tr>
+<td>%r8</td>
+<td>Argument5</td>
+<td>Argument</td>
+</tr>
+<tr>
+<td>%r9</td>
+<td>Argument6</td>
+<td>Argument</td>
+</tr>
+<tr>
+<td>%rcx</td>
+<td>Argument4</td>
+<td>Destroyed</td>
+</tr>
+<tr>
+<td>%r11</td>
+<td>Not Used</td>
+<td>Destroyed</td>
+</tr>
+</tbody></table>
+<p>syscall的返回值保存在<code>%rax</code>中，该值的范围在-4095到-1之间时，表示错误值。</p>
+<p>能够传递给kernel的值只有两种类型：</p>
+<ul>
+<li><code>INTEGER</code>: 能够存储在通用寄存器中的整数类型；</li>
+<li>``MEMORY<code>: 能够通过堆栈传递并返回内存的数据，大多为</code>strings<code>或</code>memory buffer<code>。举个例子，</code>write()<code>系统调用，第一个参数</code>fd<code>是</code>INTEGER<code>类型，第二个参数</code>buffer<code>是即将被写入文件的数据，它的类型是</code>MEMORY<code>，第三个参数是count，其类型也是</code>INTEGER`</li>
+</ul>
+<blockquote>
+<p>Class INTEGER This class consists of integral types that fit into one of the general purpose registers.</p>
+<p>Class MEMORY This class consists of types that will be passed and returned in memory via the stack. These will mostly be strings or memory buffer.</p>
+</blockquote>
+<h2 id="simple-example"><a href="#simple-example" class="headerlink" title="simple example"></a>simple example</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">        .global _start</span><br><span class="line">        .text</span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">        # write(1, message, 13)</span><br><span class="line">        mov $1, %rax      # system call number of write is 1</span><br><span class="line">        mov $1, %rdi      # first argument: file handle 1 is stdout</span><br><span class="line">        mov $message, %rsi   # second argument: address of string to output</span><br><span class="line">        mov $13, %rdx     # third argument: count(number of bytes)</span><br><span class="line">        syscall			  # invoke OS to do the write</span><br><span class="line"></span><br><span class="line">        mov $60, %rax     # system call number of exit is 60</span><br><span class="line">        xor %rdi, %rdi	  # return code is 0</span><br><span class="line">        syscall</span><br><span class="line">message:</span><br><span class="line">        .ascii &quot;hello, world\n&quot;</span><br></pre></td></tr></table></figure>
+
+<p>执行<code>gcc -c hello.s &amp;&amp; ld hello.o &amp;&amp; ./a.out</code>在命令行中得到<code>hello, world</code>的输出。</p>
+<h2 id="question"><a href="#question" class="headerlink" title="question"></a>question</h2><blockquote>
+<p>The system call destroys rcx and r11 but others registers are saved across the system call.</p>
+</blockquote>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://github.com/rishiba/doc_syscalls/blob/master/doc/05_calling_system_calls.rst" target="_blank" rel="noopener">calling_system_calls</a></li>
+<li><a href="https://cs.lmu.edu/~ray/notes/syscalls/" target="_blank" rel="noopener">System Calls</a></li>
+<li><a href="http://arthurchiao.art/blog/system-call-definitive-guide-zh/" target="_blank" rel="noopener">Linux系统调用权威指南</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -191,13 +275,13 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">virtualization</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Linux</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -210,17 +294,126 @@
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2021/06/11/2021-06-11-new-to-system-call/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2021/06/11/2021-06-11-kvm-environment-in-vmware/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          kvm environment in vmware
+        
+      </div>
+    </a>
   
   
-    </div></section>
+    <a href="/2021/06/01/2021-06-01-trusting computing/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">关于我对可信计算的理解</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Arguemnt-Passing-in-Linux"><span class="toc-number">1.</span> <span class="toc-text">Arguemnt Passing in Linux</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#simple-example"><span class="toc-number">2.</span> <span class="toc-text">simple example</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#question"><span class="toc-number">3.</span> <span class="toc-text">question</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -243,9 +436,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

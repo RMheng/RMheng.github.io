@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>vmx.c部分代码解读(一) | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="根据MSR调整CPU中部分功能的开启123456789101112131415161718static __init int adjust_vmx_controls(u32 ctl_min, u32 ctl_opt,				      u32 msr, u32 *result)&amp;#123;	u32 vmx_msr_low, vmx_msr_high;	u32 ctl = ctl_min | c">
+  <meta name="description" content="vmx.c中部分代码的理解">
 <meta name="keywords" content="OS,虚拟化,linux">
 <meta property="og:type" content="article">
 <meta property="og:title" content="vmx.c部分代码解读(一)">
 <meta property="og:url" content="http://yoursite.com/2021/06/01/2021-06-04-KVM-vmx/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
-<meta property="og:description" content="根据MSR调整CPU中部分功能的开启123456789101112131415161718static __init int adjust_vmx_controls(u32 ctl_min, u32 ctl_opt,				      u32 msr, u32 *result)&amp;#123;	u32 vmx_msr_low, vmx_msr_high;	u32 ctl = ctl_min | c">
+<meta property="og:description" content="vmx.c中部分代码的理解">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2021-06-04T16:04:05.926Z">
+<meta property="og:updated_time" content="2021-06-11T12:02:50.028Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="vmx.c部分代码解读(一)">
-<meta name="twitter:description" content="根据MSR调整CPU中部分功能的开启123456789101112131415161718static __init int adjust_vmx_controls(u32 ctl_min, u32 ctl_opt,				      u32 msr, u32 *result)&amp;#123;	u32 vmx_msr_low, vmx_msr_high;	u32 ctl = ctl_min | c">
+<meta name="twitter:description" content="vmx.c中部分代码的理解">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -180,7 +180,8 @@
 
     <div class="article-entry" itemprop="articleBody">
       
-        <a id="more"></a>
+        <p>vmx.c中部分代码的理解</p>
+<a id="more"></a>
 
 <h2 id="根据MSR调整CPU中部分功能的开启"><a href="#根据MSR调整CPU中部分功能的开启" class="headerlink" title="根据MSR调整CPU中部分功能的开启"></a>根据MSR调整CPU中部分功能的开启</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> __<span class="function">init <span class="keyword">int</span> <span class="title">adjust_vmx_controls</span><span class="params">(u32 ctl_min, u32 ctl_opt,</span></span></span><br><span class="line"><span class="function"><span class="params">				      u32 msr, u32 *result)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	u32 vmx_msr_low, vmx_msr_high;</span><br><span class="line">	u32 ctl = ctl_min | ctl_opt;</span><br><span class="line"></span><br><span class="line">	rdmsr(msr, vmx_msr_low, vmx_msr_high);</span><br><span class="line"></span><br><span class="line">	ctl &amp;= vmx_msr_high; <span class="comment">/* bit == 0 in high word ==&gt; must be zero */</span></span><br><span class="line">	ctl |= vmx_msr_low;  <span class="comment">/* bit == 1 in low word  ==&gt; must be one  */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Ensure minimum (required) set of control bits are supported. */</span></span><br><span class="line">	<span class="keyword">if</span> (ctl_min &amp; ~ctl)</span><br><span class="line">		<span class="keyword">return</span> -EIO;</span><br><span class="line"></span><br><span class="line">	*result = ctl;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -483,7 +484,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">日记</a>
+                <a href="javascript:void(0)" class="js-tag color3">读书</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -491,11 +492,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">读书</a>
+                <a href="javascript:void(0)" class="js-tag color3">日记</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -507,6 +504,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">ARM</a>
               </li>
              
@@ -515,23 +516,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">paper</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">System Security</a>
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">paper</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -543,14 +540,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">OS</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">virtualization</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">英语</a>
               </li>
              
@@ -559,11 +548,27 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">System Security</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">web</a>
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">OS</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">virtualization</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">Linux</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">KVM</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -644,6 +649,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           
             <li class="search-li">
               <a href="https://leiblog.wang/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>leiwang1999</a>
+            </li>
+          
+            <li class="search-li">
+              <a href="http://liujunming.top/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>liujunming</a>
             </li>
           
         </ul>
