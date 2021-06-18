@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2021-06-11T12:01:04.612Z</updated>
+  <updated>2021-06-18T13:22:59.217Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>VT-x, KVM, QEMU如何一起愉快地工作</title>
+    <link href="http://yoursite.com/2021/06/18/2021-06-18-VT-x-KVM-QEMU/"/>
+    <id>http://yoursite.com/2021/06/18/2021-06-18-VT-x-KVM-QEMU/</id>
+    <published>2021-06-18T13:19:10.000Z</published>
+    <updated>2021-06-18T13:22:59.217Z</updated>
+    
+    <content type="html"><![CDATA[<p>Intel Virtualization: VT-x, KVM, QEMU如何一起愉快地工作</p><a id="more"></a><blockquote><p>When we talk about virtualization we mean hardware assisted virtualization where the VM’s processor matches host computer’s processor. </p></blockquote><blockquote><p>Containerization is mostly a software concept and it builds on top of operating system abstractions like process identifiers, file system and memory consumption limits.</p></blockquote><blockquote><p>In case of KVM, this is actually Linux kernel which has KVM modules loaded into it. In other words, KVM is a set of kernel modules that when loaded into Linux kernel turn the kernel into hypervisor. </p></blockquote><p>Full virtualization: when OS that is running inside a VM is exactly the same as would be running on real hardware.</p><p>Paravirtualization: when OS inside VM is aware that it is being virtualized and thus runs in a slightly modified way than it would on real hardware.</p><p><img src="/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210612163024109.png" alt="image-20210612163024109"></p><h2 id="VT-x"><a href="#VT-x" class="headerlink" title="VT-x"></a>VT-x</h2><p>VT-x是用于Intel64和IA-32架构的CPU虚拟化。VT-x中的CPU操作有两种模式：root和non-root。Hypervisor运行在root模式，而VMs运行在non-root模式。non-root模式可以模拟在root模式下的操作，但需要注意的是”global state-changing”指令，这些指令能够影响CPU状态，这些指令是non-root模式下无法执行的。</p><blockquote><p>Examples are those instructions which modify clock or interrupt registers, or write to control registers in a way that will change the operation of root mode.</p></blockquote><h3 id="VMX-Virtual-Machine-Extension"><a href="#VMX-Virtual-Machine-Extension" class="headerlink" title="VMX(Virtual Machine Extension)"></a>VMX(Virtual Machine Extension)</h3><p>VMX是一系列用于支持VT-x的指令。</p><p><code>VMXON</code>： 用于进入虚拟化的指令，执行完毕后，CPU在root模式下；</p><p><code>VMXOFF</code>：执行完毕后，退出虚拟化；</p><p><code>VMLAUNCH</code>：构造一个VM实例并进入non-root模式；</p><p><code>VMRESUME</code>：进入non-root模式和一个已经存在的VM实例。</p><p><img src="/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210607112952018.png" alt="image-20210607112952018"></p><p>当一个VM尝试执行一条不被运行在non-root模式下执行的指令时，CPU以trap-like的方式切换到root模式，这就是VM exit。</p><ul><li>CPU首先运行在普通模式下，执行<code>VMXON</code>开始了root模式下的虚拟化</li><li>接着，执行<code>VMLAUNCH</code>进入non-root模式并构造了一个VM实例</li><li>当VM实例运行自己的代码，并尝试执行不被运行的命令时，会触发<code>VM exit</code>，并切换到root模式</li><li>切换到root模式时，控制权已经转移到了hypervisor上，hypervisor检查引起<code>VM exit</code>的原因，而后执行<code>VMRESUME</code>重新回到non-root模式下的该VM实例</li></ul><p>Q1：hypervisor如何知道VM exit的原因？不同的VM实例之间如何区分？</p><p>A1：从VMCS结构中得知。</p><p>每个vCPU都有一个VMCS，VMCS以CPU级别存储信息。</p><ul><li><code>VMREAD</code>：读取特定VMCS</li><li><code>VMWRITE</code>：写特定VMCS</li></ul><p>这两条指令都需要root模式，并且只有hypervisor能够修改VMCS。Non-root模式下的VM虽然可以执行VMWRITE，但写入的并不是真正的VMCS，而是”shadow” VMCS.</p><p>有一些指令是作用在所有的VMCS实例中，而不是单独的VMCS。</p><ul><li><code>VMPTRLD</code>: load the address of a VMCS</li><li><code>VMPTRST</code>: store the address to a specified memory address</li></ul><p>虽然可以有多个VMCS实例，但只能有一个时刻只能有一个active的VMCS。<code>VMPTRLD</code>标记该特定的VMCS为active。当执行<code>VMRESUME</code>时，non-root模式下的VM通过active VMCS实例就可以知道正在运行的VM和vCPU。</p><p>VMCS主要保存两种类型的信息：</p><ul><li>在进行root和non-root上下文切换时，CPU寄存器需要保存和恢复的信息</li><li>non-root下，决定VM行为的控制信息。（比如设置了特定的比特位，就可以允许VM尝试执行<code>RDTSC</code>时不会引起<code>VM exit</code></li></ul><p>VMCS可以被划分为6个区域：</p><ul><li>GUEST-STATE域：虚拟机从根操作模式进入非根操作模式时，处理器所处于的状态保存在这里</li><li>HOST-STATE域：虚拟机从非根模式退出到根操作模式时，处理器所处于的状态保存在这里</li><li>VM execution control fields：虚拟机在非根操作模式运行时，处理器所处于的状态</li><li>VM exit control fields：虚拟机从非根操作模式下退出时，需要保存的信息</li><li>VM entry control fields：虚拟机从跟模式进入非根模式时，需要读取的信息</li><li>VM exit information fields：虚拟机从非根操作模式退出到根操作模式，将退出的原因保存到该域中</li></ul><p>Guest software指令：</p><ul><li>INVEPT: GPA-&gt;HPA相关缓存刷新</li><li>INVVPID: 用于GVA-&gt;GPA的刷新</li></ul><h2 id="KVM-Kernel-based-Virtual-Machine"><a href="#KVM-Kernel-based-Virtual-Machine" class="headerlink" title="KVM(Kernel-based Virtual Machine)"></a>KVM(Kernel-based Virtual Machine)</h2><p><strong>KVM: a set of Linux kernel modules that when loaded, turn Linux kernel into hypervisor.</strong></p><p>KVM模块可以被分成两部分：</p><ul><li>core module: kvm.ko</li><li>machine specific modules: 取决于host machine CPU，比如VT-x需要的就是kvm-intel.ko</li></ul><p>KVM与用户空间进行交互，在本文的语境下，就是QEMU通过两种方式：</p><ul><li>device file <code>/dev/kvm</code><ul><li>system level: </li><li>vm level: </li><li>vCPU level: </li></ul></li><li>memory mapped pages: 用于QEMU和KVM之间批量数据传递</li></ul><h2 id="QEMU-Quick-Emulator"><a href="#QEMU-Quick-Emulator" class="headerlink" title="QEMU(Quick Emulator)"></a>QEMU(Quick Emulator)</h2><blockquote><p>QEMU creates one process for every VM. For each vCPU, QEMU creates a thread. These are regular threads and they get scheduled by the OS like any other thread. </p><p>As these threads get run time, QEMU creates impression of multiple CPUs for the software running inside its VM. </p></blockquote><p>QEMU能够进行模拟，它能够模拟一些KVM并不支持的I/O操作。举个例子，当VM中的某个软件希望执行I/O操作：</p><ul><li>VM返回KVM</li><li>KVM查找VM exit的原因，将控制权以及I/O请求信息的指针转交给QEMU</li><li>QEMU为该请求模拟I/O设备</li><li>当VM中的软件执行完毕后，KVM重新获得控制权，并且执行VMRESUME重新执行VM。</li></ul><p><img src="/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210612222222989.png" alt="image-20210612222222989"></p><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul><li><a href="https://binarydebt.wordpress.com/2018/10/14/intel-virtualisation-how-vt-x-kvm-and-qemu-work-together/" target="_blank" rel="noopener">Intel Virtualization: How VT-x, kVM and QEMU Work Together</a></li><li><a href="https://blog.csdn.net/wanthelping/article/details/47068745" target="_blank" rel="noopener">内核VMX基本数据结构与操作</a></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Intel Virtualization: VT-x, KVM, QEMU如何一起愉快地工作&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="虚拟化" scheme="http://yoursite.com/categories/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+    
+      <category term="虚拟化" scheme="http://yoursite.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+      <category term="VT-x" scheme="http://yoursite.com/tags/VT-x/"/>
+    
+      <category term="KVM" scheme="http://yoursite.com/tags/KVM/"/>
+    
+      <category term="QEMU" scheme="http://yoursite.com/tags/QEMU/"/>
+    
+  </entry>
   
   <entry>
     <title>kvm environment in vmware</title>
@@ -67,30 +95,6 @@
   </entry>
   
   <entry>
-    <title>关于我对可信计算的理解</title>
-    <link href="http://yoursite.com/2021/06/01/2021-06-01-trusting%20computing/"/>
-    <id>http://yoursite.com/2021/06/01/2021-06-01-trusting computing/</id>
-    <published>2021-06-01T13:31:53.000Z</published>
-    <updated>2021-06-01T13:42:57.518Z</updated>
-    
-    <content type="html"><![CDATA[<p>可信计算课程的期末报告</p><a id="more"></a><h2 id="1-可信计算和密码学的关系"><a href="#1-可信计算和密码学的关系" class="headerlink" title="1 可信计算和密码学的关系"></a>1 可信计算和密码学的关系</h2><p>可信计算是安全科学中的一个分支，所以先从我对安全科学的理解来谈。众所周知，密码学是所有安全学科的基础。密码学可以说是安全中最接近于科学的小方向，平时更受工业界追捧的工程安全可能处于安全科学领域鄙视链的最底端。Shamir在2002年图灵奖获奖致辞时就直言非密码学的安全为”a mess”。Schell在2001年描述安全领域为”pseudo-science and flying pigs”(伪科学并且充斥着谎话)[1][3]。</p><p>密码学证明安全的过程，最安全的是形式化证明，形式化证明虽然不能保证100%的安全性，但可以保证相对来说非常高的安全性；其次是规约性证明，用理论来证明密码算法的安全性；最不能保证安全的是用攻击来证明安全性。一个密码学算法的最终应用大多要经过严格的理论证明和形式化证明，最终才能走向应用接受现实的攻击实验。</p><p>但在系统安全领域内，大部分论文的安全性分析都是尝试用攻击来证明安全性，这也是硬件隔离机制和密码学的安全性证明很大的不同。可信并不等于安全，可信技术是通过构造一个信任链来让用户信任安全机制的技术。事实上，工业界中的硬件隔离机制也都是先用攻击来证明安全性，当实践已经能证明具有比较高的安全性后，再去考虑形式化验证，这相对密码学来说是个相反的过程。这样相反的论证过程也在一定程度上验证了当前很多可信机制如同漏水大锅一样层出不穷的漏洞。</p><h2 id="2-从SANCTUARY看TEE技术"><a href="#2-从SANCTUARY看TEE技术" class="headerlink" title="2 从SANCTUARY看TEE技术"></a>2 从SANCTUARY看TEE技术</h2><p>体系结构课程上沈海华老师经常喜欢说的一句话就是：体系结构架构师前三十年铆足劲提升性能，分支预测流水线，无所不用其极，近十年的meltdown, spectre攻击无一不是当初强调性能给自己挖的坑。安全是一个negative的因素，强调安全必然会带来性能的下降，结合应用实现，我们需要不断地做安全和性能之间的tradeoff，TEE(Trusted Execution Environment, 可信执行环境)就是tradeoff的产物。值得注意的是很多TEE，比如ARM TrustZone, Intel SGX, AMD SEV等公开的层出不穷的漏洞缺陷大部分都是利用TEE越权。TEE进程一般拥有比普通应用程序更高的权限，通过利用TEE上的漏洞能够以更高的权限获得系统的机密数据和代码。当TEE概念被提出并实现出来后，很多厂家都知道了TEE这么一个好东西后，都希望把自己的机密数据存入TEE中，这带来的后果就是TA(Ttrusted Application, 可信应用程序)数量的不断增大，直接导致了TCB(Trusted Computing Base, 可信计算基)的不断增大。可信计算基的增大意味着攻击面的增大，假设一个TA存在着缺陷，是否会影响到其他TA？这是需要考虑的不同TA之间的隔离性，遗憾的是，很多生产厂家的TEE中不同TAs之间的隔离是非常弱的。</p><p>在可信计算课程中由我为大家介绍的这篇论文《SANCTUARY: ARMing TrustZone with User-space Enclaves》[5]就是基于上述的TrustZone的设计缺陷构造了一个在性能，安全，开发难度之间进行tradeoff的TEE。</p><p>在进行分析后，作者认为目前各大主流TEE不能满足功能丰富的安全移动服务。针对上面提到的现有TEE的问题，SANCTUARY中通过提出了以下三点进行缓解：</p><ul><li>将安全敏感的应用程序移植到IEE(Isolated Execution Environment, 隔离执行环境)中，从而减少TCB的大小；</li><li>移植到IEE之间的应用程序通过动态划分和重分配资源来达到SA(Sanctuary Application)之间的隔离；</li><li>利用TZASC(TrustZone Address Space Controller，TrustZone地址空间控制器)等硬件来保证系统组件之间的隔离。</li></ul><p>TrustZone具有很高的权限，SANCTUARY相当于构造了一个普通权限的TEE，可以访问安全接口但不能直接运行在高权限上。这当然不是凭空产生的想法，SGX是最负盛名的用户态TEE，SANCTUARY的目标实现的就是在ARM架构上的类SGX的TEE。有趣的是，同年有类似想法的还有Keystone，阅读Keystone论文的话就会发现SANCTUARY和Keystone的架构惊人的相似，但Keystone运行在RISC-V架构上。</p><p>一个完整的SANCTUARY实例包括了处于EL0的Sanctuary App(SA)和处于EL1的Sanctuary Lib(SL), SL主要是为SA初始化运行环境并提供服务接口。SANCTUARY的架构图如下图所示。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200610153017985.png" alt="image-20200610153017985" style="zoom:50%;"><p>SANCTUARY从4个方面尝试去达成自己的安全目标。下面的篇幅我将打破文章结构介绍，从这四个方面介绍SANCTUARY为实现自己的安全目标所完成的一系列努力。</p><h3 id="2-1-如何实现严格的隔离？"><a href="#2-1-如何实现严格的隔离？" class="headerlink" title="2.1 如何实现严格的隔离？"></a>2.1 如何实现严格的隔离？</h3><p>TEE是基于硬件机制的隔离，首要任务就是保证严格的独立性。SANCTUARY从两个方面来对独立性进行保证：空间和时间。</p><p>空间独立性上主要是为SANCTUARY静态分配物理资源考虑，每个Sanctuary实例都被分配了一个独立的CPU core，利用TZC-400根据CPU core ID为每个Sanctuary实例分配物理内存。每个CPU core的地址范围的上下界都是通过四个地址范围寄存器来保存记录，而每个CPU core对这些地址范围的访问权限也是通过一个访问许可寄存器记录的。另外，为了抵御缓存侧信道攻击，不允许Sanctuary实例映射到L3缓存中（也就是将Sanctuary实例的物理内存都设置为outer uncacheable）</p><p>时间独立性主要是从SANCTUARY的动态加载来考虑，Sanctuary实例是从可信固件中启动CPU core，并且在退出使用之前将内存中的敏感信息全部清空。</p><h3 id="2-2-如何动态分配内核？"><a href="#2-2-如何动态分配内核？" class="headerlink" title="2.2 如何动态分配内核？"></a>2.2 如何动态分配内核？</h3><p>本部分简单介绍SANCTUARY建立和结束运行的过程。</p><h4 id="2-2-1-Sanctuary建立"><a href="#2-2-1-Sanctuary建立" class="headerlink" title="2.2.1 Sanctuary建立"></a>2.2.1 Sanctuary建立</h4><ul><li>当需要执行SA中的敏感代码时，由LA(Legacy Application，普通世界中的应用程序)触发并加载SL和SA的二进制文件后移交给普通世界中位于EL2的KM(kernel module)；</li><li>KM选择一个CPU core来运行Sanctuary实例并采用热拔插技术来关闭这个被选择的CPU core；</li><li>KM请求STA的服务(Static Trusted App)的服务，从而进入monitor模式，在模式切换的过程中，可信固件检查所选择的CPU core是否被合理地关闭而后将控制权转交给STA，后者对SANCTUARY内存进行配置。</li></ul><h4 id="2-2-2-Sanctuary退出"><a href="#2-2-2-Sanctuary退出" class="headerlink" title="2.2.2 Sanctuary退出"></a>2.2.2 Sanctuary退出</h4><p>当LA对SA发出请求表明自己不需要SANCTUARY的服务时，SA首先清除上下文，通过sealing保存自己的状态并将L1缓存等设备中关于自己的进程信息清除。可信固件在检查SANCTUARY core是否被真正关闭，STA将SANCTUARY内存以及其他相关的数据全部清零，防止信息泄露。最后，恢复之前的配置，释放SANCTUARY内存区域和CPU core。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200611152941103.png" alt="image-20200611152941103" style="zoom:50%;"><h3 id="2-3-如何提供和SGX类似的安全服务？"><a href="#2-3-如何提供和SGX类似的安全服务？" class="headerlink" title="2.3 如何提供和SGX类似的安全服务？"></a>2.3 如何提供和SGX类似的安全服务？</h3><p>类似的，SANCTUARY需要提供远程认证和密封服务。为了提供远程认证服务，SA和安全世界之间有共享内存，Sanctuary将自己的完整性测量结果与通向代理TA(trusted application, 可信应用程序)的信道相链接，该共享内存就是一个安全信道。而代理TA负责建立一个SA到远程服务器连接的安全信道，所有通过代理TA传输的数据都用平台密钥认证过，并与SA的身份绑定。</p><p>类似于SGX中的sealing服务，用从SA二进制文件计算得到的散列值排除出的唯一加密密钥对机密信息进行加密后存到普通世界的内存中，利用该技术，能够在安全地永久存储SANCTUARY数据信息。</p><h3 id="2-4-是否能够在现实场景中提供足够的性能？"><a href="#2-4-是否能够在现实场景中提供足够的性能？" class="headerlink" title="2.4 是否能够在现实场景中提供足够的性能？"></a>2.4 是否能够在现实场景中提供足够的性能？</h3><p>论文中作者通过构造了一个OTP双因素认证的例子，通过展现该实验构造Provision Key和产生OTP的时间来证明SANCTUARY使用普通世界和安全世界的组件所需要的时间是不会影响用户体验的。</p><h2 id="3-对SANCTUARY的讨论"><a href="#3-对SANCTUARY的讨论" class="headerlink" title="3 对SANCTUARY的讨论"></a>3 对SANCTUARY的讨论</h2><p>计算机领域中有一句很著名的话：“计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决“。SANCTUARY其实就是用了这个思想，TrustZone中只有安全世界和非安全世界，SANCTUARY就构造了一个中间层——隔离执行环境，既能保证安全敏感的应用程序的安全执行，也能保证安全世界中的TCB尽可能小。</p><p>SANCTUARY巧妙地用了已有的多核机制和内存地址控制器来进行硬件资源的隔离，但却忽略了cache coherence的影响。所谓cache coherence是在保证了不同cache之间如果有共享数据，在这些共享数据被修改时该如何维护其他CPU core读到该数据时的正确性。在CITM[6]这篇论文中构造了一个方法，利用CPU的shareability属性来操纵Sanctuary实例中的机密数据泄露或者被篡改。</p><p>cache coherence一直是体系结构中研究非常多的一个方向，在体系结构中考虑的更多是如何保证数据的正确性，但在安全领域的研究人员，看这个问题却是如何利用该机制获取机密信息，不同领域看相同的问题会有不同的角度，因为有不同的借鉴。对于我们来说，我觉得做科研可以了解不同方向的论文，不必让自己的知识栈局限在某个领域内，换个角度看问题也许就能有很多很新颖的发现。</p><p>在Sok[2]这篇文章中提到了有相当一部分的TEE相关的安全漏洞和滥用安全世界的接口有关。SANCTUARY同样是通过安全世界给普通世界提供的安全接口来提供服务，但论文中并没有提到对这些安全接口的保护。</p><p>最后谈一下与SANCTUARY架构非常接近的Keystone[4]，虽然架构相似，但Keystone的出发点和SANCTUARY并不一样，Keystone着眼于构造一个用于配置、建立以及实例化可定制TEEs的框架，实现上就是通过模块化来定制TEE。在内存隔离上，SANCTUARY是利用TZC-400，而Keystone利用RISC-V机器模式的PMP(physical memory protection)。另外，Keystone着重强调将资源管理和安全检查解耦，最高权限的SM(security monitor)用最少的代码实施安全策略，而在S(Supervisor)-mode的RT(runtime)负责安全区中执行的用户代码的生命周期、内存管理、系统调用、与SM进行通信等操作。我认为Keystone和SANCTUARY虽然出发点不同，但最后实现的架构有很多近似的地方。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200914110304034.png" alt="image-20200914110304034" style="zoom:80%;"><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] Schell R R. Information security: science, pseudoscience, and flying pigs[C]//Seventeenth Annual Computer Security Applications Conference. IEEE, 2001: 205-216.</p><p>[2] Cerdeira D, Santos N, Fonseca P, et al. Sok: Understanding the prevailing security vulnerabilities in trustzone-assisted tee systems[C]//2020 IEEE Symposium on Security and Privacy (SP). IEEE, 2020: 1416-1432.</p><p>[3] Herley C, Van Oorschot P C. Sok: Science, security and the elusive goal of security as a scientific pursuit[C]//2017 IEEE symposium on security and privacy (SP). IEEE, 2017: 99-120.</p><p>[4] Lee D, Kohlbrenner D, Shinde S, et al. Keystone: An open framework for architecting trusted execution environments[C]//Proceedings of the Fifteenth European Conference on Computer Systems. 2020: 1-16.</p><p>[5] Brasser F, Gens D, Jauernig P, et al. SANCTUARY: ARMing TrustZone with User-space Enclaves[C]//NDSS. 2019.</p><p>[6] Wang J, Sun K, Lei L, et al. Cache-in-the-Middle (CITM) Attacks: Manipulating Sensitive Data in Isolated Execution Environments[C]//Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security. 2020: 1001-1015.</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;可信计算课程的期末报告&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="可信计算" scheme="http://yoursite.com/categories/%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97/"/>
-    
-    
-      <category term="TEE" scheme="http://yoursite.com/tags/TEE/"/>
-    
-      <category term="可信计算" scheme="http://yoursite.com/tags/%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97/"/>
-    
-  </entry>
-  
-  <entry>
     <title>vmx.c部分代码解读(一)</title>
     <link href="http://yoursite.com/2021/06/01/2021-06-04-KVM-vmx/"/>
     <id>http://yoursite.com/2021/06/01/2021-06-04-KVM-vmx/</id>
@@ -113,6 +117,30 @@
       <category term="虚拟化" scheme="http://yoursite.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
       <category term="linux" scheme="http://yoursite.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>关于我对可信计算的理解</title>
+    <link href="http://yoursite.com/2021/06/01/2021-06-01-trusting%20computing/"/>
+    <id>http://yoursite.com/2021/06/01/2021-06-01-trusting computing/</id>
+    <published>2021-06-01T13:31:53.000Z</published>
+    <updated>2021-06-01T13:42:57.518Z</updated>
+    
+    <content type="html"><![CDATA[<p>可信计算课程的期末报告</p><a id="more"></a><h2 id="1-可信计算和密码学的关系"><a href="#1-可信计算和密码学的关系" class="headerlink" title="1 可信计算和密码学的关系"></a>1 可信计算和密码学的关系</h2><p>可信计算是安全科学中的一个分支，所以先从我对安全科学的理解来谈。众所周知，密码学是所有安全学科的基础。密码学可以说是安全中最接近于科学的小方向，平时更受工业界追捧的工程安全可能处于安全科学领域鄙视链的最底端。Shamir在2002年图灵奖获奖致辞时就直言非密码学的安全为”a mess”。Schell在2001年描述安全领域为”pseudo-science and flying pigs”(伪科学并且充斥着谎话)[1][3]。</p><p>密码学证明安全的过程，最安全的是形式化证明，形式化证明虽然不能保证100%的安全性，但可以保证相对来说非常高的安全性；其次是规约性证明，用理论来证明密码算法的安全性；最不能保证安全的是用攻击来证明安全性。一个密码学算法的最终应用大多要经过严格的理论证明和形式化证明，最终才能走向应用接受现实的攻击实验。</p><p>但在系统安全领域内，大部分论文的安全性分析都是尝试用攻击来证明安全性，这也是硬件隔离机制和密码学的安全性证明很大的不同。可信并不等于安全，可信技术是通过构造一个信任链来让用户信任安全机制的技术。事实上，工业界中的硬件隔离机制也都是先用攻击来证明安全性，当实践已经能证明具有比较高的安全性后，再去考虑形式化验证，这相对密码学来说是个相反的过程。这样相反的论证过程也在一定程度上验证了当前很多可信机制如同漏水大锅一样层出不穷的漏洞。</p><h2 id="2-从SANCTUARY看TEE技术"><a href="#2-从SANCTUARY看TEE技术" class="headerlink" title="2 从SANCTUARY看TEE技术"></a>2 从SANCTUARY看TEE技术</h2><p>体系结构课程上沈海华老师经常喜欢说的一句话就是：体系结构架构师前三十年铆足劲提升性能，分支预测流水线，无所不用其极，近十年的meltdown, spectre攻击无一不是当初强调性能给自己挖的坑。安全是一个negative的因素，强调安全必然会带来性能的下降，结合应用实现，我们需要不断地做安全和性能之间的tradeoff，TEE(Trusted Execution Environment, 可信执行环境)就是tradeoff的产物。值得注意的是很多TEE，比如ARM TrustZone, Intel SGX, AMD SEV等公开的层出不穷的漏洞缺陷大部分都是利用TEE越权。TEE进程一般拥有比普通应用程序更高的权限，通过利用TEE上的漏洞能够以更高的权限获得系统的机密数据和代码。当TEE概念被提出并实现出来后，很多厂家都知道了TEE这么一个好东西后，都希望把自己的机密数据存入TEE中，这带来的后果就是TA(Ttrusted Application, 可信应用程序)数量的不断增大，直接导致了TCB(Trusted Computing Base, 可信计算基)的不断增大。可信计算基的增大意味着攻击面的增大，假设一个TA存在着缺陷，是否会影响到其他TA？这是需要考虑的不同TA之间的隔离性，遗憾的是，很多生产厂家的TEE中不同TAs之间的隔离是非常弱的。</p><p>在可信计算课程中由我为大家介绍的这篇论文《SANCTUARY: ARMing TrustZone with User-space Enclaves》[5]就是基于上述的TrustZone的设计缺陷构造了一个在性能，安全，开发难度之间进行tradeoff的TEE。</p><p>在进行分析后，作者认为目前各大主流TEE不能满足功能丰富的安全移动服务。针对上面提到的现有TEE的问题，SANCTUARY中通过提出了以下三点进行缓解：</p><ul><li>将安全敏感的应用程序移植到IEE(Isolated Execution Environment, 隔离执行环境)中，从而减少TCB的大小；</li><li>移植到IEE之间的应用程序通过动态划分和重分配资源来达到SA(Sanctuary Application)之间的隔离；</li><li>利用TZASC(TrustZone Address Space Controller，TrustZone地址空间控制器)等硬件来保证系统组件之间的隔离。</li></ul><p>TrustZone具有很高的权限，SANCTUARY相当于构造了一个普通权限的TEE，可以访问安全接口但不能直接运行在高权限上。这当然不是凭空产生的想法，SGX是最负盛名的用户态TEE，SANCTUARY的目标实现的就是在ARM架构上的类SGX的TEE。有趣的是，同年有类似想法的还有Keystone，阅读Keystone论文的话就会发现SANCTUARY和Keystone的架构惊人的相似，但Keystone运行在RISC-V架构上。</p><p>一个完整的SANCTUARY实例包括了处于EL0的Sanctuary App(SA)和处于EL1的Sanctuary Lib(SL), SL主要是为SA初始化运行环境并提供服务接口。SANCTUARY的架构图如下图所示。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200610153017985.png" alt="image-20200610153017985" style="zoom:50%;"><p>SANCTUARY从4个方面尝试去达成自己的安全目标。下面的篇幅我将打破文章结构介绍，从这四个方面介绍SANCTUARY为实现自己的安全目标所完成的一系列努力。</p><h3 id="2-1-如何实现严格的隔离？"><a href="#2-1-如何实现严格的隔离？" class="headerlink" title="2.1 如何实现严格的隔离？"></a>2.1 如何实现严格的隔离？</h3><p>TEE是基于硬件机制的隔离，首要任务就是保证严格的独立性。SANCTUARY从两个方面来对独立性进行保证：空间和时间。</p><p>空间独立性上主要是为SANCTUARY静态分配物理资源考虑，每个Sanctuary实例都被分配了一个独立的CPU core，利用TZC-400根据CPU core ID为每个Sanctuary实例分配物理内存。每个CPU core的地址范围的上下界都是通过四个地址范围寄存器来保存记录，而每个CPU core对这些地址范围的访问权限也是通过一个访问许可寄存器记录的。另外，为了抵御缓存侧信道攻击，不允许Sanctuary实例映射到L3缓存中（也就是将Sanctuary实例的物理内存都设置为outer uncacheable）</p><p>时间独立性主要是从SANCTUARY的动态加载来考虑，Sanctuary实例是从可信固件中启动CPU core，并且在退出使用之前将内存中的敏感信息全部清空。</p><h3 id="2-2-如何动态分配内核？"><a href="#2-2-如何动态分配内核？" class="headerlink" title="2.2 如何动态分配内核？"></a>2.2 如何动态分配内核？</h3><p>本部分简单介绍SANCTUARY建立和结束运行的过程。</p><h4 id="2-2-1-Sanctuary建立"><a href="#2-2-1-Sanctuary建立" class="headerlink" title="2.2.1 Sanctuary建立"></a>2.2.1 Sanctuary建立</h4><ul><li>当需要执行SA中的敏感代码时，由LA(Legacy Application，普通世界中的应用程序)触发并加载SL和SA的二进制文件后移交给普通世界中位于EL2的KM(kernel module)；</li><li>KM选择一个CPU core来运行Sanctuary实例并采用热拔插技术来关闭这个被选择的CPU core；</li><li>KM请求STA的服务(Static Trusted App)的服务，从而进入monitor模式，在模式切换的过程中，可信固件检查所选择的CPU core是否被合理地关闭而后将控制权转交给STA，后者对SANCTUARY内存进行配置。</li></ul><h4 id="2-2-2-Sanctuary退出"><a href="#2-2-2-Sanctuary退出" class="headerlink" title="2.2.2 Sanctuary退出"></a>2.2.2 Sanctuary退出</h4><p>当LA对SA发出请求表明自己不需要SANCTUARY的服务时，SA首先清除上下文，通过sealing保存自己的状态并将L1缓存等设备中关于自己的进程信息清除。可信固件在检查SANCTUARY core是否被真正关闭，STA将SANCTUARY内存以及其他相关的数据全部清零，防止信息泄露。最后，恢复之前的配置，释放SANCTUARY内存区域和CPU core。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200611152941103.png" alt="image-20200611152941103" style="zoom:50%;"><h3 id="2-3-如何提供和SGX类似的安全服务？"><a href="#2-3-如何提供和SGX类似的安全服务？" class="headerlink" title="2.3 如何提供和SGX类似的安全服务？"></a>2.3 如何提供和SGX类似的安全服务？</h3><p>类似的，SANCTUARY需要提供远程认证和密封服务。为了提供远程认证服务，SA和安全世界之间有共享内存，Sanctuary将自己的完整性测量结果与通向代理TA(trusted application, 可信应用程序)的信道相链接，该共享内存就是一个安全信道。而代理TA负责建立一个SA到远程服务器连接的安全信道，所有通过代理TA传输的数据都用平台密钥认证过，并与SA的身份绑定。</p><p>类似于SGX中的sealing服务，用从SA二进制文件计算得到的散列值排除出的唯一加密密钥对机密信息进行加密后存到普通世界的内存中，利用该技术，能够在安全地永久存储SANCTUARY数据信息。</p><h3 id="2-4-是否能够在现实场景中提供足够的性能？"><a href="#2-4-是否能够在现实场景中提供足够的性能？" class="headerlink" title="2.4 是否能够在现实场景中提供足够的性能？"></a>2.4 是否能够在现实场景中提供足够的性能？</h3><p>论文中作者通过构造了一个OTP双因素认证的例子，通过展现该实验构造Provision Key和产生OTP的时间来证明SANCTUARY使用普通世界和安全世界的组件所需要的时间是不会影响用户体验的。</p><h2 id="3-对SANCTUARY的讨论"><a href="#3-对SANCTUARY的讨论" class="headerlink" title="3 对SANCTUARY的讨论"></a>3 对SANCTUARY的讨论</h2><p>计算机领域中有一句很著名的话：“计算机科学领域的任何问题都可以通过增加一个间接的中间层来解决“。SANCTUARY其实就是用了这个思想，TrustZone中只有安全世界和非安全世界，SANCTUARY就构造了一个中间层——隔离执行环境，既能保证安全敏感的应用程序的安全执行，也能保证安全世界中的TCB尽可能小。</p><p>SANCTUARY巧妙地用了已有的多核机制和内存地址控制器来进行硬件资源的隔离，但却忽略了cache coherence的影响。所谓cache coherence是在保证了不同cache之间如果有共享数据，在这些共享数据被修改时该如何维护其他CPU core读到该数据时的正确性。在CITM[6]这篇论文中构造了一个方法，利用CPU的shareability属性来操纵Sanctuary实例中的机密数据泄露或者被篡改。</p><p>cache coherence一直是体系结构中研究非常多的一个方向，在体系结构中考虑的更多是如何保证数据的正确性，但在安全领域的研究人员，看这个问题却是如何利用该机制获取机密信息，不同领域看相同的问题会有不同的角度，因为有不同的借鉴。对于我们来说，我觉得做科研可以了解不同方向的论文，不必让自己的知识栈局限在某个领域内，换个角度看问题也许就能有很多很新颖的发现。</p><p>在Sok[2]这篇文章中提到了有相当一部分的TEE相关的安全漏洞和滥用安全世界的接口有关。SANCTUARY同样是通过安全世界给普通世界提供的安全接口来提供服务，但论文中并没有提到对这些安全接口的保护。</p><p>最后谈一下与SANCTUARY架构非常接近的Keystone[4]，虽然架构相似，但Keystone的出发点和SANCTUARY并不一样，Keystone着眼于构造一个用于配置、建立以及实例化可定制TEEs的框架，实现上就是通过模块化来定制TEE。在内存隔离上，SANCTUARY是利用TZC-400，而Keystone利用RISC-V机器模式的PMP(physical memory protection)。另外，Keystone着重强调将资源管理和安全检查解耦，最高权限的SM(security monitor)用最少的代码实施安全策略，而在S(Supervisor)-mode的RT(runtime)负责安全区中执行的用户代码的生命周期、内存管理、系统调用、与SM进行通信等操作。我认为Keystone和SANCTUARY虽然出发点不同，但最后实现的架构有很多近似的地方。</p><img src="/2021/06/01/2021-06-01-trusting computing/image-20200914110304034.png" alt="image-20200914110304034" style="zoom:80%;"><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>[1] Schell R R. Information security: science, pseudoscience, and flying pigs[C]//Seventeenth Annual Computer Security Applications Conference. IEEE, 2001: 205-216.</p><p>[2] Cerdeira D, Santos N, Fonseca P, et al. Sok: Understanding the prevailing security vulnerabilities in trustzone-assisted tee systems[C]//2020 IEEE Symposium on Security and Privacy (SP). IEEE, 2020: 1416-1432.</p><p>[3] Herley C, Van Oorschot P C. Sok: Science, security and the elusive goal of security as a scientific pursuit[C]//2017 IEEE symposium on security and privacy (SP). IEEE, 2017: 99-120.</p><p>[4] Lee D, Kohlbrenner D, Shinde S, et al. Keystone: An open framework for architecting trusted execution environments[C]//Proceedings of the Fifteenth European Conference on Computer Systems. 2020: 1-16.</p><p>[5] Brasser F, Gens D, Jauernig P, et al. SANCTUARY: ARMing TrustZone with User-space Enclaves[C]//NDSS. 2019.</p><p>[6] Wang J, Sun K, Lei L, et al. Cache-in-the-Middle (CITM) Attacks: Manipulating Sensitive Data in Isolated Execution Environments[C]//Proceedings of the 2020 ACM SIGSAC Conference on Computer and Communications Security. 2020: 1001-1015.</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;可信计算课程的期末报告&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="可信计算" scheme="http://yoursite.com/categories/%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97/"/>
+    
+    
+      <category term="TEE" scheme="http://yoursite.com/tags/TEE/"/>
+    
+      <category term="可信计算" scheme="http://yoursite.com/tags/%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97/"/>
     
   </entry>
   
@@ -275,9 +303,9 @@
       <category term="Keystone" scheme="http://yoursite.com/categories/Keystone/"/>
     
     
-      <category term="RISC-V" scheme="http://yoursite.com/tags/RISC-V/"/>
-    
       <category term="paper" scheme="http://yoursite.com/tags/paper/"/>
+    
+      <category term="RISC-V" scheme="http://yoursite.com/tags/RISC-V/"/>
     
       <category term="Keystone" scheme="http://yoursite.com/tags/Keystone/"/>
     
@@ -473,32 +501,6 @@
       <category term="读书" scheme="http://yoursite.com/tags/%E8%AF%BB%E4%B9%A6/"/>
     
       <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>keystone-qemu手动安装测试</title>
-    <link href="http://yoursite.com/2019/12/03/2020-04-19-keystone-qemu%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85%E6%B5%8B%E8%AF%95/"/>
-    <id>http://yoursite.com/2019/12/03/2020-04-19-keystone-qemu手动安装测试/</id>
-    <published>2019-12-03T06:16:06.000Z</published>
-    <updated>2020-04-19T07:47:28.991Z</updated>
-    
-    <content type="html"><![CDATA[<p>还是docker装吧。（摊手</p><a id="more"></a><h1 id="Install-Dependencies"><a href="#Install-Dependencies" class="headerlink" title="Install Dependencies"></a>Install Dependencies</h1><p>在执行<code>sudo apt update</code>后执行<code>sudo apt install autoconf automake autotools-dev bc bison build-essential curl expat libexpat1-dev flex gawk gcc git gperf libgmp-dev libmpc-dev libmpfr-dev libtool texinfo tmux patchutils zlib1g-dev wget bzip2 patch vim-common lbzip2 python pkg-config libglib2.0-dev libpixman-1-dev libssl-dev screen device-tree-compiler expect makeself unzip cpio rsync</code><br>然后出现了如下问题</p><blockquote><p>Some packages could not be installed. This may mean that you have requested an impossible situation or if you are using the unstable distribution that some required packages have not yet been created or been moved out of Incoming.<br>The following information may help to resolve the situation:<br>The following packages have unmet dependencies:<br>gnupg : Breaks: software-properties-common (&lt;= 0.96.24.3) but 0.96.20.9 is to be installed<br>E: Error, pkgProblemResolver::Resolve generated breaks, this may be caused by held packages.</p></blockquote><p>用失败信息去google搜索，根据句askubuntu和stackflow中得到的信息，应该是因为Ubuntu版本号的原因。用<code>cat /etc/issue</code>命令查看当前Ubuntu版本，是18.04，继续查看更新源，也都是最新的阿里源。</p><p>根据<a href="https://askubuntu.com/questions/1108428/ubuntu-16-04-desktop-ui-is-broken-missing-features" target="_blank" rel="noopener">Ubuntu 16.04 desktop UI is broken/missing features</a>中一个老哥给出的<code>sudo apt dis-upgrade</code>的建议，运行该命令，成功更新，再安装依赖包，成功。</p><h1 id="Setup"><a href="#Setup" class="headerlink" title="Setup"></a>Setup</h1><p>本部分要完成三件事：(1)安装RISC-V toolchain；(2)检查git submodules；(3)安装SDK。</p><h2 id="同步并更新所有的子模块"><a href="#同步并更新所有的子模块" class="headerlink" title="同步并更新所有的子模块"></a>同步并更新所有的子模块</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git submodule sync --recursive  </span><br><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure><p>在执行第一条命令的时候又出现了<code>dy_ms@test:~$ git submodule sync --recursivefatal: not a git repository (or any of the parent directories): .git</code>这样的错误，这是因为没有初始化git本地版本管理仓库，所以要执行<code>git init</code>，而后就可以顺利进行同步和更新。</p><h2 id="安装RISC-V-GNU-toolchain"><a href="#安装RISC-V-GNU-toolchain" class="headerlink" title="安装RISC-V GNU toolchain"></a>安装RISC-V GNU toolchain</h2><p>安装GNU toolchain我事先在虚拟机上尝试过，过程很漫长，结果很悲惨。我的虚拟机因为硬盘空间不够直接宕机了，然后重新装了虚拟机，现在都不敢在虚拟机上重新来一遍。T^T<br>当我看到服务器硬盘是1000G的时候，露出了满意的微笑，这时候再也没有什么能阻碍我的装机之旅了。然后在运行了以下指令：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/riscv/riscv-gnu-toolchain</span><br><span class="line">cd riscv-gnu-toolchain</span><br><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure><p>然后出现了以下错误  </p><blockquote><p>error: RPC failed; curl 18 transfer closed with outstanding read data remaining<br>fatal: The remote end hung up unexpectedly<br>fatal: early EOF<br>fatal: index-pack failed<br>fatal: clone of ‘<a href="https://github.com/riscv/riscv-binutils-gdb.git&#39;" target="_blank" rel="noopener">https://github.com/riscv/riscv-binutils-gdb.git&#39;</a> into submodule path ‘/data/dy_ms/riscv-gnu-toolchain/riscv-binutils’ failed  </p></blockquote><p>google了相关问题，是因为网速太慢。(╯‵□′)╯︵┻━┻<br>本来我以为是实验室的网速慢，确实，实验室的网速也很慢。所以我昨天特地早早回家用家里的无线网连，还是10k每秒？？？今天跟学长老师交流了一下，是因为对面服务器的网速太慢了，晕了，这也太慢了。这个网速太坑了，我已经打算再试一下docker装了。</p><h2 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h2><p>然后我用docker了，docker大法好，躺平任嘲XD</p><h1 id="其他细节的知识点"><a href="#其他细节的知识点" class="headerlink" title="其他细节的知识点"></a>其他细节的知识点</h1><h2 id="ubuntu更新的区别与联系"><a href="#ubuntu更新的区别与联系" class="headerlink" title="ubuntu更新的区别与联系"></a>ubuntu更新的区别与联系</h2><p>update：是下载源里面的metadata，比如软件包的版本信息、系统要求、翻译、依赖项等等。apt get update是对软件包列表的更新过程，而upgrade是对软件包的更新过程。</p><p>upgrade: 系统将现有的package升级，如果有相依性的问题，而相依性需要安装其他新的package或影响到其他package的相依性时，此时package就不会被升级而会保留下来；<br>dist-upgrade：可以聪明地解决相依性的问题，如果有相依性问题，需要安装或移除新的package，就会尝试去安装或者移除它。</p><p>upgrade和disupgrade本质上没有什么不同，但dist-upgrade会识别出依赖关系改变的情况并作出处理，而upgrade对此情形不处理。</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul><li><a href="https://blog.csdn.net/wangyezi19930928/article/details/54928201" target="_blank" rel="noopener">apt-get update,upgrade和dist-upgrade的区别</a></li><li><a href="https://www.zhihu.com/question/20709809" target="_blank" rel="noopener">Linux ssh状态下如何后台运行程序</a></li></ul>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;还是docker装吧。（摊手&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="keystone" scheme="http://yoursite.com/categories/keystone/"/>
-    
-    
-      <category term="实验" scheme="http://yoursite.com/tags/%E5%AE%9E%E9%AA%8C/"/>
-    
-      <category term="keystone" scheme="http://yoursite.com/tags/keystone/"/>
-    
-      <category term="qemu" scheme="http://yoursite.com/tags/qemu/"/>
     
   </entry>
   

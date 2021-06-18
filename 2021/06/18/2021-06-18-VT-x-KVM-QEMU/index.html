@@ -6,16 +6,24 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Category: 操作系统 | rww&#39;s Blog</title>
+  <title>VT-x, KVM, QEMU如何一起愉快地工作 | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="system security | computer architecture | Lions come in March | Animation | for better">
-<meta property="og:type" content="website">
-<meta property="og:title" content="rww&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/categories/操作系统/index.html">
+  <meta name="description" content="Intel Virtualization: VT-x, KVM, QEMU如何一起愉快地工作">
+<meta name="keywords" content="虚拟化,VT-x,KVM,QEMU">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VT-x, KVM, QEMU如何一起愉快地工作">
+<meta property="og:url" content="http://yoursite.com/2021/06/18/2021-06-18-VT-x-KVM-QEMU/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
+<meta property="og:description" content="Intel Virtualization: VT-x, KVM, QEMU如何一起愉快地工作">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210612163024109.png">
+<meta property="og:image" content="http://yoursite.com/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210607112952018.png">
+<meta property="og:image" content="http://yoursite.com/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210612222222989.png">
+<meta property="og:updated_time" content="2021-06-18T13:22:59.217Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="rww&#39;s Blog">
+<meta name="twitter:title" content="VT-x, KVM, QEMU如何一起愉快地工作">
+<meta name="twitter:description" content="Intel Virtualization: VT-x, KVM, QEMU如何一起愉快地工作">
+<meta name="twitter:image" content="http://yoursite.com/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210612163024109.png">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -152,132 +160,282 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2021-06-18-VT-x-KVM-QEMU" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/08/01/2019-08-06-操作系统基本知识/" class="archive-article-date">
-  	<time datetime="2019-08-01T06:10:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-08-01</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/08/01/2019-08-06-操作系统基本知识/">操作系统基本知识</a>
+    <h1 class="article-title" itemprop="name">
+      VT-x, KVM, QEMU如何一起愉快地工作
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2021/06/18/2021-06-18-VT-x-KVM-QEMU/" class="archive-article-date">
+  	<time datetime="2021-06-18T13:19:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-18</time>
+</a>
+        
+      </header>
+    
+	<!-- 目录内容 -->
+	
+		<!-- 目录内容结束 -->
+
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Intel Virtualization: VT-x, KVM, QEMU如何一起愉快地工作</p>
+<a id="more"></a>
+
+<blockquote>
+<p>When we talk about virtualization we mean hardware assisted virtualization where the VM’s processor matches host computer’s processor. </p>
+</blockquote>
+<blockquote>
+<p>Containerization is mostly a software concept and it builds on top of operating system abstractions like process identifiers, file system and memory consumption limits.</p>
+</blockquote>
+<blockquote>
+<p>In case of KVM, this is actually Linux kernel which has KVM modules loaded into it. In other words, KVM is a set of kernel modules that when loaded into Linux kernel turn the kernel into hypervisor. </p>
+</blockquote>
+<p>Full virtualization: when OS that is running inside a VM is exactly the same as would be running on real hardware.</p>
+<p>Paravirtualization: when OS inside VM is aware that it is being virtualized and thus runs in a slightly modified way than it would on real hardware.</p>
+<p><img src="/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210612163024109.png" alt="image-20210612163024109"></p>
+<h2 id="VT-x"><a href="#VT-x" class="headerlink" title="VT-x"></a>VT-x</h2><p>VT-x是用于Intel64和IA-32架构的CPU虚拟化。VT-x中的CPU操作有两种模式：root和non-root。Hypervisor运行在root模式，而VMs运行在non-root模式。non-root模式可以模拟在root模式下的操作，但需要注意的是”global state-changing”指令，这些指令能够影响CPU状态，这些指令是non-root模式下无法执行的。</p>
+<blockquote>
+<p>Examples are those instructions which modify clock or interrupt registers, or write to control registers in a way that will change the operation of root mode.</p>
+</blockquote>
+<h3 id="VMX-Virtual-Machine-Extension"><a href="#VMX-Virtual-Machine-Extension" class="headerlink" title="VMX(Virtual Machine Extension)"></a>VMX(Virtual Machine Extension)</h3><p>VMX是一系列用于支持VT-x的指令。</p>
+<p><code>VMXON</code>： 用于进入虚拟化的指令，执行完毕后，CPU在root模式下；</p>
+<p><code>VMXOFF</code>：执行完毕后，退出虚拟化；</p>
+<p><code>VMLAUNCH</code>：构造一个VM实例并进入non-root模式；</p>
+<p><code>VMRESUME</code>：进入non-root模式和一个已经存在的VM实例。</p>
+<p><img src="/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210607112952018.png" alt="image-20210607112952018"></p>
+<p>当一个VM尝试执行一条不被运行在non-root模式下执行的指令时，CPU以trap-like的方式切换到root模式，这就是VM exit。</p>
+<ul>
+<li>CPU首先运行在普通模式下，执行<code>VMXON</code>开始了root模式下的虚拟化</li>
+<li>接着，执行<code>VMLAUNCH</code>进入non-root模式并构造了一个VM实例</li>
+<li>当VM实例运行自己的代码，并尝试执行不被运行的命令时，会触发<code>VM exit</code>，并切换到root模式</li>
+<li>切换到root模式时，控制权已经转移到了hypervisor上，hypervisor检查引起<code>VM exit</code>的原因，而后执行<code>VMRESUME</code>重新回到non-root模式下的该VM实例</li>
+</ul>
+<p>Q1：hypervisor如何知道VM exit的原因？不同的VM实例之间如何区分？</p>
+<p>A1：从VMCS结构中得知。</p>
+<p>每个vCPU都有一个VMCS，VMCS以CPU级别存储信息。</p>
+<ul>
+<li><code>VMREAD</code>：读取特定VMCS</li>
+<li><code>VMWRITE</code>：写特定VMCS</li>
+</ul>
+<p>这两条指令都需要root模式，并且只有hypervisor能够修改VMCS。Non-root模式下的VM虽然可以执行VMWRITE，但写入的并不是真正的VMCS，而是”shadow” VMCS.</p>
+<p>有一些指令是作用在所有的VMCS实例中，而不是单独的VMCS。</p>
+<ul>
+<li><code>VMPTRLD</code>: load the address of a VMCS</li>
+<li><code>VMPTRST</code>: store the address to a specified memory address</li>
+</ul>
+<p>虽然可以有多个VMCS实例，但只能有一个时刻只能有一个active的VMCS。<code>VMPTRLD</code>标记该特定的VMCS为active。当执行<code>VMRESUME</code>时，non-root模式下的VM通过active VMCS实例就可以知道正在运行的VM和vCPU。</p>
+<p>VMCS主要保存两种类型的信息：</p>
+<ul>
+<li>在进行root和non-root上下文切换时，CPU寄存器需要保存和恢复的信息</li>
+<li>non-root下，决定VM行为的控制信息。（比如设置了特定的比特位，就可以允许VM尝试执行<code>RDTSC</code>时不会引起<code>VM exit</code></li>
+</ul>
+<p>VMCS可以被划分为6个区域：</p>
+<ul>
+<li>GUEST-STATE域：虚拟机从根操作模式进入非根操作模式时，处理器所处于的状态保存在这里</li>
+<li>HOST-STATE域：虚拟机从非根模式退出到根操作模式时，处理器所处于的状态保存在这里</li>
+<li>VM execution control fields：虚拟机在非根操作模式运行时，处理器所处于的状态</li>
+<li>VM exit control fields：虚拟机从非根操作模式下退出时，需要保存的信息</li>
+<li>VM entry control fields：虚拟机从跟模式进入非根模式时，需要读取的信息</li>
+<li>VM exit information fields：虚拟机从非根操作模式退出到根操作模式，将退出的原因保存到该域中</li>
+</ul>
+<p>Guest software指令：</p>
+<ul>
+<li>INVEPT: GPA-&gt;HPA相关缓存刷新</li>
+<li>INVVPID: 用于GVA-&gt;GPA的刷新</li>
+</ul>
+<h2 id="KVM-Kernel-based-Virtual-Machine"><a href="#KVM-Kernel-based-Virtual-Machine" class="headerlink" title="KVM(Kernel-based Virtual Machine)"></a>KVM(Kernel-based Virtual Machine)</h2><p><strong>KVM: a set of Linux kernel modules that when loaded, turn Linux kernel into hypervisor.</strong></p>
+<p>KVM模块可以被分成两部分：</p>
+<ul>
+<li>core module: kvm.ko</li>
+<li>machine specific modules: 取决于host machine CPU，比如VT-x需要的就是kvm-intel.ko</li>
+</ul>
+<p>KVM与用户空间进行交互，在本文的语境下，就是QEMU通过两种方式：</p>
+<ul>
+<li>device file <code>/dev/kvm</code><ul>
+<li>system level: </li>
+<li>vm level: </li>
+<li>vCPU level: </li>
+</ul>
+</li>
+<li>memory mapped pages: 用于QEMU和KVM之间批量数据传递</li>
+</ul>
+<h2 id="QEMU-Quick-Emulator"><a href="#QEMU-Quick-Emulator" class="headerlink" title="QEMU(Quick Emulator)"></a>QEMU(Quick Emulator)</h2><blockquote>
+<p>QEMU creates one process for every VM. For each vCPU, QEMU creates a thread. These are regular threads and they get scheduled by the OS like any other thread. </p>
+<p>As these threads get run time, QEMU creates impression of multiple CPUs for the software running inside its VM. </p>
+</blockquote>
+<p>QEMU能够进行模拟，它能够模拟一些KVM并不支持的I/O操作。举个例子，当VM中的某个软件希望执行I/O操作：</p>
+<ul>
+<li>VM返回KVM</li>
+<li>KVM查找VM exit的原因，将控制权以及I/O请求信息的指针转交给QEMU</li>
+<li>QEMU为该请求模拟I/O设备</li>
+<li>当VM中的软件执行完毕后，KVM重新获得控制权，并且执行VMRESUME重新执行VM。</li>
+</ul>
+<p><img src="/2021/06/18/2021-06-18-VT-x-KVM-QEMU/image-20210612222222989.png" alt="image-20210612222222989"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://binarydebt.wordpress.com/2018/10/14/intel-virtualisation-how-vt-x-kvm-and-qemu-work-together/" target="_blank" rel="noopener">Intel Virtualization: How VT-x, kVM and QEMU Work Together</a></li>
+<li><a href="https://blog.csdn.net/wanthelping/article/details/47068745" target="_blank" rel="noopener">内核VMX基本数据结构与操作</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">操作系统</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">虚拟化</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">基本知识复习</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">VT-x</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">KVM</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">QEMU</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/操作系统//" class="article-tag-list-link color5">操作系统</a>
+        			<a href="/categories/虚拟化//" class="article-tag-list-link color4">虚拟化</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2021/06/18/2021-06-18-VT-x-KVM-QEMU/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/31/2019-09-01-intel-sgx-explained阅读笔记/" class="archive-article-date">
-  	<time datetime="2019-07-31T08:17:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-31</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2021/06/11/2021-06-11-kvm-environment-in-vmware/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">kvm environment in vmware</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/31/2019-09-01-intel-sgx-explained阅读笔记/">intel sgx explained阅读笔记</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">操作系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">基本知识复习</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">SGX</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/操作系统//" class="article-tag-list-link color5">操作系统</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#VT-x"><span class="toc-number">1.</span> <span class="toc-text">VT-x</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#VMX-Virtual-Machine-Extension"><span class="toc-number">1.1.</span> <span class="toc-text">VMX(Virtual Machine Extension)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KVM-Kernel-based-Virtual-Machine"><span class="toc-number">2.</span> <span class="toc-text">KVM(Kernel-based Virtual Machine)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#QEMU-Quick-Emulator"><span class="toc-number">3.</span> <span class="toc-text">QEMU(Quick Emulator)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -300,10 +458,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
-		isCategory: true,
+		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",
