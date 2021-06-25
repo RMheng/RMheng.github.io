@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives: 2019/11 | rww&#39;s Blog</title>
+  <title>KVM SVM | rww&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="system security | computer architecture | Lions come in March | Animation | for better">
-<meta property="og:type" content="website">
-<meta property="og:title" content="rww&#39;s Blog">
-<meta property="og:url" content="http://yoursite.com/archives/2019/11/index.html">
+  <meta name="description" content="如果去谷歌上搜VT-x，相关的技术blog特别特别多，但如果要是找SVM，基本就是没有，所以本文大部分的内容来自于《AMD programmable manual》以及KVM svm.c代码。">
+<meta name="keywords" content="虚拟化,SVM,KVM,手册工程师">
+<meta property="og:type" content="article">
+<meta property="og:title" content="KVM SVM">
+<meta property="og:url" content="http://yoursite.com/2021/06/25/2021-06-25-AMD-SEV/index.html">
 <meta property="og:site_name" content="rww&#39;s Blog">
+<meta property="og:description" content="如果去谷歌上搜VT-x，相关的技术blog特别特别多，但如果要是找SVM，基本就是没有，所以本文大部分的内容来自于《AMD programmable manual》以及KVM svm.c代码。">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-06-25T09:26:08.329Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="rww&#39;s Blog">
+<meta name="twitter:title" content="KVM SVM">
+<meta name="twitter:description" content="如果去谷歌上搜VT-x，相关的技术blog特别特别多，但如果要是找SVM，基本就是没有，所以本文大部分的内容来自于《AMD programmable manual》以及KVM svm.c代码。">
   
     <link rel="alternative" href="/atom.xml" title="rww&#39;s Blog" type="application/atom+xml">
   
@@ -152,75 +156,248 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-2021-06-25-AMD-SEV" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/11/26/2019-11-diary/" class="archive-article-date">
-  	<time datetime="2019-11-26T08:47:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-26</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/11/26/2019-11-diary/">2019.11日记</a>
+    <h1 class="article-title" itemprop="name">
+      KVM SVM
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2021/06/25/2021-06-25-AMD-SEV/" class="archive-article-date">
+  	<time datetime="2021-06-25T09:22:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-25</time>
+</a>
+        
+      </header>
+    
+	<!-- 目录内容 -->
+	
+		<!-- 目录内容结束 -->
+
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>如果去谷歌上搜VT-x，相关的技术blog特别特别多，但如果要是找SVM，基本就是没有，所以本文大部分的内容来自于《AMD programmable manual》以及KVM <code>svm.c</code>代码。</p>
+<a id="more"></a>
+
+<h1 id="VMRUN"><a href="#VMRUN" class="headerlink" title="VMRUN"></a><code>VMRUN</code></h1><p>SVM中<code>VMRUN</code>, <code>VMSAVE</code>, <code>VMLOAD</code>, <code>VMEXIT</code></p>
+<p>VMCB(virtual machine control block): 用于表示即将运行的虚拟机</p>
+<ul>
+<li>guest中的需要拦截的一系列指令或者行为（比如，向CR3中写数据）</li>
+<li>定义guest的执行环境的control bits或进入guest code之前的将进行的特殊动作</li>
+<li>guest处理器状态（控制寄存器）</li>
+</ul>
+<p>VMRUN</p>
+<p><strong>保存主机状态(Host State)</strong>。<code>VMRUN</code>保存主机状态到<code>VM_HSAVE_PA</code>寄存器指定的物理地址</p>
+<ul>
+<li><p><code>CS.SEL</code>, <code>NEXT_RIP</code>: <code>VMRUN</code>紧接着的CS选择符和RIP，当发起<code>#VMEXIT</code>操作后，主机从该地址重新执行；</p>
+</li>
+<li><p><code>RFLAGS</code>, <code>RAX</code>: 主机处理器以及<code>VMRUN</code>用于寻址VMCB的寄存器</p>
+</li>
+<li><p><code>SS.SEL</code>, <code>RSP</code>： 主机的栈指针(stack pointer)</p>
+</li>
+<li><p><code>CR0</code>, <code>CR3</code>, <code>CR4</code>, <code>EFER</code>: 主机的分页/操作模式</p>
+<ul>
+<li><code>CR0</code>: 系统内的控制寄存器，控制CPU中的一些重要特征</li>
+<li><code>CR3</code>: 页目录基址寄存器，保存页目录表的物理地址</li>
+<li><code>CR4</code>: 是否进入实模式等控制位</li>
+<li><code>EFER</code>(Extended Feature Enable Register): 管理一些扩展bit位（比如System-Call Extension(SCE) Bit)(svm.c <code>smv_set_efer</code>函数)</li>
+</ul>
+</li>
+<li><p><code>IDTR</code>, <code>GDTR</code>: 伪描述符，<code>VMRUN</code>并不会保存或者恢复主机的<code>LDTR</code></p>
+</li>
+<li><p><code>ES.SEL</code>, <code>DS.SEL</code></p>
+</li>
+</ul>
+<p><strong>加载客户机状态(guest state)</strong></p>
+<ul>
+<li><code>CS</code>, <code>rIP</code>: 客户机从该地址处开始执行（从VMCB中加载）</li>
+<li><code>RFLAGS</code>, <code>RAX</code></li>
+<li><code>SS</code>, <code>RSP</code>: <code>SS</code>段寄存器的状态</li>
+<li><code>CR0</code>, <code>CR2</code>, <code>CR3</code>, <code>CR4</code>, <code>EFER</code>: 客户机分页模式。</li>
+<li><code>INTERRUPT_SHADOW</code>: 标记客户机是否位于<em>interrupt lockout shadow</em></li>
+<li><code>IDTR</code>, <code>GDTR</code></li>
+<li><code>ES</code>, <code>DS</code>: 段寄存器中的隐藏状态</li>
+<li><code>DR6</code>, <code>DR7</code>: 客户机的断点状态</li>
+<li><code>V_TPR</code>: 客户机的虚拟TPR</li>
+<li><code>V_IRQ</code>: 指示是否在客户机中使用虚拟中断的标志</li>
+<li><code>CPL</code>: 如果客户机位于实模式，则CPL为0；如果客户机在v86模式，则CPL为3</li>
+</ul>
+<p>当EFLAGS.RF=1时，VMM阻止第一条guest命令中的任何可能的指令断点；</p>
+<p>当EFLGAS.TF=1时，该指令在客户机的第一条指令后会产生trace trap</p>
+<h2 id="svm-c"><a href="#svm-c" class="headerlink" title="svm.c"></a><code>svm.c</code></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//设置指定v</span></span><br><span class="line">cpu的efer</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">svm_set_efer</span><span class="params">(struct kvm_vcpu *vcpu, u64 efer)</span></span></span><br><span class="line"><span class="function"><span class="comment">/*</span></span></span><br><span class="line"><span class="function"><span class="comment">1. 获取vcpu对应的svm结构体</span></span></span><br><span class="line"><span class="function"><span class="comment">2. 读取vcpu中已有的efer，记为old_efer, 并将vcpu对应的efer设置为efer</span></span></span><br><span class="line"><span class="function"><span class="comment">3. 如果没有开启NPT</span></span></span><br><span class="line"><span class="function"><span class="comment">	3.1 设置efer中的EFER_NX位</span></span></span><br><span class="line"><span class="function"><span class="comment">	3.2 判断LMA位(Long Mode Active)，如果不是长模式，则设置LME(Long Mode Enable)为0, 使用legacy mode。</span></span></span><br><span class="line"><span class="function"><span class="comment">4. 如果old_efer和efer中的SVME(Secure Virtual Machine Enable)位不一致</span></span></span><br><span class="line"><span class="function"><span class="comment">	4.1 如果efer设置中的EFER_SVME为0（也就是没有开启）</span></span></span><br><span class="line"><span class="function"><span class="comment">		4.1.1 svm_leave_nested(svm)</span></span></span><br><span class="line"><span class="function"><span class="comment">		4.1.2 svm_set_git</span></span></span><br><span class="line"><span class="function"><span class="comment">		4.1.3 如果开启了vmware_backdoor, 则清理exception和intercept</span></span></span><br><span class="line"><span class="function"><span class="comment">		4.1.4 如果不位于VMM状态，则清楚nested guest state</span></span></span><br><span class="line"><span class="function"><span class="comment">	4.2 如果不为0.也就是开了SVM</span></span></span><br><span class="line"><span class="function"><span class="comment">		4.2.1 svm_allocate_nested(svm)</span></span></span><br><span class="line"><span class="function"><span class="comment">		4.2.2 设置成功，则设置vcpu中的arch.efer为old_efer</span></span></span><br><span class="line"><span class="function"><span class="comment">		4.2.3 设置exception, intercept</span></span></span><br><span class="line"><span class="function"><span class="comment">5. 如果一致，则设置svm vmcb save.efer中的EFER_SVME位，并将svm vmcb结构体中的clean位保留最后五位</span></span></span><br><span class="line"><span class="function"><span class="comment">*/</span></span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//当用户通过KVM_CREATE_VCPU系统调用请求创建vCPU之后，KVM子模块将创建kvm_vcpu结构体并进行初始化操作，最后返回对应的vcpu_fd描述符</span></span><br><span class="line"><span class="comment">//内核版本为4.8</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">kvm_vcpu</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">kvm</span> *<span class="title">kvm</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_PREEMPT_NOTIFIERS</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">preempt_notifier</span> <span class="title">preempt_notifier</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="keyword">int</span> cpu;   <span class="comment">//运行当前vCPU的物理编号</span></span><br><span class="line">	<span class="keyword">int</span> vcpu_id;</span><br><span class="line">	<span class="keyword">int</span> srcu_idx;</span><br><span class="line">	<span class="keyword">int</span> mode;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> requests;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> guest_debug;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> pre_pcpu;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">blocked_vcpu_list</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">mutex</span> <span class="title">mutex</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">kvm_run</span> *<span class="title">run</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> fpu_active;</span><br><span class="line">	<span class="keyword">int</span> guest_fpu_loaded, guest_xcr0_loaded;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> fpu_counter;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">swait_queue_head</span> <span class="title">wq</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">pid</span> *<span class="title">pid</span>;</span></span><br><span class="line">	<span class="keyword">int</span> sigset_active;</span><br><span class="line">	<span class="keyword">sigset_t</span> sigset;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">kvm_vcpu_stat</span> <span class="title">stat</span>;</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> halt_poll_ns;</span><br><span class="line">	<span class="keyword">bool</span> valid_wakeup;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_HAS_IOMEM</span></span><br><span class="line">	<span class="keyword">int</span> mmio_needed;</span><br><span class="line">	<span class="keyword">int</span> mmio_read_completed;</span><br><span class="line">	<span class="keyword">int</span> mmio_is_write;</span><br><span class="line">	<span class="keyword">int</span> mmio_cur_fragment;</span><br><span class="line">	<span class="keyword">int</span> mmio_nr_fragments;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">kvm_mmio_fragment</span> <span class="title">mmio_fragments</span>[<span class="title">KVM_MAX_MMIO_FRAGMENTS</span>];</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_KVM_ASYNC_PF</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">		u32 queued;</span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">queue</span>;</span></span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">done</span>;</span></span><br><span class="line">		<span class="keyword">spinlock_t</span> lock;</span><br><span class="line">	&#125; async_pf;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_HAVE_KVM_CPU_RELAX_INTERCEPT</span></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * Cpu relax intercept or pause loop exit optimization</span></span><br><span class="line"><span class="comment">	 * in_spin_loop: set when a vcpu does a pause loop exit</span></span><br><span class="line"><span class="comment">	 *  or cpu relax intercepted.</span></span><br><span class="line"><span class="comment">	 * dy_eligible: indicates whether vcpu is eligible for directed yield.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">		<span class="keyword">bool</span> in_spin_loop;</span><br><span class="line">		<span class="keyword">bool</span> dy_eligible;</span><br><span class="line">	&#125; spin_loop;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="keyword">bool</span> preempted;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">kvm_vcpu_arch</span> <span class="title">arch</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>int vcpu_id;</code> //对应的vcpu的id</li>
+<li><code>struct kvm_run *run;</code> //vCPU的运行时参数，其中保存了寄存器信息、内存信息、虚拟机状态等各种动态信息</li>
+<li><code>struct kvm_vcpu_arch arch;</code>  //KVM虚拟机的运行时参数，比如定时器、中断、内存槽等信息</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">vcpu_svm</span></span></span><br></pre></td></tr></table></figure>
+
+<p>深坑。。。未完待续</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li>AMD手册</li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">生活</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">虚拟化</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">日记</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">SVM</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">KVM</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">手册工程师</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/日记//" class="article-tag-list-link color3">日记</a>
+        			<a href="/categories/虚拟化//" class="article-tag-list-link color4">虚拟化</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2021/06/25/2021-06-25-AMD-SEV/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2021/06/18/2021-06-18-VT-x-KVM-QEMU/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">VT-x, KVM, QEMU如何一起愉快地工作</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#VMRUN"><span class="toc-number">1.</span> <span class="toc-text">VMRUN</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#svm-c"><span class="toc-number">1.1.</span> <span class="toc-text">svm.c</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-number">1.2.</span> <span class="toc-text">参考</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -243,8 +420,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

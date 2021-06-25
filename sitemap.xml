@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2021/06/25/2021-06-25-AMD-SEV/</loc>
+    
+    <lastmod>2021-06-25T09:26:08.329Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2021/06/18/2021-06-18-VT-x-KVM-QEMU/</loc>
     
     <lastmod>2021-06-18T13:22:59.217Z</lastmod>
