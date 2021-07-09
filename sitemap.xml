@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2021/07/09/2021-07-09-%E7%A2%8E%E7%A2%8E%E5%BF%B5%E7%A2%8E%E7%A2%8E%E5%BF%B5/</loc>
+    
+    <lastmod>2021-07-09T10:49:26.179Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2021/07/08/2021-07-08-git-push%E6%97%B6%E5%A6%82%E4%BD%95%E5%BF%BD%E7%95%A5%E5%A4%A7%E6%96%87%E4%BB%B6/</loc>
+    
+    <lastmod>2021-07-08T03:01:17.404Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2021/07/02/2021-07-02-kvm-unit-tests-init_vmx_caps()/</loc>
     
     <lastmod>2021-07-02T09:42:29.220Z</lastmod>
