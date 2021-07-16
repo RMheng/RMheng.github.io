@@ -188,9 +188,9 @@
       <category term="虚拟化" scheme="http://yoursite.com/categories/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
     
-      <category term="OS" scheme="http://yoursite.com/tags/OS/"/>
-    
       <category term="Linux" scheme="http://yoursite.com/tags/Linux/"/>
+    
+      <category term="OS" scheme="http://yoursite.com/tags/OS/"/>
     
       <category term="KVM" scheme="http://yoursite.com/tags/KVM/"/>
     
@@ -214,9 +214,9 @@
       <category term="OS" scheme="http://yoursite.com/categories/OS/"/>
     
     
-      <category term="OS" scheme="http://yoursite.com/tags/OS/"/>
-    
       <category term="Linux" scheme="http://yoursite.com/tags/Linux/"/>
+    
+      <category term="OS" scheme="http://yoursite.com/tags/OS/"/>
     
   </entry>
   
@@ -332,9 +332,9 @@
       <category term="日记" scheme="http://yoursite.com/categories/%E6%97%A5%E8%AE%B0/"/>
     
     
-      <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
-    
       <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
+    
+      <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
     
   </entry>
   
