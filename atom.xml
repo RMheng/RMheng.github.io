@@ -63,32 +63,6 @@
   </entry>
   
   <entry>
-    <title>kvm-unit-tests init_vmx_caps()</title>
-    <link href="http://yoursite.com/2021/07/02/2021-07-02-kvm-unit-tests-init_vmx_caps()/"/>
-    <id>http://yoursite.com/2021/07/02/2021-07-02-kvm-unit-tests-init_vmx_caps()/</id>
-    <published>2021-07-02T08:54:00.000Z</published>
-    <updated>2021-07-02T09:42:29.220Z</updated>
-    
-    <content type="html"><![CDATA[<p>vmx.c中的<code>init_vmx_cap()</code>函数解读。</p><a id="more"></a><p>关于<code>init_vmx_cap()</code>函数，该函数密切相关的两个结构体是<code>vmx_ctrl_msr</code>和<code>vmx_basic</code></p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">union</span> vmx_ctrl_msr &#123;</span><br><span class="line">    u64 val;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">        u32 <span class="built_in">set</span>, clr;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">union</span> vmx_basic &#123;</span><br><span class="line">u64 val;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">u32 revision;</span><br><span class="line">u32size:<span class="number">13</span>,</span><br><span class="line">reserved1: <span class="number">3</span>,</span><br><span class="line">width:<span class="number">1</span>,</span><br><span class="line">dual:<span class="number">1</span>,</span><br><span class="line">type:<span class="number">4</span>,</span><br><span class="line">insouts:<span class="number">1</span>,</span><br><span class="line">ctrl:<span class="number">1</span>,  <span class="comment">//如果VMX controls默认为1但可以被清除为0，则该bit位为1</span></span><br><span class="line">reserved2:<span class="number">8</span>;</span><br><span class="line">&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init_vmx_caps</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    basic.val = rmdsr(MSR_IA32_VMX_BASIC);</span><br><span class="line">    ctrl_pin_rev.val = rdmsr(basic.ctrl ? MSR_IA32_VMX_TRUE_PIN</span><br><span class="line">            : MSR_IA32_VMX_PINBASED_CTLS);</span><br><span class="line">    ....</span><br><span class="line">        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><code>MSR_IA32_VMX_BASIC</code>寄存器中保存的值即为<code>vmx_basic</code>，该寄存器bit 55如果为1，通过读取<code>IA32_VMX_TRUE_PINBASED_CTLS MSR</code>报告在VM entry中默认1的类中有哪些pin-based VM-execution controls可以为0（reports which of the pin-based VM-execution controls in the default1 class can be 0 on VM entry)</p><blockquote><p>bits 31:0  indicates the allowed 0-settings of these controls. VM entry allows control X to be 0 if bit X in the MSR is cleared to 0; if bit X in the MSR is set to 1, VM entry fails if control X is 0.</p><p>bits 63:32 indicate the allowed 1-settings of these controls. VM entry allows control X to be 1 if bit 32+X in the MSR is set to 1; if bit 32+X in the MSR is cleared to 0, VM entry fails if control X is 1.</p></blockquote><p>当<code>MSR_IA32_VMX_BASIC</code>寄存器的bit55为0时，所有关于pin-based VM-execution controls信息都保存在<code>IA32_VMX_PINBASED_CTLS MSR</code>。</p><p>（更详细的解释参考intel sdm Volume3 A.3）</p><p>事实证明，当看不懂代码的时候，intel手册永远是最好的小帮手(</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;vmx.c中的&lt;code&gt;init_vmx_cap()&lt;/code&gt;函数解读。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="虚拟化" scheme="http://yoursite.com/categories/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
-    
-    
-      <category term="KVM" scheme="http://yoursite.com/tags/KVM/"/>
-    
-      <category term="虚拟化" scheme="http://yoursite.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
-    
-      <category term="VT-x" scheme="http://yoursite.com/tags/VT-x/"/>
-    
-  </entry>
-  
-  <entry>
     <title>CPUID</title>
     <link href="http://yoursite.com/2021/07/02/2021-07-02-CPUID/"/>
     <id>http://yoursite.com/2021/07/02/2021-07-02-CPUID/</id>
@@ -106,9 +80,35 @@
       <category term="虚拟化" scheme="http://yoursite.com/categories/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
     
+      <category term="虚拟化" scheme="http://yoursite.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
       <category term="KVM" scheme="http://yoursite.com/tags/KVM/"/>
     
+      <category term="VT-x" scheme="http://yoursite.com/tags/VT-x/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>kvm-unit-tests init_vmx_caps()</title>
+    <link href="http://yoursite.com/2021/07/02/2021-07-02-kvm-unit-tests-init_vmx_caps()/"/>
+    <id>http://yoursite.com/2021/07/02/2021-07-02-kvm-unit-tests-init_vmx_caps()/</id>
+    <published>2021-07-02T08:54:00.000Z</published>
+    <updated>2021-07-02T09:42:29.220Z</updated>
+    
+    <content type="html"><![CDATA[<p>vmx.c中的<code>init_vmx_cap()</code>函数解读。</p><a id="more"></a><p>关于<code>init_vmx_cap()</code>函数，该函数密切相关的两个结构体是<code>vmx_ctrl_msr</code>和<code>vmx_basic</code></p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">union</span> vmx_ctrl_msr &#123;</span><br><span class="line">    u64 val;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">        u32 <span class="built_in">set</span>, clr;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">union</span> vmx_basic &#123;</span><br><span class="line">u64 val;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">u32 revision;</span><br><span class="line">u32size:<span class="number">13</span>,</span><br><span class="line">reserved1: <span class="number">3</span>,</span><br><span class="line">width:<span class="number">1</span>,</span><br><span class="line">dual:<span class="number">1</span>,</span><br><span class="line">type:<span class="number">4</span>,</span><br><span class="line">insouts:<span class="number">1</span>,</span><br><span class="line">ctrl:<span class="number">1</span>,  <span class="comment">//如果VMX controls默认为1但可以被清除为0，则该bit位为1</span></span><br><span class="line">reserved2:<span class="number">8</span>;</span><br><span class="line">&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init_vmx_caps</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    basic.val = rmdsr(MSR_IA32_VMX_BASIC);</span><br><span class="line">    ctrl_pin_rev.val = rdmsr(basic.ctrl ? MSR_IA32_VMX_TRUE_PIN</span><br><span class="line">            : MSR_IA32_VMX_PINBASED_CTLS);</span><br><span class="line">    ....</span><br><span class="line">        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><code>MSR_IA32_VMX_BASIC</code>寄存器中保存的值即为<code>vmx_basic</code>，该寄存器bit 55如果为1，通过读取<code>IA32_VMX_TRUE_PINBASED_CTLS MSR</code>报告在VM entry中默认1的类中有哪些pin-based VM-execution controls可以为0（reports which of the pin-based VM-execution controls in the default1 class can be 0 on VM entry)</p><blockquote><p>bits 31:0  indicates the allowed 0-settings of these controls. VM entry allows control X to be 0 if bit X in the MSR is cleared to 0; if bit X in the MSR is set to 1, VM entry fails if control X is 0.</p><p>bits 63:32 indicate the allowed 1-settings of these controls. VM entry allows control X to be 1 if bit 32+X in the MSR is set to 1; if bit 32+X in the MSR is cleared to 0, VM entry fails if control X is 1.</p></blockquote><p>当<code>MSR_IA32_VMX_BASIC</code>寄存器的bit55为0时，所有关于pin-based VM-execution controls信息都保存在<code>IA32_VMX_PINBASED_CTLS MSR</code>。</p><p>（更详细的解释参考intel sdm Volume3 A.3）</p><p>事实证明，当看不懂代码的时候，intel手册永远是最好的小帮手(</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;vmx.c中的&lt;code&gt;init_vmx_cap()&lt;/code&gt;函数解读。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="虚拟化" scheme="http://yoursite.com/categories/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+    
       <category term="虚拟化" scheme="http://yoursite.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+      <category term="KVM" scheme="http://yoursite.com/tags/KVM/"/>
     
       <category term="VT-x" scheme="http://yoursite.com/tags/VT-x/"/>
     
@@ -132,9 +132,9 @@
       <category term="虚拟化" scheme="http://yoursite.com/categories/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
     
-      <category term="KVM" scheme="http://yoursite.com/tags/KVM/"/>
-    
       <category term="虚拟化" scheme="http://yoursite.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+      <category term="KVM" scheme="http://yoursite.com/tags/KVM/"/>
     
       <category term="SVM" scheme="http://yoursite.com/tags/SVM/"/>
     
@@ -160,9 +160,9 @@
       <category term="虚拟化" scheme="http://yoursite.com/categories/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
     
-      <category term="KVM" scheme="http://yoursite.com/tags/KVM/"/>
-    
       <category term="虚拟化" scheme="http://yoursite.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+      <category term="KVM" scheme="http://yoursite.com/tags/KVM/"/>
     
       <category term="VT-x" scheme="http://yoursite.com/tags/VT-x/"/>
     
@@ -332,9 +332,9 @@
       <category term="日记" scheme="http://yoursite.com/categories/%E6%97%A5%E8%AE%B0/"/>
     
     
-      <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
-    
       <category term="生活" scheme="http://yoursite.com/tags/%E7%94%9F%E6%B4%BB/"/>
+    
+      <category term="日记" scheme="http://yoursite.com/tags/%E6%97%A5%E8%AE%B0/"/>
     
   </entry>
   
