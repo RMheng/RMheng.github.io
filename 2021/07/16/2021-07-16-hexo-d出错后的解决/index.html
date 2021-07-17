@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="rww&#39;s Blog">
 <meta property="og:description" content="可恶的cmder，还是改换成wsl了。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2021-07-16T13:23:47.920Z">
+<meta property="og:updated_time" content="2021-07-17T02:49:16.053Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="hexo d出错后的解决">
 <meta name="twitter:description" content="可恶的cmder，还是改换成wsl了。">
@@ -194,7 +194,9 @@
 <p>fatal: Failed to connect to github.com port 443: Timed out</p>
 </blockquote>
 <p>ping不通github的错误XD</p>
-<p>然后根据<a href="https://blog.csdn.net/qq_34817440/article/details/106420689" target="_blank" rel="noopener">这篇</a>，我在windows的hosts文件下加入了<code>github.com</code>和<code>gist.github.com</code>的IP地址后，终于成攻<code>hexo d</code>了。</p>
+<p><del>然后根据<a href="https://blog.csdn.net/qq_34817440/article/details/106420689" target="_blank" rel="noopener">这篇</a>，我在windows的hosts文件下加入了<code>github.com</code>和<code>gist.github.com</code>的IP地址后，终于成攻<code>hexo d</code>了</del>。</p>
+<p>比较搞笑的是，我打算把这篇blog推送上去的时候，又出现了上面的错误，怒，遂拥抱<code>wsl</code>。</p>
+<p>注意网上都是直接切换<code>wsl</code>版本为2，但是我直接切换会遇到<code>Error 0x80370102</code>的错误，而<code>wsl2</code>相对于<code>wsl1</code>可能应用了底层硬件的虚拟化功能，需要开启<code>hyper-V</code>，但是虚拟机中使用嵌套虚拟化的话需要关闭<code>hyper-V</code>。。。所以这里我直接使用<code>wsl1</code>，一切顺利。</p>
 
       
 
@@ -434,6 +436,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">SGX</a>
               </li>
              
@@ -446,15 +456,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">操作系统</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">基本知识复习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">读书</a>
+                <a href="javascript:void(0)" class="js-tag color3">日记</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -462,43 +464,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">日记</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">NVDLA</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ARM</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">汇编</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">paper</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">System Security</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Keystone</a>
+                <a href="javascript:void(0)" class="js-tag color3">读书</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -510,19 +480,39 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ARM</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">汇编</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">TrustZone</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">python</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">paper</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">System Security</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">paper - System Security</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">英语</a>
+                <a href="javascript:void(0)" class="js-tag color2">RISC-V</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">读后感</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">web</a>
+                <a href="javascript:void(0)" class="js-tag color4">Keystone</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -534,11 +524,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">虚拟化</a>
+                <a href="javascript:void(0)" class="js-tag color4">web</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">linux</a>
+                <a href="javascript:void(0)" class="js-tag color3">英语</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">读后感</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -554,7 +548,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">VT-x</a>
+                <a href="javascript:void(0)" class="js-tag color4">虚拟化</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">linux</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -562,15 +560,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">VT-x</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">QEMU</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">SVM</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">手册工程师</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -579,6 +573,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">杂七杂八的配置</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">SVM</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">手册工程师</a>
               </li>
             
             <div class="clearfix"></div>
